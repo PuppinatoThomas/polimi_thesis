@@ -1,0 +1,247 @@
+High-level data profiling for dataset “Master”
+
+- Domain classification: Residential real-estate listings/sales (property ads and transactions)
+- Number of columns: 12
+- Number of rows: 100
+- Exact duplicate rows: 0 observed
+- Missing/placeholder values: High. Multiple placeholders used, including empty cells, nan, -, Unknown, and sentinel -1 (often in numeric fields). Well over 80% of rows contain at least one such value.
+- Data type inconsistencies:
+  - price: numeric mixed with “$” strings and -1 sentinel
+  - bed/bath: mixture of numerals (e.g., 3) and words (one, two, three), plus “nan”/-1
+  - acre_lot and house_size: wide range; includes near-zero scientific notation and -1
+  - state: mix of full names (e.g., Texas), two-letter codes (TX), and Unknown/-
+  - zip_code: mix of 5-digit, -1, nan, and blanks
+  - prev_sold_date: multiple formats (YYYY-MM-DD, MM/DD/YY), plus Unknown/blank
+- Outliers/anomalies (examples):
+  - house_size values near zero (e.g., ~1e-05) and very large (e.g., 9708)
+  - acre_lot near zero (e.g., 0.00054) up to 48.0
+  - price ranges from very low (e.g., 13400) to multi-million; -1 appears as invalid/sentinel
+- Consistency issues:
+  - status has many variants: sold, for_sale, s, f, Unknown, -, blank
+  - Addresses frequently incomplete (street “-” or blank) and repeated across rows with differing details (near-duplicates likely; exact duplicates not observed)
+- Likely no reliable unique key as-is due to missing/inconsistent address parts and repeated entries
+
+Notes for downstream cleaning (not executed here): standardize missing tokens, normalize data types (parse currency, map spelled numbers, coerce numerics), harmonize state codes, unify date format, and deduplicate by a standardized address key plus date.
+Consider this dataset:
+code, artist, name, year, museum, city
+25987, Leonardo da Vinci, Mona Lisa, 1503, Louvre Museum, Paris
+63524, Vincent van Gogh, The Starry Night, 1889, Museum of Modern Art, New York
+38245, Michelangelo, David, 1504, Galleria dell'Accademia, Florence
+57392, Pablo Picasso, Les Demoiselles d'Avignon, 1907, Museum of Modern Art, New York
+11123, Johannes Vermeer, Girl with a Pearl Earring, 1665, Mauritshuis, The Hague
+66543, Michelangelo, The Creation of Adam, 1512, Sistine Chapel, Vatican City
+After performing single column analysis, we get the following information:
+code:
+Domain classification: Code that identify the object of art
+Datatype: String
+Number of missing values: 0
+Number of distinct values: 6
+Histogram: 25987 1, 63524 1, 38245 1, 57392 1, 11123 1, 66543 1
+artist:
+Domain classification: Name of the artist
+Datatype: String
+Number of missing values: 0
+Number of distinct values: 6
+Histogram: Michelangelo 2, Leonardo da Vinci 1, Vincent van Gogh 1, Pablo Picasso 1, Johannes Vermeer 1
+name:
+Domain classification: Name of the object of art
+Datatype: String
+Number of missing values: 0
+Number of distinct values: 6
+Histogram: Mona Lisa 1, The Starry Night 1, David 1, Les Demoiselles d'Avignon 1, Girl with a Pearl Earring 1, The Creation of Adam 1
+year:
+Domain classification: Year of creation of the object of art
+Datatype: Integer
+Number of missing values: 0
+Number of distinct values: 6
+Minimum: 1503
+Maximum: 1907
+Mean: 1663.333
+Variance: 30716.222
+Median: 1588.5
+Q1: 1506 - Q2: 1588.5  - Q3: 1833
+museum:
+Domain classification: Name of the museum where the object of art is located
+Datatype: String
+Number of missing values: 0
+Number of distinct values: 5
+Histogram: Museum of Modern Art 2, Louvre Museum 1, Galleria dell'Accademia 1, Mauritshuis 1, Sistine Chapel 1
+city:
+Domain classification: Location of the museum where the object of art is located
+Datatype: String
+Number of missing values: 0
+Number of distinct values: 5
+Histogram: New York 2, Paris , Florence 1, The Hague 1, Vatican City 1
+
+Consider this dataset:
+user_id,first_name,last_name,birth_year,height_cm,weight_kg,hours_exercise_per_week
+U001,,Rossi,1985,null,75,3
+U002,Laura,Bianchi,1990,165,60,5
+U003,Laura,,-,170,68,2
+U004,Andrea,Neri,1995,183,80,4
+U005,Matteo,missing,1982,175,78,-
+U006,Matteo,Ferri,1993,160,55,-
+U007,Luca,Conti,1993,180,78,1
+U008,nan,Moretti,1980,168,missing,999999
+U009,Davide,Conti,1980,nan,85,3
+U010,Davide,Conti,1980,162,58,5
+After performing single column analysis, we get the following information:
+user_id:
+Domain classification: Code that identify the person
+Datatype: String
+Number of missing values: 0
+Number of distinct values: 10
+Histogram: U001 1,  U002 1, U003 1, U004 1, U005 1, U006 1, U007 1, U008 1, U009 1, U010 1,
+first_name:
+Domain classification: Name of the artist
+Datatype: String
+Number of missing values: 2
+Number of distinct values: 7
+Histogram: Laura 2, Matteo 2, Davide 2, nan 1, Andrea 1, Luca 1, '' 1
+last_name:
+Domain classification: Surname of the artist
+Datatype: String
+Number of missing values: 2
+Number of distinct values: 8
+Histogram: Conti 3, Rossi 1, Bianchi 1, Neri 1, missing 1, Ferri 1, Moretti 1, '' 1
+birth_year:
+Domain classification: year of birth of the person
+Datatype: Integer
+Number of missing values: 1
+Number of distinct values: 6
+Minimum: 1980
+Maximum: 1995
+Mean: 1986.444
+Variance: 35.358
+Median: 1985
+Q1: 1980 - Q2: 1985  - Q3: 1993
+height_cm:
+Domain classification: height of the person in centimeters
+Datatype: Integer
+Number of missing values: 2
+Number of distinct values: 10
+Minimum: 160
+Maximum: 183
+Mean: 170.375
+Variance: 60.734
+Median: 169
+Q1: 164.25 - Q2: 169  - Q3: 176.25
+weight_kg:
+Domain classification: weight of the person in kilograms
+Datatype: Integer
+Number of missing values: 1
+Number of distinct values: 9
+Minimum: 55
+Maximum: 85
+Mean: 70.778
+Variance: 105.061
+Median: 75
+Q1: 60 - Q2: 75  - Q3: 78
+hours_exercise_per_week:
+Domain classification: Number of hours of exercise per week
+Datatype: Integer
+Number of missing values: 3
+Number of distinct values: 7
+Minimum: 1
+Maximum: 5
+Mean: 3.285
+Variance: 1.918
+Median: 3
+Q1: 2.5 - Q2: 3  - Q3: 4.5
+
+Consider the Master dataset, perform the single column analysis on it.
+Single-column analysis (high level) for dataset “Master”
+
+General note on missing/placeholder tokens across columns:
+- Common placeholders: empty string, -, nan, Unknown, -1 (often sentinel in numeric fields), and currency symbols ($) embedded in numeric fields.
+- Data types are mixed-as-entered; “inferred types” below assume standardization (strip $, map number words to numerals, treat -1/-, nan/Unknown/blank as missing, coerce numerics).
+
+1) brokered_by
+- Domain: Broker/agent identifier
+- Inferred datatype: String ID (sometimes numeric-like)
+- Missing/placeholder tokens observed: empty, -, nan, -1
+- Cardinality: Medium (many repeated IDs and many placeholders)
+- Notes: -1/blank/nan are frequent; no reliable uniqueness.
+
+2) status
+- Domain: Listing status
+- Inferred datatype: Categorical
+- Missing/placeholder tokens observed: empty, -, Unknown
+- Distinct values (observed): for_sale, sold, s, f, Unknown, -, empty
+- Notes: s/f are short forms; needs normalization to a canonical set.
+
+3) price
+- Domain: Listing or sale price (currency)
+- Inferred datatype: Numeric (currency); as-entered is mixed (plain numbers, $-prefixed, -1, nan, blank)
+- Missing/placeholder tokens observed: empty, nan, -1
+- Range (observed after normalization): ~13,400 to 2,365,000; strongly right-skewed
+- Notes: Requires stripping “$”, coercing to float, and treating -1/nan/blank as missing.
+
+4) bed
+- Domain: Number of bedrooms
+- Inferred datatype: Integer; as-entered mixed (numerals, number words, -1, nan, empty)
+- Missing/placeholder tokens observed: empty, nan, -1
+- Distinct value forms (observed): 1..11, and words one/two/three/four/five/six/seven/nine/ten
+- Notes: Normalize words to integers; outliers exist (very high counts like 11).
+
+5) bath
+- Domain: Number of bathrooms
+- Inferred datatype: Integer (may be float in other datasets, but here integer/word)
+- Missing/placeholder tokens observed: empty, nan, -1
+- Distinct value forms (observed): 1..10 and words one/two/three/four/five
+- Notes: Normalize words to integers; -1 denotes missing/invalid in several rows.
+
+6) acre_lot
+- Domain: Lot size in acres
+- Inferred datatype: Float
+- Missing/placeholder tokens observed: empty, nan, -1
+- Range (observed): near-zero values (~1e-05) up to very large (e.g., 48.0 and 27.59); highly skewed
+- Notes: Scientific notation appears; -1 used as sentinel; some zeros/near-zero values may be unit-errors.
+
+7) street
+- Domain: Street address (line)
+- Inferred datatype: String
+- Missing/placeholder tokens observed: empty, -
+- Patterns: Many repeated street names with/without house number, commas in-field (already quoted in some), and “Unknown”
+- Notes: Some rows have only “-” or blank; normalization and parsing of “Street, number” needed.
+
+8) city
+- Domain: City name
+- Inferred datatype: String (categorical)
+- Missing/placeholder tokens observed: empty, -, Unknown
+- Values: Mix of proper cities and “Unknown”; sometimes blank even when state present.
+
+9) state
+- Domain: State or state-like region
+- Inferred datatype: String (categorical)
+- Missing/placeholder tokens observed: empty, -, Unknown, nan
+- Values: Mixed formats (full names: Texas, abbreviations: TX/CA/WA/MA/NJ/KY/SC/GA/OH/CO/IN/ID/IL/VA/AL/PA/UT/MN/NC/OK/TN/FL/MT, “Unknown”)
+- Notes: Requires mapping full names to USPS codes and harmonization.
+
+10) zip_code
+- Domain: Postal/ZIP code
+- Inferred datatype: String (keep leading zeros), but as-entered is mixed with numbers and sentinels
+- Missing/placeholder tokens observed: empty, nan, -1
+- Values: 5-digit ZIPs present alongside -1 and blanks; some rows have state code but no ZIP.
+
+11) house_size
+- Domain: Interior size (square feet) or area measure
+- Inferred datatype: Float; as-entered includes small scientific-notation values, integers, and -1
+- Missing/placeholder tokens observed: empty, nan, -1
+- Range (observed): extremely small (~1e-05) to very large (e.g., 9708, 9564); bimodal/erratic
+- Notes: Units inconsistent/unclear for very small values; likely data-entry or unit issues.
+
+12) prev_sold_date
+- Domain: Previous sale/transaction date
+- Inferred datatype: Date
+- Missing/placeholder tokens observed: empty, Unknown
+- Formats observed: YYYY-MM-DD (e.g., 2021-12-22), MM/DD/YY (e.g., 09/20/04), and some blanks/Unknown
+- Notes: Requires format unification (e.g., ISO 8601); some very old two-digit years.
+
+Summary recommendations per column
+- Standardize missing tokens: map {empty, -, nan, Unknown, -1} → null as appropriate per column.
+- Normalize numerics: strip “$”; map number words to integers for bed/bath; coerce price/acre_lot/house_size to floats; validate ranges and flag outliers.
+- Harmonize categorical values: status (map s/f/for_sale/sold/Unknown), state (map to USPS codes).
+- Parse and standardize dates to YYYY-MM-DD.
+- Address fields: split and standardize street; validate city/state/ZIP combos; consider geocoding for consistency.
+- After normalization, recompute precise distinct counts and descriptive statistics; deduplicate records via a composite key (normalized street+city+state+ZIP+price+date) if needed.

@@ -1,0 +1,105 @@
+Here’s a comprehensive checklist of common data-cleaning operations. Use the parts that fit your data and goals:
+
+- Plan and profile
+  - Define data dictionary, business rules, constraints
+  - Data profiling (types, ranges, missingness, cardinality, duplicates, distributions)
+
+- Schema and type enforcement
+  - Enforce column presence, order, and data types
+  - Cast/coerce types; handle parsing errors explicitly
+  - Validate primary keys, unique constraints, foreign keys
+
+- Validity and consistency checks
+  - Range, domain, and set-membership checks
+  - Pattern/regex checks (emails, phones, IDs)
+  - Cross-field consistency rules (e.g., start_date <= end_date)
+  - Check-digit algorithms (e.g., Luhn) for IDs
+
+- Standardization and canonicalization
+  - Trim whitespace; normalize case; Unicode normalization; remove control chars
+  - Unify categorical labels (synonyms, capitalization, spelling)
+  - Standardize formats (dates, numbers, decimals, thousands separators)
+  - Normalize phone, email, addresses to a standard format
+  - Harmonize units and convert (e.g., lbs→kg); standardize time zones (e.g., to UTC)
+  - Normalize currency with explicit FX rate/date if needed
+
+- Handling missing data
+  - Detect true missing vs placeholder codes (e.g., “N/A”, 9999)
+  - Unify missing indicators to nulls
+  - Impute (mean/median/mode, kNN, model-based), forward/back fill, or flag
+  - Drop rows/columns when appropriate (with justification)
+
+- Outliers and anomalies
+  - Detect (IQR, z-score, robust methods, isolation forest)
+  - Correct obvious errors, cap/winsorize, transform, exclude, or flag
+
+- Error correction and enrichment
+  - Spellcheck/typo correction, fuzzy matching to reference lists
+  - Reference data lookups (country codes, postal codes, ISO codes)
+  - Compute/repair derived fields (e.g., BMI from height/weight)
+
+- Duplicates and entity resolution
+  - Exact de-duplication (full-row or key-based)
+  - Fuzzy de-duplication (similarity on names/addresses)
+  - Record linkage across sources; survivorship/merge rules
+
+- Parsing and restructuring
+  - Split/merge columns; extract from patterns
+  - Parse JSON/XML/HTML; flatten nested structures
+  - Explode lists; pivot/unpivot to tidy format
+  - Remove fully empty rows/columns; reorder columns
+
+- Numeric data cleaning
+  - Remove non-numeric characters; fix separators
+  - Handle impossible values (negatives where not allowed, zeros)
+  - De-skew/transform (log, Box-Cox) when appropriate
+  - Validate ratios, percentages sum to 100%, etc.
+
+- Categorical handling
+  - Consolidate rare levels; map “other/unknown” consistently
+  - Resolve multiselects; ensure one-hot/indicator consistency (if needed)
+
+- Text-specific cleaning (NLP)
+  - Tokenization, lowercasing, stopword handling
+  - Stemming/lemmatization (as appropriate)
+  - Normalize punctuation, emojis, accents; fix encoding issues
+  - Remove HTML/markup; handle URLs, mentions, hashtags
+
+- Date/time and time-series specifics
+  - Parse heterogeneous date formats; resolve ambiguous dates
+  - Normalize DST/time zones; handle missing or duplicate timestamps
+  - Resample to regular intervals; interpolate gaps; remove spikes
+  - Ensure monotonicity where required
+
+- Geospatial specifics
+  - Validate lat/lon ranges; fix swapped coordinates
+  - Normalize CRS/projection; validate geometries
+  - Snap/clean self-intersections; dedupe near-identical points
+
+- Media (images/audio) basics
+  - Remove corrupt files; verify headers
+  - Normalize dimensions, color space, sampling rates
+  - Denoise, deblur, orientation correction (if needed)
+
+- Integration and joins
+  - Standardize join keys; trim and canonicalize before joins
+  - Detect and handle many-to-many joins, orphans, and duplicates
+  - Reconcile conflicts across sources; precedence rules
+
+- Privacy and compliance (when applicable)
+  - Detect/mask/redact PII; hash/tokenize identifiers
+  - Apply consent rules; minimize data; log access
+
+- Quality control, audit, and automation
+  - Add quality flags; keep change logs and provenance
+  - Unit tests/expectations for constraints (e.g., Great Expectations)
+  - Track metrics (missingness, duplicate rate, outliers) over time
+  - Make pipelines idempotent; support incremental/streaming runs
+  - Document assumptions and residual data issues
+
+- Export and delivery hygiene
+  - Validate output schema; consistent encodings (UTF-8), line endings, delimiters
+  - Handle BOMs/quoting; stable file naming/partitioning
+  - Versioned outputs and schema evolution notes
+
+No single project needs all of these. Start by profiling, define rules tied to business use, and implement only the operations that improve fitness-for-purpose while preserving data integrity.

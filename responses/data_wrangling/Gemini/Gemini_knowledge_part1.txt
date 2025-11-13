@@ -1,0 +1,100 @@
+Data wrangling, also known as data cleaning or data preparation, is the process of transforming and mapping data from one format into another to make it more valuable and appropriate for analysis. Here's a comprehensive list of operations involved in data wrangling:
+
+**1. Data Discovery & Assessment:**
+
+*   **Data Profiling:** Understanding the data's structure, content, and relationships.
+    *   **Data Type Identification:** Determining the data type of each column (e.g., integer, float, string, date).
+    *   **Descriptive Statistics:** Calculating summary statistics like mean, median, standard deviation, min, max, etc.
+    *   **Frequency Analysis:** Identifying the frequency of values in categorical columns.
+    *   **Pattern Discovery:** Identifying patterns and relationships within the data.
+*   **Data Quality Assessment:** Identifying data quality issues.
+    *   **Missing Value Analysis:** Identifying and quantifying missing values.
+    *   **Outlier Detection:** Identifying data points that deviate significantly from the norm.
+    *   **Duplicate Detection:** Identifying and quantifying duplicate records.
+    *   **Data Consistency Checks:** Ensuring data adheres to defined rules and constraints.
+    *   **Data Validity Checks:** Verifying data against known valid values or ranges.
+
+**2. Data Cleaning:**
+
+*   **Handling Missing Values:**
+    *   **Deletion:** Removing rows or columns with missing values (use with caution).
+    *   **Imputation:** Replacing missing values with estimated values (e.g., mean, median, mode, constant, regression-based imputation).
+    *   **Prediction:** Using machine learning models to predict missing values.
+*   **Handling Outliers:**
+    *   **Deletion:** Removing outlier data points (use with caution).
+    *   **Transformation:** Transforming data to reduce the impact of outliers (e.g., log transformation, winsorizing).
+    *   **Capping/Flooring:** Limiting extreme values to a specified range.
+*   **Handling Duplicates:**
+    *   **Deduplication:** Removing duplicate records based on specific criteria.
+*   **Data Type Conversion:**
+    *   **Casting:** Converting data from one type to another (e.g., string to integer, float to string).
+*   **Data Standardization/Normalization:**
+    *   **Scaling:** Scaling numerical data to a specific range (e.g., min-max scaling, z-score standardization).
+    *   **Standardization:** Transforming data to have a mean of 0 and a standard deviation of 1.
+*   **Data Validation:**
+    *   **Correcting Errors:** Fixing incorrect or invalid data entries.
+    *   **Data Enrichment:** Adding missing or relevant information from external sources.
+*   **Text Cleaning:**
+    *   **Removing Special Characters:** Removing unwanted characters from text data.
+    *   **Lowercasing/Uppercasing:** Converting text to lowercase or uppercase.
+    *   **Removing Stop Words:** Removing common words that don't carry much meaning (e.g., "the," "a," "is").
+    *   **Stemming/Lemmatization:** Reducing words to their root form.
+    *   **Regular Expression Cleaning:** Using regular expressions to find and replace patterns in text.
+    *   **HTML/XML Tag Removal:** Removing HTML or XML tags from text data.
+
+**3. Data Transformation:**
+
+*   **Data Aggregation:**
+    *   **Grouping:** Grouping data based on specific criteria.
+    *   **Summarization:** Calculating summary statistics for grouped data (e.g., sum, average, count).
+*   **Data Integration:**
+    *   **Merging:** Combining data from multiple sources based on common keys.
+    *   **Joining:** Combining data from multiple tables based on relationships.
+    *   **Concatenation:** Appending data from multiple sources.
+*   **Data Reshaping:**
+    *   **Pivoting:** Transforming data from long format to wide format.
+    *   **Unpivoting:** Transforming data from wide format to long format.
+*   **Data Derivation:**
+    *   **Creating New Features:** Creating new features from existing ones (e.g., calculating age from date of birth).
+    *   **Feature Engineering:** Creating new features to improve the performance of machine learning models.
+*   **Data Encoding:**
+    *   **One-Hot Encoding:** Converting categorical variables into numerical representations.
+    *   **Label Encoding:** Assigning a unique numerical value to each category.
+    *   **Binary Encoding:** Converting categorical variables into binary representations.
+*   **Date/Time Manipulation:**
+    *   **Extracting Date Components:** Extracting year, month, day, hour, minute, etc. from date/time values.
+    *   **Date/Time Formatting:** Converting date/time values to a specific format.
+    *   **Calculating Time Differences:** Calculating the difference between two dates or times.
+*   **String Manipulation:**
+    *   **Splitting Strings:** Splitting strings into multiple parts based on a delimiter.
+    *   **Concatenating Strings:** Combining multiple strings into one.
+    *   **Extracting Substrings:** Extracting a portion of a string.
+    *   **Replacing Strings:** Replacing a portion of a string with another string.
+
+**4. Data Enrichment:**
+
+*   **Adding External Data:** Integrating data from external sources to enrich the existing dataset.
+*   **Geocoding:** Converting addresses to geographic coordinates.
+*   **Reverse Geocoding:** Converting geographic coordinates to addresses.
+
+**5. Data Validation & Verification (Post-Transformation):**
+
+*   **Re-running Data Quality Checks:** Ensuring that the cleaning and transformation steps have improved data quality.
+*   **Data Consistency Checks:** Verifying that the transformed data is consistent with business rules and constraints.
+*   **Data Integrity Checks:** Ensuring that the data is accurate and reliable.
+
+**6. Documentation & Metadata Management:**
+
+*   **Documenting Data Wrangling Steps:** Recording all the steps taken during the data wrangling process.
+*   **Creating Data Dictionaries:** Defining the meaning and format of each data field.
+*   **Tracking Data Lineage:** Tracking the origin and transformation history of the data.
+
+**Tools and Technologies:**
+
+*   **Programming Languages:** Python (with libraries like Pandas, NumPy, Scikit-learn), R
+*   **Data Wrangling Tools:** OpenRefine, Trifacta Wrangler, Alteryx
+*   **Databases:** SQL, NoSQL databases
+*   **Cloud Platforms:** AWS, Azure, Google Cloud
+
+This list is not exhaustive, but it covers the most common operations involved in data wrangling. The specific operations required will depend on the nature of the data and the goals of the analysis. Remember that data wrangling is often an iterative process, requiring multiple passes to achieve the desired data quality and format.
+

@@ -1,0 +1,214 @@
+Below is a pragmatic, end‑to‑end cleaning plan and a reproducible pandas script tailored to your dataset. I’ve selected only the checklist items that are relevant to listing analytics/modeling.
+
+What we’ll do (selected checklist items)
+- Define rules and targets
+  - Target schema and types:
+    - brokered_by: string (nullable)
+    - status: categorical in {for_sale, sold} (nullable)
+    - price: float USD, > 0 (nullable)
+    - bed, bath: integer [0–12] (nullable)
+    - acre_lot: float acres; valid if >= 0.001 (micro-lots < 0.001 set to missing); negative => missing
+    - street, city: clean strings (nullable)
+    - state: USPS 2-letter code (nullable)
+    - zip_code: 5-digit string (nullable)
+    - house_size: integer sqft; keep if 150–20,000 else set to missing
+    - prev_sold_date: date (YYYY-MM-DD), nullable
+- Profile and audit (quick)
+  - Compute basic missingness and value counts after cleaning (code included).
+- Schema and structure
+  - Keep the same columns; standardize names, order, and string normalization.
+- Data types and parsing
+  - Parse currency, numbers (including number words like “three”), and mixed date formats.
+- Standardize formats and encodings
+  - Trim/normalize whitespace, title-case addresses and cities, uppercase state codes.
+- Handle missing data
+  - Normalize markers: "", "-", "Unknown", "nan", "NaN", "None" → NaN (and -1 to NaN in invalid numeric fields).
+- Duplicates
+  - Drop exact duplicate rows (keep first). Do not collapse near-duplicates across sources unless you specify a survivorship rule.
+- Fix categorical errors
+  - status: map f→for_sale, s→sold; anything else invalid → NaN.
+  - state: map full names to USPS codes; unknowns → NaN.
+- Validate values and business rules
+  - Enforce ranges above; zip_code must be 5 digits; state must be 2 letters; cross-field constraints minimally checked.
+- Outliers/anomalies
+  - Micro-lots < 0.001 acres → missing (likely noise). House_size outside [150, 20000] → missing.
+
+Reproducible pandas code
+- Paste your CSV text into raw_csv (or point read_csv to a file). The script produces a cleaned DataFrame df and prints basic QA summaries.
+
+```python
+import io, re
+import numpy as np
+import pandas as pd
+
+# -- Load ---------------------------------------------------------------------
+raw_csv = """brokered_by,status,price,bed,bath,acre_lot,street,city,state,zip_code,house_size,prev_sold_date
+,sold,292677,five,3,0.0032,63 Field Dr,Sumter,South Carolina,-1,9564.0,2021-12-22
+53138,sold,479000,nan,three,0.22,"Lincoln Rd, 47",-,Unknown,nan,,2022-01-04
+... (paste the full CSV here exactly as provided) ...
+52946,f,nan,,10,10.0,675 Circle Dr,Hulbert,Oklahoma,74441,1896,2018-04-19
+"""
+
+na_like = {"", "-", "unknown", "nan", "none"}  # case-insensitive
+def is_missing(x):
+    if pd.isna(x): return True
+    s = str(x).strip().lower()
+    return s in na_like
+
+df = pd.read_csv(io.StringIO(raw_csv), dtype=str, keep_default_na=False)
+
+# -- Normalize column names (lower_snake_case) --------------------------------
+df.columns = [c.strip().lower() for c in df.columns]
+
+# -- Strip and normalize whitespace on all string cells -----------------------
+for c in df.columns:
+    df[c] = df[c].map(lambda v: np.nan if is_missing(v) else re.sub(r"\s+", " ", str(v).strip()))
+
+# -- Status normalization ------------------------------------------------------
+status_map = {"for_sale": "for_sale", "sold": "sold", "f": "for_sale", "s": "sold"}
+def clean_status(x):
+    if pd.isna(x): return np.nan
+    sx = str(x).strip().lower()
+    return status_map.get(sx, np.nan)
+df["status"] = df["status"].map(clean_status).astype("category")
+
+# -- State normalization (full name -> USPS) ----------------------------------
+STATE_MAP = {
+    "alabama":"AL","alaska":"AK","arizona":"AZ","arkansas":"AR","california":"CA","colorado":"CO",
+    "connecticut":"CT","delaware":"DE","district of columbia":"DC","florida":"FL","georgia":"GA","hawaii":"HI",
+    "idaho":"ID","illinois":"IL","indiana":"IN","iowa":"IA","kansas":"KS","kentucky":"KY","louisiana":"LA",
+    "maine":"ME","maryland":"MD","massachusetts":"MA","michigan":"MI","minnesota":"MN","mississippi":"MS",
+    "missouri":"MO","montana":"MT","nebraska":"NE","nevada":"NV","new hampshire":"NH","new jersey":"NJ",
+    "new mexico":"NM","new york":"NY","north carolina":"NC","north dakota":"ND","ohio":"OH","oklahoma":"OK",
+    "oregon":"OR","pennsylvania":"PA","rhode island":"RI","south carolina":"SC","south dakota":"SD",
+    "tennessee":"TN","texas":"TX","utah":"UT","vermont":"VT","virginia":"VA","washington":"WA",
+    "west virginia":"WV","wisconsin":"WI","wyoming":"WY"
+}
+def clean_state(x):
+    if pd.isna(x): return np.nan
+    s = str(x).strip()
+    up = s.upper()
+    if len(up) == 2 and up.isalpha():
+        return up
+    abbr = STATE_MAP.get(s.lower())
+    return abbr if abbr else np.nan
+df["state"] = df["state"].map(clean_state)
+
+# -- Address/city formatting ---------------------------------------------------
+def title_or_none(x):
+    if pd.isna(x): return np.nan
+    return str(x).title()
+
+df["street"] = df["street"].map(title_or_none)
+df["city"]   = df["city"].map(title_or_none)
+
+# -- ZIP code cleaning (5-digit string) ---------------------------------------
+def clean_zip(z):
+    if pd.isna(z): return np.nan
+    s = re.sub(r"\D", "", str(z))
+    if s == "": return np.nan
+    if len(s) < 5: s = s.zfill(5)
+    return s[:5]
+df["zip_code"] = df["zip_code"].map(clean_zip)
+
+# -- Numeric parsing helpers ---------------------------------------------------
+NUM_WORDS = {
+    "zero":0,"one":1,"two":2,"three":3,"four":4,"five":5,"six":6,"seven":7,"eight":8,"nine":9,"ten":10,"eleven":11
+}
+def parse_num_or_word(x):
+    if pd.isna(x): return np.nan
+    s = str(x).strip().lower()
+    if s in NUM_WORDS: return float(NUM_WORDS[s])
+    try:
+        return float(s.replace(",", ""))
+    except:
+        return np.nan
+
+def parse_price(x):
+    if pd.isna(x): return np.nan
+    s = str(x).replace("$","").replace(",","").strip()
+    try:
+        val = float(s)
+        return np.nan if val <= 0 else val
+    except:
+        return np.nan
+
+# -- price, bed, bath ----------------------------------------------------------
+df["price"] = df["price"].map(parse_price)
+
+df["bed"]  = df["bed"].map(parse_num_or_word)
+df["bath"] = df["bath"].map(parse_num_or_word)
+
+# enforce feasible ranges
+def clamp_or_nan(val, lo, hi):
+    if pd.isna(val): return np.nan
+    try:
+        v = float(val)
+        return v if (lo <= v <= hi) else np.nan
+    except:
+        return np.nan
+
+df["bed"]  = df["bed"].map(lambda v: clamp_or_nan(v, 0, 12)).astype("Float64")
+df["bath"] = df["bath"].map(lambda v: clamp_or_nan(v, 0, 12)).astype("Float64")
+
+# -- acre_lot ------------------------------------------------------------------
+df["acre_lot"] = df["acre_lot"].map(parse_num_or_word)  # handles plain floats too
+# Treat negatives as missing; micro-lots < 0.001 acres treated as missing
+def clean_acre(a):
+    if pd.isna(a): return np.nan
+    if a <= 0: return np.nan
+    if a < 0.001: return np.nan
+    return a
+df["acre_lot"] = df["acre_lot"].map(clean_acre).astype("Float64")
+
+# -- house_size (sqft), drop implausible/suspicious values --------------------
+df["house_size"] = df["house_size"].map(parse_num_or_word)
+df["house_size"] = df["house_size"].map(lambda v: np.nan if pd.isna(v) else float(v))
+# keep only [150, 20000] sqft
+df["house_size"] = df["house_size"].map(lambda v: v if (not pd.isna(v) and 150 <= v <= 20000) else np.nan)
+df["house_size"] = df["house_size"].round().astype("Float64")
+
+# -- brokered_by: keep as string id (nullable) --------------------------------
+df["brokered_by"] = df["brokered_by"].astype("string")
+
+# -- Dates ---------------------------------------------------------------------
+# Accept ISO (YYYY-MM-DD) and US (MM/DD/YY or MM/DD/YYYY); normalize to date
+df["prev_sold_date"] = pd.to_datetime(df["prev_sold_date"], errors="coerce", infer_datetime_format=True).dt.date
+
+# -- Remove exact duplicate rows ----------------------------------------------
+before = len(df)
+df = df.drop_duplicates()
+after = len(df)
+
+# -- Basic QA summaries --------------------------------------------------------
+print("Rows before/after exact-duplicate drop:", before, after)
+print("\nDtypes:\n", df.dtypes)
+print("\nStatus value counts:\n", df["status"].value_counts(dropna=False))
+print("\nMissingness (fraction NaN):\n", df.isna().mean().sort_values(ascending=False))
+
+# Example validations
+assert set(df["status"].dropna().unique()).issubset({"for_sale", "sold"})
+assert df["state"].dropna().str.match(r"^[A-Z]{2}$").all()
+assert df["zip_code"].dropna().str.match(r"^\d{5}$").all()
+```
+
+Key assumptions and decisions
+- Missing markers: "", "-", "Unknown", "nan", "NaN", "None" are treated as NaN in all columns. For numeric fields that cannot be negative (price, acre_lot, house_size), negative values (including “-1”) are set to NaN.
+- status is restricted to for_sale or sold; short forms f/s are mapped accordingly; all other variants become missing.
+- Number words for bed/bath (e.g., “three”, “ten”, “eleven”) are mapped to integers; anything outside 0–12 is set to missing.
+- acre_lot: Micro-lots under 0.001 acres (≈43.56 sq ft) are flagged as likely noise and set to missing. If you want to retain micro-lots, remove that threshold.
+- house_size: Valid range 150–20,000 sqft; values outside this are set to missing (addresses unrealistic entries and scientific-notation artifacts).
+- state values are standardized to USPS codes (e.g., “California” → “CA”). Unrecognized strings become missing.
+- zip codes are normalized to 5-digit strings and padded with leading zeros when needed; invalids become missing.
+- Only exact duplicate rows are removed. If you want one row per property, define a survivorship rule (e.g., keep the most recent non-null price by key [street, city, state, zip]).
+
+What you’ll get
+- Cleaned, typed DataFrame with standardized categories, addresses, state/zip, parsed numerics and dates, and implausible values handled.
+- Simple QA summaries printed: dtypes, status distribution, and per-column missingness.
+
+Optional next steps (if needed)
+- Property-level deduplication: define a key (e.g., normalized address + state + zip) and a rule to select the “best” record (e.g., most complete, most recent date).
+- Add missingness indicators (e.g., price_missing) for modeling.
+- Outlier review on price by market: e.g., cap at 99th percentile per state.
+- Geocoding if you need lat/long; validate zip–state consistency with a reference table.
+- Persist pipeline: wrap into a function or notebook, version inputs/outputs, add tests and drift monitoring.

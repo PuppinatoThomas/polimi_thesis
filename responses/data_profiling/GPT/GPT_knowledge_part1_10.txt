@@ -1,0 +1,84 @@
+Here’s a comprehensive list of operations commonly performed in data profiling, grouped by category.
+
+Setup and scoping
+- Inventory data sources and tables
+- Extract schema/metadata (tables, columns, declared types, nullability, constraints, indexes)
+- Determine sampling strategy (full scan, stratified, time-window, random)
+- Detect file formats and encodings (CSV/JSON/Parquet; UTF-8 vs others)
+
+Structure (schema) discovery
+- Type inference and validation vs declared types
+- Length/precision/scale analysis
+- Format/pattern discovery (e.g., regex patterns, date formats)
+- Candidate key discovery (single/composite)
+- Constraint inference (NOT NULL, uniqueness, value ranges)
+- Schema conformance checks across partitions/environments
+
+Column/content profiling
+- Completeness: null/blank/whitespace counts and ratios
+- Cardinality: distinct count, uniqueness, duplicate counts
+- Descriptive stats (numeric): count, min/max, mean, median, mode, std dev, variance, quantiles, IQR, skewness, kurtosis
+- Distribution analysis: histograms, entropy, top-k values, rare values
+- Range/domain checks: allowed code sets, enumerations
+- Outlier/anomaly detection: z-score, IQR, MAD, isolation forest-style flags (as applicable)
+- Special numeric checks: zeros, negatives, infinities, NaNs
+- String/text profiling: length stats, character classes, non-printables, leading/trailing spaces, case/diacritics, token counts, language detection
+- Pattern/format validation: emails, phone numbers, postal codes, regex match rates
+- Encoding/locale detection and issues
+- Date/time profiling: min/max date, invalid/ambiguous dates, timezone presence, weekend/holiday share, gap analysis
+- Identifier checks: checksum validation (e.g., Luhn, ISBN), formatting
+- Geospatial checks: coordinate plausibility, CRS hints, bounding-box coverage
+
+Multi-column profiling
+- Cross-field consistency rules (e.g., end_date >= start_date, currency matches country)
+- Conditional validity (values valid only when another field has certain values)
+- Correlation/covariance/mutual information (numeric and categorical)
+- Functional dependency discovery (A → B)
+- Inclusion/conditional inclusion dependencies within a table
+- Composite key uniqueness validation
+
+Table/relationship profiling
+- Primary key analysis and collision detection
+- Foreign key discovery and validation; referential integrity; orphan detection
+- Inclusion dependencies across tables/datasets
+- Join key quality assessment; join cardinalities and selectivity
+- Duplicate record detection/record linkage (exact and fuzzy)
+- Redundancy/overlap across datasets
+
+Quality dimension scoring
+- Validity (conformance to rules, types, domains)
+- Accuracy (comparison with reference/master data)
+- Completeness (presence of required values)
+- Consistency (no contradicting values across fields/records)
+- Conformity (formats/standards)
+- Uniqueness (de-duplication)
+- Integrity (PK/FK, constraints)
+- Timeliness/freshness (age, last updated, latency)
+
+Standardization and semantics
+- Unit of measure detection and normalization
+- Code mapping to standards (ISO country/currency, ICD, NAICS, etc.)
+- Reference/master data conformance checks
+- PII/PHI/sensitive data detection and classification
+
+Temporal and operational profiling
+- Volume profiling (row counts, growth rates)
+- Data drift detection vs baseline (schema and distribution drift)
+- Stability monitoring of metrics over time; trend and seasonality checks
+- Pipeline/source health signals (ingest success rates, lag)
+
+Output, documentation, and governance
+- Generate data dictionary and column summaries
+- Produce profiling reports and dashboards
+- Define/catalog data quality rules and thresholds
+- Baseline metrics and diffs between runs/environments
+- Alerting/SLAs for rule violations
+- Lineage and versioning of profiling results
+
+Automation and scalability
+- Incremental profiling (changed data capture)
+- Partition-aware profiling (by date/tenant/region)
+- Sampling vs full-scan strategies and error bounds
+- Parallelization/distributed execution considerations
+
+These operations together provide a thorough understanding of structure, content, relationships, and quality of data, enabling rule definition, monitoring, and remediation planning.

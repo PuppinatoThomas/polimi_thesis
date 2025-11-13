@@ -1,0 +1,111 @@
+This dataset is very messy — it has inconsistent data types, missing values, duplicate/conflicting records, misformatted numbers, and strange categorical values. Let’s go step by step and clean it up.
+
+---
+
+### **Issues in the dataset**
+
+1. **Missing values:** lots of blanks (`""`, `nan`, `Unknown`, `-1`, `-`).
+2. **Inconsistent data types:**
+
+   * `price` has numbers, strings with `$`, `nan`, `-1`, etc.
+   * `bed`, `bath` contain words (`two`, `three`, `four`, `five`) instead of integers.
+   * `house_size` has scientific notation or impossible values (like `0.0001`).
+   * `acre_lot` sometimes is `-1`, `nan`, or very tiny unrealistic numbers.
+3. **Duplicate/conflicting records:** Same properties appear multiple times with slightly different info.
+4. **Inconsistent categorical values:**
+
+   * `status` has `sold`, `for_sale`, `s`, `f`, `Unknown`, `-`.
+   * `brokered_by` sometimes empty, `-1`, `nan`.
+5. **Date formats:** `prev_sold_date` has mixed formats (`2021-11-09`, `02/14/22`, `Unknown`).
+
+---
+
+### **Cleaning plan**
+
+1. **Standardize missing values** → Replace `""`, `Unknown`, `-`, `-1`, `nan` with `NaN`.
+2. **Fix price column**
+
+   * Remove `$`, commas.
+   * Convert to numeric.
+   * Replace negative/0 prices with `NaN`.
+3. **Fix bed & bath columns**
+
+   * Map words (`one`, `two`, `three`, `four`, `five`, etc.) → integers.
+   * Convert to numeric.
+   * Replace invalid (`-1`, `nan`) with `NaN`.
+4. **Fix `acre_lot` & `house_size`**
+
+   * Drop unrealistic tiny values (like `1e-05`).
+   * Convert to float.
+5. **Standardize `status` column**
+
+   * Map: `s → sold`, `f → for_sale`, `- → NaN`, `Unknown → NaN`.
+6. **Dates**
+
+   * Parse into standard `YYYY-MM-DD`.
+   * Keep `NaN` if invalid.
+7. **Remove duplicate records**
+
+   * Based on (`street`, `city`, `state`, `zip_code`).
+   * Keep most complete record.
+
+---
+
+### **Example Python code (Pandas cleaning pipeline)**
+
+```python
+import pandas as pd
+import numpy as np
+
+# Load dataset
+df = pd.read_csv("houses.csv")
+
+# 1. Standardize missing values
+df.replace(["", "Unknown", "-", "-1", "nan", "NaN"], np.nan, inplace=True)
+
+# 2. Clean price column
+df["price"] = df["price"].astype(str).str.replace(r"[\$,]", "", regex=True)
+df["price"] = pd.to_numeric(df["price"], errors="coerce")
+df.loc[df["price"] <= 0, "price"] = np.nan
+
+# 3. Clean bed & bath columns (map words to numbers)
+word_to_num = {
+    "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
+    "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
+    "eleven": 11, "twelve": 12
+}
+for col in ["bed", "bath"]:
+    df[col] = df[col].astype(str).str.lower().replace(word_to_num)
+    df[col] = pd.to_numeric(df[col], errors="coerce")
+
+# 4. Fix acre_lot and house_size
+df["acre_lot"] = pd.to_numeric(df["acre_lot"], errors="coerce")
+df["house_size"] = pd.to_numeric(df["house_size"], errors="coerce")
+
+# Remove unrealistic tiny numbers
+df.loc[df["acre_lot"] < 0.001, "acre_lot"] = np.nan
+df.loc[df["house_size"] < 50, "house_size"] = np.nan
+
+# 5. Standardize status
+status_map = {
+    "s": "sold",
+    "f": "for_sale",
+    "sold": "sold",
+    "for_sale": "for_sale"
+}
+df["status"] = df["status"].str.lower().map(status_map)
+
+# 6. Clean prev_sold_date
+df["prev_sold_date"] = pd.to_datetime(df["prev_sold_date"], errors="coerce")
+
+# 7. Drop duplicates (keep most recent record if possible)
+df.sort_values("prev_sold_date", ascending=False, inplace=True)
+df.drop_duplicates(subset=["street", "city", "state", "zip_code"], keep="first", inplace=True)
+
+# Save cleaned dataset
+df.to_csv("houses_cleaned.csv", index=False)
+```
+
+---
+
+👉 Would you like me to **actually run this cleaning and show you the cleaned dataset as a table**, or just leave you with the cleaning pipeline so you can run it yourself?

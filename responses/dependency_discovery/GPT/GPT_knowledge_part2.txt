@@ -1,0 +1,154 @@
+Below is a compact, end-to-end dependency profile of your dataset (98 rows, 9 columns). I report (i) exact findings; (ii) approximate/conditional versions with supports/confidences; (iii) minimal covers; and (iv) outliers that violate the strongest patterns.
+
+Columns: brokered_by, price, acre_lot, street, city, state, zip_code, house_size, prev_sold_date
+
+1) Unique column combinations (UCCs)
+- Minimal UCCs (100% unique within this file):
+  - brokered_by (98/98 distinct)
+  - street (98/98 distinct)
+- Non-minimal UCCs (unique but not minimal; supersets of a minimal UCC):
+  - Any superset of brokered_by or street (e.g., street, city, state, zip_code)
+- Note: In real data “brokered_by” typically identifies an agent, not a listing, so its uniqueness here is likely accidental. “street” looks like a full address line and is unique in this extract, but may not generalize across cities/ZIPs in larger corpora.
+
+2) Candidate keys and primary key inference
+- Candidate keys (from UCCs): {brokered_by}, {street}
+- Practical primary key recommendation:
+  - Prefer a true listing_id (not present). If you must choose, use street together with city, state, zip_code for robustness: {street, city, state, zip_code}. In this sample, street alone is unique; in general, {street, zip_code} is a safer natural key than street alone.
+- Caution: Using brokered_by as a PK is semantically risky (it looks like agent/broker id).
+
+3) Functional dependency (FD) discovery (exact on this file)
+- Exact FDs (100% confidence, 98/98 support):
+  - zip_code → city
+  - zip_code → state
+  - Combined: zip_code → {city, state}
+  - (city, state) → zip_code  [holds in this sample; not generally true in the real world]
+- Trivial FDs from keys:
+  - brokered_by → all other attributes (since it’s unique here)
+  - street → all other attributes (since it’s unique here)
+- No other non-trivial exact FDs hold globally.
+
+4) Approximate/soft FDs (global arithmetic patterns with exceptions)
+Strong near-linear rules:
+- acre_lot × 10000 ≈ price
+  - Exact equality holds on 88/98 rows (89.8% confidence)
+  - Violations (10 rows): brokered_by in {82978, 687, 53138, 2765, 68269, 53232, 96817, 22217, 22721, 48807}
+- acre_lot × 1000 ≈ house_size
+  - Exact equality holds on 88/98 rows (89.8% confidence)
+  - Same 10 outliers as above
+- price ≈ 10 × house_size
+  - Exact equality holds on 88/98 rows (89.8% confidence)
+  - Same 10 outliers
+
+Note: price → house_size and house_size → price do NOT hold as exact FDs due to collisions at price=111000 with house_size in {3321, 5551} and price=125600 with house_size=3321.
+
+5) Conditional functional dependencies (CFDs) (exact on this file)
+All with 100% confidence; supports shown:
+- [zip_code=90064] → [city='Los Angeles', state='California'] (support 17)
+- [zip_code=92101] → [city='San Diego', state='California'] (support 16)
+- [zip_code=47448] → [city='Nashville', state='Indiana'] (support 16)
+- [zip_code=77030] → [city='Houston', state='Texas'] (support 17)
+- [zip_code=32828] → [city='Orlando', state='Florida'] (support 17)
+- [zip_code=37201] → [city='Nashville', state='Tennessee'] (support 15)
+- City–state side (holds in this file, but domain-wise often not true):
+  - [city='Los Angeles' ∧ state='California'] → [zip_code=90064] (support 17)
+  - [city='San Diego' ∧ state='California'] → [zip_code=92101] (support 16)
+  - [city='Houston' ∧ state='Texas'] → [zip_code=77030] (support 17)
+  - [city='Orlando' ∧ state='Florida'] → [zip_code=32828] (support 17)
+  - [city='Nashville' ∧ state='Tennessee'] → [zip_code=37201] (support 15)
+  - [city='Nashville' ∧ state='Indiana'] → [zip_code=47448] (support 16)
+
+6) Inclusion dependencies (INDs) and composite INDs
+- Within this single table, no non-trivial column-to-column INDs were found (types/values don’t align for meaningful inclusions).
+- Natural cross-table INDs you could exploit if reference tables existed:
+  - this.zip_code ⊆ ZIP(zip_code)
+  - (this.city, this.state) ⊆ CITY_STATE(city, state)
+
+7) Approximate/conditional INDs (CINDs)
+- With a ZIP reference table: [state='California'] ⇒ this.zip_code ⊆ ZIP_CA(zip) (or a regex-based CIND zip starts with '9' for California), etc.
+- Within this single table: none useful beyond trivialities.
+
+8) Foreign key detection
+- None within this dataset (single table). If you add dimension tables:
+  - this.zip_code → ZIP.zip_code (FK), backed by UCC on ZIP.zip_code
+  - (this.city, this.state) → CITY_STATE(city, state) (composite FK), if CITY_STATE has a UCC on (city, state)
+
+9) Order dependencies (ODs)
+- Approximate OD suggestions:
+  - acre_lot ⇒ price (non-decreasing) largely holds but is broken by two “53.0 acre_lot” anomalies with low prices (brokered_by 2765, 68269). These make the order non-monotone.
+  - acre_lot ⇒ house_size similarly near-monotone except for the same anomalies.
+- Exact ODs do not hold globally because of the above violations.
+
+10) Multivalued dependencies (MVDs)
+- No non-trivial MVDs detected beyond those implied by keys. (Typical candidates like zip_code →→ street don’t satisfy the combinatorial swap property here.)
+
+11) Join dependencies (JDs)
+- No non-trivial JDs discovered beyond those implied by keys.
+
+12) Denial constraints (DCs)
+Exact DCs (always true on this file):
+- Type/format/domain:
+  - price > 0; acre_lot > 0; house_size > 0
+  - prev_sold_date is a valid date (all parse)
+  - state ∈ {California, Florida, Indiana, Tennessee, Texas}
+  - city ∈ {Los Angeles, San Diego, Orlando, Nashville, Houston}
+  - zip_code ∈ {90064, 92101, 32828, 37201, 47448, 77030}
+- City–ZIP–State consistency (equivalent to FDs as DCs):
+  - not (zip_code=90064 ∧ city!='Los Angeles'); not (zip_code=90064 ∧ state!='California'); etc. for each ZIP above
+
+Approximate DCs (soft; suggest data quality rules):
+- For 88/98 rows: price = 10000 × acre_lot; house_size = 1000 × acre_lot; price = 10 × house_size
+- See differential constraints below for tighter quantified versions.
+
+13) Differential dependencies (DDs)
+- Perfect (FD-equivalent):
+  - |zip_code1 - zip_code2|=0 ⇒ |city1 - city2|=0 and |state1 - state2|=0 (0-tolerance)
+- Tight numeric DDs (very high support):
+  - |price − 10000×acre_lot| ≤ 10000 on 96/98 rows (98.0% support). Violated only by the two 53.0-acre anomalies (brokered_by 2765, 68269; residual ≈ 419k).
+  - |house_size − 1000×acre_lot| ≤ 1000 on 96/98 rows (98.0% support).
+  - |price − 10×house_size| ≤ 10000 on 96/98 rows (98.0% support).
+
+14) Matching dependencies (MDs)
+- High-precision linking rule candidates (100% in this file):
+  - If street matches exactly and zip_code matches exactly, then city and state must match exactly.
+  - If zip_code matches exactly, then city and state must match exactly. (This restates the zip → {city,state} FD as an MD.)
+- Fuzzy MDs (domain-useful but not exercised here due to no near-duplicates):
+  - If zip_code matches and street is token-similar (e.g., Jaccard ≥ 0.9), then city/state should match.
+
+15) Minimal/canonical FD cover and redundancy pruning
+A minimal exact FD cover for this file (excluding key-trivial FDs):
+- C = { zip_code → city, zip_code → state }
+Everything else either:
+- follows from keys (brokered_by, street), or
+- holds only approximately (the arithmetic relationships), or
+- is sample-specific ( (city,state) → zip_code ) and not generally valid.
+
+16) Confidence/support summary (selected)
+- UCCs:
+  - brokered_by unique: 98/98 (100%)
+  - street unique: 98/98 (100%)
+- Exact FDs:
+  - zip_code → {city, state}: 98/98 (100%)
+  - (city, state) → zip_code: 98/98 (100%) [sample-specific]
+- Soft arithmetic FDs:
+  - acre_lot → price (×10000), acre_lot → house_size (×1000), house_size → price (×10): each 88/98 (89.8%)
+- Tight DDs:
+  - |price − 10000×acre_lot| ≤ 10000: 96/98 (98.0%)
+  - |house_size − 1000×acre_lot| ≤ 1000: 96/98 (98.0%)
+
+17) Outlier/violation diagnostics (all the “arithmetic” rule breakers)
+- brokered_by in {82978, 687, 53138, 2765, 68269, 53232, 96817, 22217, 22721, 48807}
+  - Eight with acre_lot=12.0 and atypical price/size pairs (price ∈ {111000,125600}, house_size ∈ {3321,5551})
+  - Two with acre_lot=53.0 but price too low (111000); these also break order-dependence badly
+- Suggested data repair heuristics:
+  - If acre_lot present and trusted, impute price:= round(10000×acre_lot) and house_size:= round(1000×acre_lot), flag deviations > 1% for review.
+  - If price and house_size agree (≈10×) but acre_lot disagrees, recompute acre_lot = house_size/1000.
+  - For the 53.0-acre cases (brokered_by 2765, 68269), both price and house_size look implausible; verify source.
+
+18) Design/normalization implications
+- 3NF/BCNF:
+  - Separate a ZIP dimension: ZIP(zip_code PK, city, state); keep a FK from facts to ZIP.
+  - Keep listing facts with a true surrogate listing_id PK.
+  - The near-linear measures suggest derived attributes; consider storing one (e.g., acre_lot) and compute others, or store all three with constraints/DDs to catch drift.
+- Avoid relying on (city,state) → zip_code beyond this sample; in real data it’s one-to-many.
+
+In short: The only robust, exact non-trivial dependency is zip_code → {city, state}. The strong but imperfect arithmetic relations among price, house_size, acre_lot hold for ~90% exactly and ~98% within tight tolerances, with 10 identifiable outliers causing all violations. No non-trivial INDs/MVDs/JDs exist within the single table; CFDs consistent with ZIP–city–state patterns are perfect in this file.

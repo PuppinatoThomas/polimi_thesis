@@ -1,0 +1,156 @@
+Here is a thorough, human-readable data-profiling of the dataset you provided. I normalize “missing” as any of: empty string, “-”, or “nan” (case-insensitive). I do not count “Unknown” as missing (it’s an explicit value). Currency symbols were not stripped and no numbers were imputed for the statistics listed below unless explicitly stated.
+
+1) Dataset-level profile
+- Domain classification of columns
+  - Identifiers: brokered_by (agent/listing id-like)
+  - Categorical: status, city, state
+  - Numeric (continuous): price, acre_lot, house_size
+  - Numeric (discrete): bed, bath, zip_code
+  - Free-form text: street
+  - Date: prev_sold_date
+- Dimensions: 100 rows x 12 columns
+- Total missing values (empty | “-” | “nan”): 45 cells (3.75% of all cells)
+- Exact duplicate rows: 0
+- Candidate unique column combinations (UCCs)
+  - No single column is unique.
+  - No common address-based key is unique. street+city+state+zip_code is not unique (e.g., repeated addresses like “Third Ct, 553 | Saint Louis | Missouri | 63115” and “219 Field St | Houston | Texas | 77021” occur multiple times).
+  - Adding brokered_by to address is still not unique (e.g., 109987 at the same address repeated).
+  - The only trivial superkey is all 12 columns together (since there are no exact duplicate rows). No minimal candidate key was found.
+- Cross-column correlations (qualitative, after light cleaning)
+  - Price vs house_size: positive relationship (larger houses tend to have higher prices). Outliers (e.g., price=2500, -1; house_size extremely small decimals) reduce reliability.
+  - Beds/Baths vs house_size: positive relationship.
+  - Acre_lot vs price: weak-to-moderate positive tendency with large spread (big-acre lots but modest houses; also suburban small-lot high-price properties).
+  - Zip_code is numeric but is a geographic code, not a true continuous variable; it should not be treated as numeric for correlation purposes.
+  - Brokered_by is an ID-like field; treat as categorical, not suitable for correlation.
+
+2) Column-level profile
+Conventions: Missing counts use the rule (empty | “-” | “nan”). “Invalid” are values of the wrong type or out-of-domain but not counted as missing.
+
+- brokered_by
+  - Inferred type: identifier-like (string/integer mix)
+  - Missing: 6
+  - Distinct: High (mostly unique IDs) with occasional repeats; includes -1 (invalid as an ID).
+  - Domain quality
+    - Valid-looking IDs: majority
+    - Missing: 6
+    - Invalid/sentinel (e.g., -1): present
+- status
+  - Inferred type: categorical
+  - Missing (“-” only): 4
+  - Distinct values and frequencies:
+    - sold: 52
+    - for_sale: 38
+    - f (invalid code): 4
+    - - (missing): 4
+    - Unknown: 1
+    - s (ambiguous): 1
+  - Domain quality: Needs normalization to {sold, for_sale, pending?}. Map f and s to known statuses or flag as invalid.
+- price
+  - Inferred type: numeric currency
+  - Missing: 3 (“nan”)
+  - Domain issues:
+    - Currency symbol present (e.g., $949900)
+    - Unrealistic/invalid entries: -1, and probably 2500 looks like rent/month not sale price
+  - Observed range (raw, uncleaned): min -1 to max 2,450,000
+  - Notes: For proper statistics (mean, median, variance), first strip currency symbols, coerce numerics, and decide how to handle outliers (-1, 2500).
+- bed
+  - Inferred type: integer count (with text variants)
+  - Missing: 2
+  - Domain issues:
+    - Text numerals: “four”, “three”
+    - Typical range (post-normalization): 1–12 (observed max 12)
+- bath
+  - Inferred type: integer count (with text variants)
+  - Missing: 2 (“”, “nan”)
+  - Domain issues:
+    - Text numeral “two”
+    - Invalid: -1
+    - Outliers: 11 and 12 (probable data issues)
+- acre_lot
+  - Inferred type: numeric (acres)
+  - Missing: 3
+  - Invalid: -1 values (at least 2 rows)
+  - Observed range (raw): -1 to 35.0
+  - Notes: There are realistic suburban values around 0.1–1.0, plus rural properties up to 35 acres. One micro-lot 0.00089 is suspicious but could be a condo.
+- street
+  - Inferred type: free text address line
+  - Missing: 3
+  - Domain issues: “Unknown” and empty, plus embedded unit numbers (“Elm Ave, 593”) are acceptable but may require normalization.
+- city
+  - Inferred type: categorical (city names)
+  - Missing: 8 (explicit “-” or empty)
+  - Domain issues: “-” used as missing; “Unknown” used as explicit unknown; both should be normalized.
+- state
+  - Inferred type: categorical (US state)
+  - Missing: 1 (empty)
+  - Domain issues:
+    - Mix of full names and two-letter abbreviations (e.g., CA vs California, OH vs Ohio, TX vs Texas, NC vs North Carolina)
+    - “Unknown” appears
+- zip_code
+  - Inferred type: integer-like postal code (string recommended)
+  - Missing: 7 (empty or “nan”)
+  - Domain issues:
+    - -1 used as sentinel; 4- or 5-digit variations (e.g., 1262, 2043, 2831); zip should be stored as zero-padded 5-digit string
+- house_size
+  - Inferred type: numeric (square feet)
+  - Missing: 2
+  - Domain issues:
+    - Implausible small decimals (e.g., ~1e-4), likely unit conversion errors
+    - Very small values (e.g., 12.0, 85.0) are possible but suspicious given context; most values are 1,000–5,000
+  - Observed range (raw): ~6.88e-05 to 5,828
+- prev_sold_date
+  - Inferred type: date
+  - Missing: 4 (empty or “-”)
+  - Domain issues:
+    - Multiple formats: ISO (YYYY-MM-DD), US short (MM/DD/YY), and the literal “Unknown”
+    - Needs normalization to ISO 8601; “Unknown” should be set to null/missing or a special flag
+
+Numeric statistics notes
+- Because the numeric columns contain mixed formats/outliers (e.g., $-prefixed price, explicit -1 sentinels, text numerals for bed/bath, implausible decimals for house_size), providing exact mean/median/variance and quartiles without prior cleaning would be misleading.
+- If you’d like, I can provide a cleaning plan and then compute exact descriptive statistics (mean, median, min, max, range, variance, quartiles) for:
+  - price (after stripping $, removing/flagging nonpositive values)
+  - bed, bath (after parsing text numerals and removing invalids like -1)
+  - acre_lot (excluding -1)
+  - house_size (excluding implausible micro values and unit mistakes)
+
+3) Functional dependencies (FDs) and relaxed/approximate dependencies (RFDs)
+- Strong/near-FDs (with caveats)
+  - (street, city, state, zip_code) → house_size appears to hold for repeated addresses (e.g., same house_size across duplicates), but data are noisy. This is a good candidate RFD with few violations.
+  - (street, city, state, zip_code) → bed, bath tend to be stable for repeated addresses, but some entries differ via textual vs numeric formats (“two” vs 2). This is also a candidate RFD if we normalize values.
+- Weak/relaxed dependencies
+  - zip_code → state: Holds in principle (US zips map to a single state), but violations appear due to mixed state formats (CA vs California) and missing values. After normalizing state names and ignoring missing, this should become a near-FD.
+  - zip_code → city: Often holds (e.g., 78418 → Corpus Christi) but can fail if a ZIP covers multiple areas or if city is missing; a plausible RFD.
+  - (city, state) → zip_code: Not an FD (many ZIPs per city), but as an RFD it may predict a small set of likely ZIPs.
+  - brokered_by → status: Not an FD; brokers list different properties with different statuses.
+  - status → price: Not an FD; both sold and for_sale appear across the full price range.
+- Non-FDs
+  - No simple address-free combination (e.g., brokered_by, status) determines any of the main numerical attributes.
+- Candidate unique keys (FD perspective)
+  - There is no practical candidate key in the current dataset that uniquely identifies rows aside from the full 12-column row. The natural business key should be an address key:
+    - Normalize address components (separate street_number, street_name, street_type, unit), standardize city/state/ZIP (including zero-padding), and then test uniqueness for (street_address_norm, city_norm, state_norm, zip_norm). Current data have duplicate addresses (same property) recorded multiple times, so deduplication rules may need to consider event time (prev_sold_date) or listing status.
+
+Key data-quality findings and recommendations
+- Normalize categorical values:
+  - status: map {sold, for_sale}; decide fate of {f, s, Unknown, -}
+  - state: unify to USPS two-letter abbreviations; map Unknown to null
+- Standardize data types:
+  - price: remove $ and commas; set to numeric; treat ≤0 as invalid/missing
+  - bed/bath: coerce text numerals to integers; set negative/implausible (e.g., bath=11/12) to null for review
+  - zip_code: store as zero-padded 5-digit string; set -1/empty/nan to null
+  - house_size: verify units; flag improbable values (e.g., <100 or fractional <1) for correction
+  - acre_lot: set -1 to null; examine tiny values like 0.00089
+  - prev_sold_date: parse to ISO 8601; set “Unknown” and “-” to null
+- Address standardization:
+  - Clean “street” strings (split unit numbers, normalize types: Rd, Rd., Road)
+  - Treat “Unknown” and “-” as missing
+- Deduplication strategy:
+  - Use a normalized address key + state/ZIP, and then model duplicates with differing status/price as multiple listings of the same property.
+- After cleaning, recompute:
+  - Descriptive statistics (mean, median, quartiles) for price, bed, bath, acre_lot, house_size
+  - Pearson/Spearman correlations among numeric columns
+  - FD tests (e.g., zip → state; address → {bed,bath,house_size}) and candidate keys
+
+If you want, I can:
+- Provide exact descriptive stats (mean, median, min, max, variance, quartiles) for each numeric column after a cleaning pass.
+- Produce a correlation matrix with clear handling of outliers and missing values.
+- Run FD discovery to quantify exact support/violation rates for the candidate dependencies listed above.

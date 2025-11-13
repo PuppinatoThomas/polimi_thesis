@@ -1,0 +1,154 @@
+# Data Wrangling on Real Estate Dataset
+
+I'll perform several data wrangling steps to clean and prepare this real estate dataset for analysis. Here's my approach:
+
+## 1. Initial Data Inspection
+
+First, let's understand the structure and quality of the data:
+
+- The dataset contains 100 property listings
+- Variables include broker information, property details, pricing, and historical data
+- Mixed data types (numeric, categorical, dates)
+- Some potential missing or inconsistent values to check
+
+## 2. Data Cleaning
+
+```python
+import pandas as pd
+import numpy as np
+
+# Load the data
+df = pd.read_csv('real_estate_data.csv')
+
+# Check for missing values
+print(df.isnull().sum())
+
+# Convert price to numeric (remove $ and commas)
+df['price'] = df['price'].str.replace('[$,]', '', regex=True).astype(float)
+
+# Convert date columns to datetime
+df['prev_sold_date'] = pd.to_datetime(df['prev_sold_year'].astype(str) + '-' + 
+                                     df['prev_sold_month'].astype(str) + '-' + 
+                                     df['prev_sold_day'].astype(str))
+
+# Clean acre_lot - some very large values that might be errors
+df['acre_lot'] = pd.to_numeric(df['acre_lot'], errors='coerce')
+
+# Extract state from address
+df['state'] = df['address'].str.extract(r', ([A-Za-z ]+),')[0]
+
+# Standardize status values
+df['status'] = df['status'].str.replace(' ', '_').str.lower()
+
+# Create price per square foot metric
+df['price_per_sqft'] = df['price'] / df['house_size']
+
+# Create full broker name
+df['broker_name'] = df['broker_first_name'] + ' ' + df['broker_surname']
+
+# Drop unnecessary columns
+df = df.drop(['prev_sold_month', 'prev_sold_day', 'prev_sold_year', 'currency'], axis=1)
+```
+
+## 3. Data Transformation
+
+```python
+# Create categorical bins
+df['price_category'] = pd.cut(df['price'], 
+                             bins=[0, 200000, 400000, 600000, 1000000, float('inf')],
+                             labels=['Under $200k', '$200k-$400k', '$400k-$600k', 
+                                    '$600k-$1M', 'Over $1M'])
+
+df['size_category'] = pd.cut(df['house_size'],
+                            bins=[0, 1500, 2500, 3500, float('inf')],
+                            labels=['Small (<1500)', 'Medium (1500-2500)', 
+                                   'Large (2500-3500)', 'X-Large (3500+)'])
+
+# Calculate days since last sale
+df['days_since_last_sale'] = (pd.to_datetime('today') - df['prev_sold_date']).dt.days
+
+# Create a flag for properties with large lots
+df['large_lot'] = df['acre_lot'] > 1
+```
+
+## 4. Feature Engineering
+
+```python
+# Calculate price premium/discount compared to state average
+state_avg_price = df.groupby('state')['price'].mean().to_dict()
+df['price_vs_state_avg'] = df['price'] / df['state'].map(state_avg_price)
+
+# Create broker performance metrics
+broker_stats = df.groupby('brokered_by').agg({
+    'price': ['count', 'mean'],
+    'status': lambda x: (x == 'sold').mean()
+}).reset_index()
+broker_stats.columns = ['brokered_by', 'listings_count', 'avg_price', 'sale_success_rate']
+df = df.merge(broker_stats, on='brokered_by')
+
+# Create time on market estimate (for sold properties)
+df['time_on_market'] = np.where(df['status'] == 'sold',
+                               (df['prev_sold_date'] - pd.to_datetime('2022-01-01')).dt.days,
+                               np.nan)
+```
+
+## 5. Data Quality Checks
+
+```python
+# Identify potential outliers
+price_zscore = (df['price'] - df['price'].mean()) / df['price'].std()
+df['price_outlier'] = abs(price_zscore) > 3
+
+size_zscore = (df['house_size'] - df['house_size'].mean()) / df['house_size'].std()
+df['size_outlier'] = abs(size_zscore) > 3
+
+# Check for duplicate listings
+duplicate_addresses = df['address'].duplicated(keep=False)
+df['potential_duplicate'] = duplicate_addresses
+
+# Validate bedroom/bathroom ratios
+df['bath_bed_ratio'] = df['bath'] / df['bed']
+df['unusual_ratio'] = (df['bath_bed_ratio'] < 0.5) | (df['bath_bed_ratio'] > 2)
+```
+
+## 6. Final Dataset Structure
+
+The cleaned dataset now includes:
+
+1. **Original columns** (cleaned and standardized):
+   - Property details (bed, bath, size, lot size, address)
+   - Pricing information
+   - Broker information
+   - Status (sold/for_sale)
+   - Previous sale date
+
+2. **New derived columns**:
+   - Price metrics (price/sqft, price categories)
+   - Location features (state extracted)
+   - Temporal features (days since last sale)
+   - Broker performance metrics
+   - Data quality flags
+
+3. **Enhanced categorical variables**:
+   - Price categories
+   - Size categories
+   - Lot size flags
+
+## 7. Potential Next Steps for Analysis
+
+This wrangled dataset is now ready for:
+
+1. **Exploratory Data Analysis**:
+   - Price distributions by state, bedroom count, etc.
+   - Time-on-market analysis
+   - Broker performance comparisons
+
+2. **Predictive Modeling**:
+   - Predict sale price based on property features
+   - Predict likelihood of sale (classification)
+
+3. **Market Segmentation**:
+   - Identify property clusters
+   - Analyze regional price differences
+
+Would you like me to perform any specific analysis on this cleaned dataset?

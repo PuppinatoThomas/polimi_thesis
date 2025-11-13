@@ -1,0 +1,72 @@
+This dataset has lots of messy values (`nan`, `-1`, `Unknown`, mixed formats for numbers, text instead of numerics, etc.), so cleaning will involve:
+
+### **Steps I’ll take to clean it:**
+
+1. **Standardize missing values** → Replace `"nan"`, `"-1"`, `""`, `"Unknown"`, and `"-"` with `NaN`.
+2. **Fix numeric columns** → Convert `price`, `bed`, `bath`, `acre_lot`, `zip_code`, and `house_size` to numeric where possible. Strip `$` and commas from `price`.
+3. **Normalize categorical values** → Make `status` consistent (`sold`, `for_sale`, etc.).
+4. **Fix text-to-number issues** → Convert `"three"`, `"five"`, `"ten"`, etc. in `bed`/`bath` to integers.
+5. **Handle dates** → Convert `prev_sold_date` to proper datetime format.
+6. **Drop duplicates** → Some rows appear multiple times with slight differences.
+7. **Optional**: Drop rows where critical fields (like `price` and `status`) are completely missing.
+
+---
+
+Here’s **Python code (using Pandas)** to clean it:
+import pandas as pd
+import numpy as np
+
+# Load dataset
+df = pd.read_csv("raw_housing.csv")
+
+# Step 1: Standardize missing values
+missing_values = ["nan", "-1", "Unknown", "-", ""]
+df.replace(missing_values, np.nan, inplace=True)
+
+# Step 2: Clean numeric columns
+# Price → remove $ and commas, convert to float
+df["price"] = df["price"].astype(str).str.replace("$", "", regex=True).str.replace(",", "", regex=True)
+df["price"] = pd.to_numeric(df["price"], errors="coerce")
+
+# Zip code as string (some start with 0)
+df["zip_code"] = df["zip_code"].astype(str).str.replace(".0", "", regex=False)
+df.loc[df["zip_code"] == "nan", "zip_code"] = np.nan
+
+# Convert house_size and acre_lot to numeric
+df["house_size"] = pd.to_numeric(df["house_size"], errors="coerce")
+df["acre_lot"] = pd.to_numeric(df["acre_lot"], errors="coerce")
+
+# Step 3: Normalize categorical values (status)
+df["status"] = df["status"].str.lower().str.strip()
+valid_status = {"s": "sold", "f": "for_sale"}
+df["status"] = df["status"].replace(valid_status)
+
+# Step 4: Convert text numbers to digits
+num_map = {
+    "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
+    "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
+    "eleven": 11
+}
+for col in ["bed", "bath"]:
+    df[col] = df[col].astype(str).str.lower().replace(num_map)
+    df[col] = pd.to_numeric(df[col], errors="coerce")
+
+# Step 5: Convert dates
+df["prev_sold_date"] = pd.to_datetime(df["prev_sold_date"], errors="coerce")
+
+# Step 6: Drop duplicates
+df.drop_duplicates(inplace=True)
+
+# Step 7: Optional cleanup — drop rows where both price and status are missing
+df = df[~(df["price"].isna() & df["status"].isna())]
+
+# Save cleaned dataset
+df.to_csv("cleaned_housing.csv", index=False)
+
+print("Cleaning complete! Cleaned dataset saved as 'cleaned_housing.csv'")
+
+
+I’ve written a cleaning script that handles missing values, fixes inconsistent numbers/text, standardizes categories, and converts dates.
+
+Would you like me to also **impute missing values** (e.g., fill missing `bed`, `bath`, `house_size` based on averages or medians) or just leave them as `NaN` for analysis?
+

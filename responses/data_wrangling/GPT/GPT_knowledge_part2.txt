@@ -1,0 +1,372 @@
+Below is a practical, end‑to‑end wrangling pipeline you can run on this dataset. It covers ingestion, profiling, cleaning, transformations, QA, privacy, documentation, and delivery. Copy the CSV you provided to a file called listings.csv and run the Python code. It prints summaries, flags anomalies, writes clean/curated outputs, and leaves you with model‑ready features.
+
+Python (pandas + scikit‑learn) reference pipeline
+
+- What this does
+  - Ingest: robust CSV read, types, schema inference
+  - Profiling: info, stats, missingness, uniqueness, correlations (light)
+  - Cleaning: trims/case, dtype fixes, currency parsing, zero‑pad ZIPs, date parsing, address parsing, deduping, constraints
+  - Outliers/anomalies: IQR/zscore flags for price, lot size, price_per_sqft
+  - Transform: engineered features (price_per_sqft, lot_sqft, log features), encodings, bins
+  - Time/date: prev_sold_date, components
+  - Geo stub: ready‑to‑run geocoding function (optional)
+  - QA: assertions/expectations
+  - Privacy: hashed surrogate keys
+  - Delivery: curated parquet/CSV + metadata JSON
+
+Code
+- Save your CSV to ./listings.csv before running.
+
+import json, os, re, math, hashlib
+from datetime import date, datetime
+from io import StringIO
+
+import numpy as np
+import pandas as pd
+from sklearn.preprocessing import RobustScaler, OneHotEncoder
+
+# -----------------------
+# 1) Ingest
+# -----------------------
+src_path = "listings.csv"  # put your pasted data here
+df = pd.read_csv(
+    src_path,
+    dtype={
+        "brokered_by": "Int64",
+        "broker_first_name": "string",
+        "broker_surname": "string",
+        "status": "string",
+        "price": "Int64",
+        "currency": "string",
+        "bed": "Int64",
+        "bath": "Int64",
+        "acre_lot": "float64",
+        "address": "string",
+        "zip_code": "string",   # read as string to preserve leading zeros
+        "house_size": "Int64",
+        "prev_sold_month": "Int64",
+        "prev_sold_day": "Int64",
+        "prev_sold_year": "Int64",
+    },
+    keep_default_na=False,    # treat empty strictly; your dataset has no empties
+    encoding="utf-8",
+)
+
+# -----------------------
+# 2) Profiling (light)
+# -----------------------
+print("\n--- Basic info ---")
+print(df.info())
+print("\n--- Head ---")
+print(df.head(5))
+
+print("\n--- Missingness (count of NA by column) ---")
+print(df.isna().sum())
+
+print("\n--- Uniqueness ---")
+for col in ["brokered_by", "address", "zip_code"]:
+    print(f"{col}: n_unique={df[col].nunique()} total={len(df)}")
+
+print("\n--- Status distribution ---")
+print(df["status"].value_counts(dropna=False))
+
+print("\n--- Numeric summary ---")
+num_cols = ["price", "bed", "bath", "acre_lot", "house_size"]
+print(df[num_cols].describe(percentiles=[.01,.05,.25,.5,.75,.95,.99]))
+
+# Simple correlations (spearman for robustness)
+print("\n--- Spearman correlations ---")
+print(df[num_cols].corr(method="spearman"))
+
+# Detect obvious schema drift signals (single currency?)
+print("\nUnique currencies:", df["currency"].unique())
+
+# -----------------------
+# 3) Cleaning
+# -----------------------
+# 3.1 Normalize text: trim, case
+def norm_name(s: pd.Series) -> pd.Series:
+    return s.str.strip().str.title()
+
+for col in ["broker_first_name", "broker_surname", "status", "currency", "address"]:
+    df[col] = df[col].astype("string").str.strip()
+
+df["broker_first_name"] = norm_name(df["broker_first_name"])
+df["broker_surname"]    = norm_name(df["broker_surname"])
+df["status"]            = df["status"].str.lower().str.replace(r"[^a-z_]", "", regex=True)
+df["currency"]          = df["currency"].str.replace(r"[^\$\£\€]", "", regex=True)  # keep typical symbols
+
+# 3.2 Standardize ZIP codes: zero-pad to 5 digits
+df["zip_code"] = df["zip_code"].str.strip().str.replace(r"[^0-9]", "", regex=True).str.zfill(5)
+
+# 3.3 Parse previous sold date
+def safe_date(y, m, d):
+    try:
+        return pd.Timestamp(int(y), int(m), int(d))
+    except Exception:
+        return pd.NaT
+
+df["prev_sold_date"] = [
+    safe_date(y, m, d)
+    for y, m, d in zip(df["prev_sold_year"], df["prev_sold_month"], df["prev_sold_day"])
+]
+
+# 3.4 Parse address into street, city, state (assumes "street, City, State")
+def split_address(addr):
+    # Expected pattern: "123 Main St, City, State"
+    parts = [p.strip() for p in str(addr).split(",")]
+    street = city = state = None
+    if len(parts) >= 3:
+        street = parts[0]
+        city   = parts[1]
+        state  = parts[2]
+    elif len(parts) == 2:
+        street, city = parts
+    else:
+        street = addr
+    return street, city, state
+
+parsed = df["address"].apply(split_address)
+df[["street", "city", "state"]] = pd.DataFrame(parsed.tolist(), index=df.index)
+df["state"] = df["state"].str.title().str.strip()
+
+# 3.5 Currency/price dtype: your data uses USD exclusively
+assert set(df["currency"].unique()) <= {"$"}, "Unexpected currency detected."
+
+df["price"] = pd.to_numeric(df["price"], errors="coerce").astype("float64")
+df["bed"]   = pd.to_numeric(df["bed"], errors="coerce")
+df["bath"]  = pd.to_numeric(df["bath"], errors="coerce")
+df["acre_lot"] = pd.to_numeric(df["acre_lot"], errors="coerce")
+df["house_size"] = pd.to_numeric(df["house_size"], errors="coerce")
+
+# 3.6 De-duplication: keep first by natural key (address+zip). (Adjust if needed.)
+before = len(df)
+df = df.sort_values(["address", "zip_code"]).drop_duplicates(subset=["address","zip_code"], keep="first")
+print(f"\nDeduped rows: {before - len(df)}")
+
+# 3.7 Constraint checks (nonnegative values, reasonable ranges)
+violations = []
+violations += df.index[df["price"] <= 0].tolist()
+violations += df.index[df["bed"]   < 0].tolist()
+violations += df.index[df["bath"]  < 0].tolist()
+violations += df.index[df["acre_lot"] <= 0].tolist()
+if violations:
+    print(f"\nConstraint violations (nonnegative checks) at rows: {sorted(set(violations))}")
+
+# -----------------------
+# 4) Outliers/Anomaly flags
+# -----------------------
+def iqr_flag(s, k=1.5):
+    q1, q3 = s.quantile(0.25), s.quantile(0.75)
+    iqr = q3 - q1
+    low, high = q1 - k*iqr, q3 + k*iqr
+    return (s < low) | (s > high)
+
+df["price_per_sqft"] = df["price"] / df["house_size"].replace(0, np.nan)
+df["lot_sqft"]       = df["acre_lot"] * 43560.0
+
+for col in ["price", "acre_lot", "price_per_sqft"]:
+    df[f"is_outlier_{col}"] = iqr_flag(df[col].astype(float))
+
+# z-score option (robust) for price
+df["z_price"] = (df["price"] - df["price"].median()) / (1.4826 * (df["price"] - df["price"].median()).abs().median())
+
+# -----------------------
+# 5) Transformations / Features
+# -----------------------
+# Log transforms for skewed features
+for col in ["price", "acre_lot", "house_size", "price_per_sqft", "lot_sqft"]:
+    df[f"log1p_{col}"] = np.log1p(df[col])
+
+# Ratios
+df["bed_bath_ratio"] = df["bed"] / df["bath"].replace(0, np.nan)
+
+# Date features
+df["prev_sold_year"]  = pd.to_datetime(df["prev_sold_date"]).dt.year
+df["prev_sold_month"] = pd.to_datetime(df["prev_sold_date"]).dt.month
+df["prev_sold_day"]   = pd.to_datetime(df["prev_sold_date"]).dt.day
+as_of = pd.Timestamp("2022-12-31")
+df["years_since_prev_sale"] = (as_of - df["prev_sold_date"]).dt.days / 365.25
+
+# Binning (quantile bins for price)
+df["price_bin_q5"] = pd.qcut(df["price"], q=5, duplicates="drop")
+
+# Categorical encodings (one-hot for small-cardinality cols)
+df = pd.get_dummies(df, columns=["status"], prefix="status", drop_first=False)
+
+# Frequency encoding for state and broker (example)
+state_freq = df["state"].value_counts(normalize=True)
+df["state_freq"] = df["state"].map(state_freq)
+
+broker_fullname = (df["broker_first_name"].fillna("") + " " + df["broker_surname"].fillna("")).str.strip()
+broker_freq = broker_fullname.value_counts(normalize=True)
+df["broker_freq"] = broker_fullname.map(broker_freq)
+
+# Scaling (robust) for select numeric features
+scale_cols = ["price", "house_size", "acre_lot", "price_per_sqft", "lot_sqft"]
+scaler = RobustScaler()
+df[[f"r_{c}" for c in scale_cols]] = scaler.fit_transform(df[scale_cols])
+
+# -----------------------
+# 6) Time-series specific (basic)
+# -----------------------
+# You can create rolling aggregates if you have temporal listing data.
+# Here we only keep years_since_prev_sale already computed.
+
+# -----------------------
+# 7) Geospatial (optional; requires internet)
+# -----------------------
+# from geopy.geocoders import Nominatim
+# geolocator = Nominatim(user_agent="listings_etl")
+# def geocode(row):
+#     try:
+#         loc = geolocator.geocode(f"{row['street']}, {row['city']}, {row['state']} {row['zip_code']}, USA", timeout=10)
+#         return pd.Series({"lat": loc.latitude, "lon": loc.longitude}) if loc else pd.Series({"lat": np.nan, "lon": np.nan})
+#     except Exception:
+#         return pd.Series({"lat": np.nan, "lon": np.nan})
+# df[["lat","lon"]] = df.apply(geocode, axis=1)
+
+# -----------------------
+# 8) QA / Validation
+# -----------------------
+print("\n--- QA Assertions ---")
+assert df["currency"].eq("$").all(), "Non-USD currency present."
+assert df["zip_code"].str.fullmatch(r"\d{5}").all(), "ZIP codes must be 5 digits."
+assert df["price"].gt(0).all(), "Price must be > 0"
+assert df["bed"].ge(0).all() and df["bath"].ge(0).all(), "Beds/baths must be >= 0"
+assert df["acre_lot"].gt(0).all(), "acre_lot must be > 0"
+assert df["address"].isna().sum() == 0, "Address cannot be null"
+print("QA checks passed.")
+
+# Minimal audit summary
+audit = {
+    "row_count": int(len(df)),
+    "n_states": int(df["state"].nunique()),
+    "n_brokers": int(broker_fullname.nunique()),
+    "n_addresses": int(df["address"].nunique()),
+    "outliers_price": int(df["is_outlier_price"].sum()),
+    "outliers_lot": int(df["is_outlier_acre_lot"].sum()),
+    "ts_as_of": str(as_of.date()),
+}
+
+print("\n--- Audit summary ---")
+print(audit)
+
+# -----------------------
+# 9) Privacy / Security
+# -----------------------
+# Create hashed surrogate IDs for brokers and properties
+def sha256(s: str) -> str:
+    return hashlib.sha256(s.encode("utf-8")).hexdigest()
+
+df["broker_id"] = broker_fullname.fillna("unknown").apply(sha256)
+df["property_id"] = (df["address"].fillna("") + "|" + df["zip_code"]).apply(sha256)
+
+# Optionally drop direct PII before modeling/delivery
+pii_cols = ["broker_first_name", "broker_surname", "address", "street"]
+# df = df.drop(columns=pii_cols)  # uncomment if required
+
+# -----------------------
+# 10) Aggregations / Reshaping examples
+# -----------------------
+print("\n--- Avg price by state and sale status ---")
+by_state_status = df.groupby(["state"])[["price", "price_per_sqft"]].median().sort_values("price", ascending=False)
+print(by_state_status.head(10))
+
+# Pivot example: median price per state
+pivot_state = df.pivot_table(index="state", values="price", aggfunc="median")
+print("\n--- Median price by state ---")
+print(pivot_state.sort_values("price", ascending=False).head(10))
+
+# -----------------------
+# 11) Delivery
+# -----------------------
+out_dir = "out_curated"
+os.makedirs(out_dir, exist_ok=True)
+df.to_parquet(os.path.join(out_dir, "listings_curated.parquet"), index=False)
+df.to_csv(os.path.join(out_dir, "listings_curated.csv"), index=False)
+
+metadata = {
+    "source_file": src_path,
+    "generated_at": datetime.utcnow().isoformat(),
+    "row_count": int(len(df)),
+    "columns": df.columns.tolist(),
+    "description": "Curated and feature-enriched real-estate listings",
+}
+with open(os.path.join(out_dir, "metadata.json"), "w") as f:
+    json.dump(metadata, f, indent=2)
+
+print(f"\nWrote curated outputs to ./{out_dir}")
+
+Notes and results you should expect when you run this
+
+- Missingness: Your pasted dataset has complete rows; no nulls expected.
+- ZIP codes: Several are missing leading zeros (e.g., MA, RI, NJ). The pipeline zero‑pads to 5 digits (e.g., 01262, 02043, 02831, 08830, 01760, 01886, 02631).
+- Currency: Only USD detected. Assertion enforces that.
+- Duplicates: Kept first per (address, zip_code). Brokered_by repeats across different listings, so it’s not a primary key.
+- Outliers: Large acre_lot values (35.0, 27.59, 14.25, 10.0, 9.0, 8.36, 6.69, 4.44, 3.0) likely flagged; high prices (2.45M, 2.365M, 2.199M, 1.979M, 1.3M) flagged; extremely low prices (69.9K, 90K, 98.5K) flagged. Use log1p_price and robust scaling for modeling.
+- Engineered features: price_per_sqft, lot_sqft, log transforms, years_since_prev_sale (relative to 2022‑12‑31), frequency encodings for state/broker, one-hot status.
+- QA: Assertions fail fast if values are out of spec.
+
+Optional SQL DDL (if you want to land this in a warehouse)
+
+CREATE TABLE listings_raw (
+  brokered_by BIGINT,
+  broker_first_name VARCHAR(64),
+  broker_surname VARCHAR(64),
+  status VARCHAR(16),
+  price BIGINT,
+  currency CHAR(1),
+  bed INT,
+  bath INT,
+  acre_lot DOUBLE PRECISION,
+  address VARCHAR(256),
+  zip_code CHAR(5),
+  house_size INT,
+  prev_sold_month INT,
+  prev_sold_day INT,
+  prev_sold_year INT
+);
+
+-- Basic constraints you can add:
+-- CHECK (price > 0), CHECK (bed >= 0), CHECK (bath >= 0), CHECK (acre_lot > 0),
+-- CHECK (zip_code ~ '^[0-9]{5}$'), CHECK (currency IN ('$'))
+
+Great‑Expectations style checks (illustrative)
+
+- expect_table_row_count_to_be_between: [1, 1000000]
+- expect_column_values_to_not_be_null: for price, address, zip_code, bed, bath, acre_lot, house_size
+- expect_column_values_to_match_regex: zip_code -> ^[0-9]{5}$
+- expect_column_values_to_be_between:
+  - price: min 50000, max 10000000
+  - bed: min 0, max 10
+  - bath: min 0, max 10
+  - acre_lot: min 0.01, max 1000
+- expect_column_values_to_be_in_set: currency -> {'$'}, status -> {'sold','for_sale'}
+
+Data dictionary (post‑curation; key fields)
+
+- property_id: SHA‑256 hash of address|zip (surrogate key; PII‑safe)
+- broker_id: SHA‑256 hash of broker full name
+- broker_first_name, broker_surname: normalized title case (PII; drop if needed)
+- status_*: one‑hot sale status
+- price: numeric USD
+- house_size: interior sqft
+- bed, bath: bedroom/bathroom counts
+- acre_lot: lot size in acres; lot_sqft computed as acres*43560
+- price_per_sqft: price / house_size
+- log1p_*: log1p transforms of skewed numeric fields
+- prev_sold_date, years_since_prev_sale: derived time features
+- address, street, city, state, zip_code: normalized address components; zip is 5‑digit string
+- state_freq, broker_freq: frequency encodings
+- is_outlier_*: IQR flags for anomaly tagging
+- r_*: robust‑scaled versions of selected numeric features
+
+Next steps you can add if needed
+
+- Geocoding to lat/lon and spatial joins to census tracts, school ratings, flood zones, or crime indices.
+- Train/validation/test split (time‑aware if you add listing dates) and class balancing if modeling status.
+- Persist to Parquet with partitioning by state or status for query efficiency.
+- Orchestrate with Airflow/Prefect; add checkpointing and idempotency.
+
+If you want the same pipeline in PySpark or dbt/SQL, say the word and I’ll adapt it.

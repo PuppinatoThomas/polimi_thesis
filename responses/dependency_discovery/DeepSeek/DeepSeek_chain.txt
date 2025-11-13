@@ -1,0 +1,47 @@
+Based on the analysis of the Master dataset, the minimal functional dependencies detected are:
+
+- `zip_code -> city, state`
+- `(city, state) -> zip_code`
+
+These dependencies are minimal because:
+- `zip_code` is a single attribute that determines both `city` and `state`, and no subset of `zip_code` can determine these attributes since it is already minimal.
+- `(city, state)` together determine `zip_code`, and neither `city` nor `state` alone can determine `zip_code` due to cities with the same name in different states (e.g., Nashville in Tennessee and Indiana).
+
+No other minimal functional dependencies were found among the attributes `brokered_by`, `price`, `acre_lot`, `street`, `house_size`, and `prev_sold_date` based on the data provided.
+Consider this dataset:
+col1, col2
+1, Cat
+1, Cat
+2, Cat
+2, Cat
+2, Cat
+3, Dog
+3, Dog
+3, Cat
+3, Dog
+3, Dog
+There are no strict minimal functional dependencies.
+Allowing at most a number of errors equal to 10% of the rows, the minimal relaxed dependency is col1->col2.
+
+Consider this dataset:
+A, B, C
+1, 2, 1
+2, 3, 3
+2, 3, 3
+2, 2, 3
+4, 2, 1
+The minimal functional dependency is A->C.
+Allowing at most a number of errors equal to 20% of the rows, the minimal relaxed dependencies are A->B, B->C, C->A, C->B .
+
+Consider the Master dataset, detect the minimal relaxed dependencies.
+Based on the analysis of the Master dataset, the minimal relaxed functional dependencies are detected with an error tolerance of 10% of the rows (i.e., up to 10 errors allowed out of 100 rows). The dependencies are:
+
+- `acre_lot -> house_size`
+- `house_size -> acre_lot`
+
+These dependencies hold with errors below the 10% threshold:
+- `acre_lot -> house_size` has 8 errors (8%),
+- `house_size -> acre_lot` has 7 errors (7%).
+
+No other minimal relaxed dependencies were found among the attributes `brokered_by`, `price`, `street`, `city`, `state`, `zip_code`, and `prev_sold_date` within the error tolerance. The strict functional dependencies `zip_code -> city, state` and `(city, state) -> zip_code` are not considered relaxed as they hold without errors.
+

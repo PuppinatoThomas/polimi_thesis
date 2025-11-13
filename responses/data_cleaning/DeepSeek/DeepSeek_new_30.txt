@@ -1,0 +1,220 @@
+I'll help you clean this real estate dataset. Here's a comprehensive data cleaning approach:
+
+```python
+import pandas as pd
+import numpy as np
+from datetime import datetime
+
+# Load the dataset
+df = pd.read_csv('real_estate_data.csv')
+
+# Display initial info
+print("Initial dataset shape:", df.shape)
+print("\nInitial data types:")
+print(df.dtypes)
+print("\nMissing values before cleaning:")
+print(df.isnull().sum())
+
+# 1. Clean the 'brokered_by' column
+df['brokered_by'] = df['brokered_by'].replace(['', '-1', 'nan', 'NaN', 'None'], np.nan)
+df['brokered_by'] = pd.to_numeric(df['brokered_by'], errors='coerce')
+
+# 2. Clean and standardize the 'status' column
+status_mapping = {
+    's': 'sold',
+    'f': 'for_sale',
+    'for_sale': 'for_sale',
+    'sold': 'sold',
+    '-': 'unknown',
+    'Unknown': 'unknown',
+    'nan': 'unknown'
+}
+df['status'] = df['status'].replace(status_mapping)
+df['status'] = df['status'].fillna('unknown')
+
+# 3. Clean the 'price' column
+def clean_price(value):
+    if pd.isna(value) or value in ['', '-1', 'nan']:
+        return np.nan
+    if isinstance(value, str):
+        # Remove $ and commas
+        value = value.replace('$', '').replace(',', '')
+    try:
+        return float(value)
+    except:
+        return np.nan
+
+df['price'] = df['price'].apply(clean_price)
+
+# Remove extreme outliers in price (keeping reasonable range $10,000 - $20,000,000)
+df = df[(df['price'].isna()) | ((df['price'] >= 10000) & (df['price'] <= 20000000))]
+
+# 4. Clean 'bed' and 'bath' columns
+def clean_bed_bath(value):
+    if pd.isna(value) or value in ['', '-1', 'nan']:
+        return np.nan
+    if isinstance(value, str):
+        # Convert word numbers to digits
+        word_to_num = {
+            'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
+            'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10
+        }
+        if value.lower() in word_to_num:
+            return word_to_num[value.lower()]
+        try:
+            return float(value)
+        except:
+            return np.nan
+    return float(value)
+
+df['bed'] = df['bed'].apply(clean_bed_bath)
+df['bath'] = df['bath'].apply(clean_bed_bath)
+
+# Remove unrealistic bed/bath values
+df = df[(df['bed'].isna()) | (df['bed'] <= 20)]
+df = df[(df['bath'].isna()) | (df['bath'] <= 20)]
+
+# 5. Clean 'acre_lot' column
+def clean_acre_lot(value):
+    if pd.isna(value) or value in ['', '-1', 'nan']:
+        return np.nan
+    try:
+        val = float(value)
+        # Remove extreme outliers
+        if val > 1000 or val < 0.0001:
+            return np.nan
+        return val
+    except:
+        return np.nan
+
+df['acre_lot'] = df['acre_lot'].apply(clean_acre_lot)
+
+# 6. Clean address columns
+def clean_address(value):
+    if pd.isna(value) or value in ['', '-', 'Unknown', 'unknown', 'nan']:
+        return np.nan
+    return str(value).strip()
+
+df['street'] = df['street'].apply(clean_address)
+df['city'] = df['city'].apply(clean_address)
+
+# 7. Clean 'state' column - standardize to 2-letter codes
+state_mapping = {
+    'Montana': 'MT', 'North Carolina': 'NC', 'Virginia': 'VA', 'Florida': 'FL',
+    'Kansas': 'KS', 'California': 'CA', 'Texas': 'TX', 'Georgia': 'GA',
+    'Michigan': 'MI', 'Maryland': 'MD', 'Wisconsin': 'WI', 'Massachusetts': 'MA',
+    'Oklahoma': 'OK', 'Kentucky': 'KY', 'Missouri': 'MO', 'Ohio': 'OH',
+    'Nevada': 'NV', 'Idaho': 'ID', 'South Carolina': 'SC', 'New York': 'NY',
+    'Minnesota': 'MN', 'New Jersey': 'NJ', 'Washington': 'WA', 'Alabama': 'AL',
+    'Utah': 'UT', 'West Virginia': 'WV', 'Iowa': 'IA'
+}
+
+df['state'] = df['state'].replace(state_mapping)
+df['state'] = df['state'].apply(lambda x: x if pd.isna(x) or (isinstance(x, str) and len(x) == 2) else np.nan)
+
+# 8. Clean 'zip_code' column
+def clean_zipcode(value):
+    if pd.isna(value) or value in ['', '-1', 'nan']:
+        return np.nan
+    value = str(value).split('.')[0]  # Remove decimal if any
+    if len(value) == 5 and value.isdigit():
+        return value
+    return np.nan
+
+df['zip_code'] = df['zip_code'].apply(clean_zipcode)
+
+# 9. Clean 'house_size' column
+def clean_house_size(value):
+    if pd.isna(value) or value in ['', '-1', 'nan']:
+        return np.nan
+    try:
+        val = float(value)
+        # Remove unrealistic values (either too small or too large)
+        if val < 50 or val > 20000:
+            return np.nan
+        return val
+    except:
+        return np.nan
+
+df['house_size'] = df['house_size'].apply(clean_house_size)
+
+# 10. Clean 'prev_sold_date' column
+def clean_date(value):
+    if pd.isna(value) or value in ['', 'Unknown', 'unknown', 'nan', '-']:
+        return np.nan
+    
+    value = str(value).strip()
+    
+    # Try different date formats
+    date_formats = [
+        '%Y-%m-%d',
+        '%m/%d/%y',
+        '%m/%d/%Y',
+        '%Y-%m-%d',
+        '%m-%d-%Y'
+    ]
+    
+    for fmt in date_formats:
+        try:
+            return pd.to_datetime(value, format=fmt)
+        except:
+            continue
+    
+    return np.nan
+
+df['prev_sold_date'] = df['prev_sold_date'].apply(clean_date)
+
+# 11. Remove duplicates based on key columns
+df = df.drop_duplicates(subset=['street', 'city', 'state', 'price', 'bed', 'bath'])
+
+# 12. Final data type conversions
+df['brokered_by'] = df['brokered_by'].astype('Int64')  # Nullable integer type
+df['bed'] = df['bed'].astype('Int64')
+df['bath'] = df['bath'].astype('Int64')
+
+# Display cleaning results
+print("\n" + "="*50)
+print("CLEANING RESULTS")
+print("="*50)
+print("Final dataset shape:", df.shape)
+print("\nMissing values after cleaning:")
+print(df.isnull().sum())
+print("\nData types after cleaning:")
+print(df.dtypes)
+print(f"\nPrice range: ${df['price'].min():,.0f} - ${df['price'].max():,.0f}")
+print(f"Bedrooms range: {df['bed'].min()} - {df['bed'].max()}")
+print(f"Bathrooms range: {df['bath'].min()} - {df['bath'].max()}")
+
+# Display sample of cleaned data
+print("\nSample of cleaned data:")
+print(df.head(10))
+```
+
+Key cleaning steps performed:
+
+1. **Brokered_by**: Converted to numeric, handled missing values
+2. **Status**: Standardized to 'sold', 'for_sale', 'unknown'
+3. **Price**: Removed currency symbols, converted to float, handled outliers
+4. **Bed/Bath**: Converted word numbers to digits, handled missing values
+5. **Acre_lot**: Cleaned and removed unrealistic values
+6. **Address fields**: Standardized missing values and formatting
+7. **State**: Converted to 2-letter codes
+8. **Zip code**: Validated 5-digit format
+9. **House size**: Removed unrealistic values
+10. **Date**: Standardized date formats
+11. **Duplicates**: Removed duplicate entries
+12. **Data types**: Ensured proper data types
+
+The cleaned dataset will have:
+- Consistent data types
+- Standardized categorical values
+- Realistic numerical ranges
+- Proper handling of missing values
+- Valid geographic information
+- Standardized date formats
+
+You can further enhance this by:
+- Geocoding addresses for latitude/longitude
+- Imputing missing values using appropriate strategies
+- Creating derived features (price per square foot, etc.)
+- Additional outlier detection for specific business rules

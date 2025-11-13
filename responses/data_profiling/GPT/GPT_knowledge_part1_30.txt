@@ -1,0 +1,89 @@
+Here’s a comprehensive list of operations commonly used to perform data profiling, grouped by scope.
+
+Planning and setup
+- Define objectives, scope, success criteria
+- Inventory data sources and access methods
+- Choose sampling vs full scan; define performance limits
+- Capture metadata, lineage, and ownership
+
+Structural/schema profiling
+- Ingest schema (tables, columns, data types, constraints)
+- Verify declared vs actual data types
+- Extract and validate constraints (NOT NULL, UNIQUE, CHECK, FK)
+- Detect missing or weak constraints
+- Encoding/locale detection
+
+Column-level content profiling
+- Row count, non-null count, null/blank/whitespace-only counts
+- Distinct count, cardinality, uniqueness ratio
+- Value frequency distribution; top-N and rare values
+- Min/max; numeric stats (mean, median, stddev, variance, quantiles, skewness, kurtosis)
+- String stats (min/max/avg length, character sets)
+- Pattern/format discovery (regex, token shapes)
+- Semantic type detection (email, phone, URL, code, ID)
+- Domain/range validation (allowed lists, reference sets)
+- Outliers/anomalies (IQR, Z-score, MAD)
+- Special values (zeros, negatives, NaN/Inf, sentinels)
+- Default/constant value detection
+- Completeness/mandatory field checks
+- Conformance/standardization (case, trimming, units, formats)
+- Timeliness/recency for date/time fields
+- Error/invalid value categorization
+
+Table-level profiling
+- Duplicate row detection
+- Candidate key discovery (single/composite uniqueness)
+- Functional dependency discovery
+- Conditional rules (IF X THEN Y), cross-field consistency
+- Referential integrity within table (self-references)
+- Correlations/associations (Pearson/Spearman, MI) across columns
+- Missingness patterns and null co-occurrence
+- Record lifecycle: created/updated timestamps, churn/growth trends
+- Multi-column anomaly detection
+
+Cross-table/relationship profiling
+- Foreign key inference and validation; orphan detection
+- Join cardinality profiling (1–1, 1–N, N–M)
+- Schema conformance across sources (field mapping, type alignment)
+- Cross-source reconciliation/consistency checks
+- Entity resolution and deduplication across datasets
+- Surrogate key mapping
+
+Semi-structured/unstructured profiling
+- Schema inference for JSON/Avro/XML/Parquet
+- Field presence/optionality; type heterogeneity by path
+- Array/object depth and size stats; path coverage
+- Key frequency and cardinality
+- Text profiling (language detection, token/term frequencies)
+
+Data quality dimension assessment
+- Completeness
+- Validity
+- Uniqueness
+- Accuracy (against reference/authoritative data)
+- Consistency (intra-/inter-table)
+- Timeliness/freshness
+- Conformity/standardization
+- Integrity (structural and referential)
+- Overall data quality scoring
+
+Privacy, risk, and compliance checks
+- PII/PHI detection and classification
+- Policy/rule adherence (e.g., masking needs, retention)
+- Sensitive data location mapping
+
+Operationalization and governance
+- Baseline creation and drift/change detection
+- Thresholds, rule catalogs, and alerting
+- Incremental profiling/scheduling
+- Documentation of findings; data dictionaries
+- Issue tracking, remediation recommendations, owner assignment
+- Reporting/dashboards and export of metrics
+
+Output and remediation support
+- Data quality reports and scorecards
+- Cleansing/standardization rules and mappings
+- Root-cause hints (source vs downstream)
+- Monitoring hooks for ongoing quality checks
+
+This set covers the practical operations most teams use; you can tailor it to your data types, volumes, and governance requirements.

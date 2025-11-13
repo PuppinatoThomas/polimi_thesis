@@ -1,0 +1,113 @@
+Here’s a comprehensive set of operations commonly used for data profiling, grouped by scope. Not every item applies in every context, but together they cover most profiling needs.
+
+Planning and setup
+- Define profiling objectives and data quality rules
+- Inventory sources and datasets; catalog metadata
+- Determine access, security, and sampling strategy
+- Choose tools and configure environments
+- Establish baselines and thresholds
+
+Ingestion and technical profiling
+- Detect file formats, encodings, delimiters, compression
+- Parse and infer schema (including JSON/XML/Parquet)
+- Validate row counts, column counts, header presence
+- Identify parsing/ingestion errors and malformed records
+- Measure dataset size, partitions, and small-file issues
+- Detect duplicate files/snapshots; compute checksums
+
+Schema and type profiling
+- Infer/validate data types per column
+- Measure type-casting success/failure rates
+- Detect mixed types within columns
+- Identify optional vs required fields (schema optionality)
+- Discover schema drift and version differences
+
+Column/attribute-level profiling
+- Completeness: null/blank/NA rates; missingness patterns
+- Cardinality: distinct counts, uniqueness, candidate keys
+- Value distributions: frequencies, histograms, modes
+- Numeric stats: min/max, mean/median, std dev, variance, percentiles, MAD, CV, skewness, kurtosis
+- Outlier detection: z-score, IQR, robust methods, isolation forest
+- Range checks and domain limits; negative/zero detection
+- String profiling: length stats, whitespace, casing, special chars
+- Pattern/format checks: regex, date/time formats, email/URL/phone validation
+- Code/domain conformance to reference lists and enumerations
+- Sentinel/default value detection (e.g., 9999-12-31, -1)
+- Unit/currency detection and consistency; scaling/rounding checks
+- Encoding validity (UTF-8), control characters, byte-order marks
+- Entropy/complexity and duplication of values
+
+Record-level profiling
+- Duplicate row detection (exact and fuzzy)
+- Record completeness (field coverage per row)
+- Conditional rules (if A then B; cross-field constraints)
+- Functional dependencies and conditional FDs
+- Denial constraints and rule violations
+- Business key construction and validation
+
+Table-level profiling
+- Primary key detection; uniqueness and null checks
+- Surrogate vs natural key analysis
+- Temporal coverage: earliest/latest timestamps, gaps, seasonality
+- Change rate and churn across snapshots
+- Class imbalance and skew within target/label columns
+- Entropy and clustering tendencies of rows
+
+Relationship and cross-table profiling
+- Foreign key detection; referential integrity checks
+- Inclusion dependencies (subset relations) and joinability
+- Relationship cardinalities (1–1, 1–N, N–M)
+- Overlap/coverage analysis; orphan and dangling records
+- Schema matching and synonym/homonym detection across datasets
+- Cross-dataset consistency checks
+
+Statistical and ML-oriented profiling
+- Correlations: Pearson/Spearman/Kendall; Cramér’s V; Theil’s U
+- Mutual information and redundancy checks; VIF for multicollinearity
+- Chi-square/ANOVA tests for associations
+- Distribution fit tests (KS, AD), QQ analysis
+- Drift detection across time/partitions (PSI, KL, Wasserstein)
+- Missingness mechanism tests (MCAR/MAR/MNAR hints)
+
+Data quality dimension scoring
+- Completeness, validity, uniqueness, consistency, accuracy
+- Integrity, timeliness/freshness, availability
+- Weighted scoring and SLA/SLO mapping
+
+Privacy, security, and compliance profiling
+- PII/PHI detection (regex, dictionaries, ML)
+- Sensitive data classification and tagging
+- Masking/anonymization needs; policy conformance
+- Access control and data residency flags
+
+Semi-structured and unstructured data profiling
+- JSON/XML: depth, array lengths, required vs optional fields
+- Text: language detection, length, vocabulary size, n-grams, stopword ratio, PII in text
+- Geospatial: CRS detection, geometry validity, bounds
+- Media: basic metadata (dimensions, duration, codecs), checksum consistency
+
+Operational/infra profiling
+- Volume trends, row growth, file counts
+- Partitioning quality and skew
+- Ingestion latency and end-to-end freshness
+- Query performance baselines and cost hotspots
+
+Remediation and documentation operations
+- Generate standardized cleaning rules and transformations
+- Map value standardizations and code-set harmonization
+- Produce data dictionary and business glossary entries
+- Record lineage and provenance; versioning and change logs
+- Create quality scorecards and exception reports
+
+Automation and monitoring
+- Schedule recurring profiling and incremental runs
+- Establish alerts on threshold breaches and anomalies
+- Maintain baselines and drift monitors
+- Store metrics, logs, and sample bad records for audit
+
+Outputs and communication
+- Publish summaries, detailed reports, and dashboards
+- Export metrics to catalogs/observability platforms
+- Share issue lists with owners and track resolution
+
+If you share your data context (sources, types, goals), I can tailor this list to a focused, actionable checklist.

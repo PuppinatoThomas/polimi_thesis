@@ -1,0 +1,107 @@
+Here’s a comprehensive checklist of common data cleaning operations. Not every project needs all of them, but this covers the typical landscape.
+
+Planning and profiling
+- Define data quality rules and acceptance criteria
+- Create/align a data dictionary and metadata
+- Profile data (types, ranges, missingness, uniqueness, distributions)
+- Identify source-of-truth and reference/master data
+
+Schema/structure normalization
+- Harmonize schemas across sources (column names, order, data models)
+- Rename columns consistently; enforce naming conventions
+- Split/merge columns (e.g., full name → first/last; street + unit)
+- Unpivot/pivot as needed (wide/long formats)
+- Remove duplicated columns; drop irrelevant/constant columns
+- Type casting (string→int/float/bool/date; categorical types)
+- Validate and fix character encodings (e.g., to UTF-8)
+
+Standardizing values
+- Trim whitespace; collapse repeated spaces
+- Remove/replace control and non-printable characters
+- Unicode normalization (NFC/NFKC) and diacritics handling
+- Consistent casing (lower/upper/title) where appropriate
+- Standardize categorical labels and synonyms (e.g., yes/No/Y → True/False)
+- Map codes to canonical values (state codes, country codes, ISO standards)
+- Normalize number formats (decimal/thousand separators)
+- Standardize units and perform unit conversions (e.g., lbs→kg)
+- Standardize currency representation (code, symbol, locale)
+- Normalize booleans, nulls, and sentinel values (e.g., “N/A”, -999 → null)
+
+Dates, times, and ordering
+- Parse and validate date/time strings
+- Normalize time zones (e.g., to UTC) and handle DST
+- Standardize date/time formats (ISO 8601)
+- Sort by event time; deduplicate by timestamp windows
+- Resample/align time series; fill or flag gaps
+
+Missing data handling
+- Detect explicit and implicit missing values; unify to null
+- Decide strategy: drop rows/columns, impute, or leave as missing
+- Imputation (constant, mean/median/mode, group-wise, kNN, regression/model-based, ffill/bfill for time series)
+- Add missingness indicator flags where useful
+
+Duplicates and entity resolution
+- Identify exact duplicate rows; remove or consolidate
+- Fuzzy de-duplication (string similarity, phonetic keys, fingerprinting)
+- Record linkage across datasets; resolve entities (survivorship rules)
+- Generate/validate unique keys and IDs
+
+Outliers and anomalies
+- Detect outliers (IQR, z-score, robust z, MAD, isolation forest/DBSCAN)
+- Investigate domain validity; correct, cap/winsorize, transform, or remove
+- Detect logical anomalies (impossible combos, negative ages, etc.)
+
+Integrity and consistency checks
+- Range/domain checks (min/max, allowed sets)
+- Cross-field rules (start_date ≤ end_date, weight consistent with BMI)
+- Referential integrity (foreign keys to reference tables)
+- Functional dependencies and uniqueness constraints
+- Business rule validation and conflict resolution
+- Reconcile to authoritative reference data (MDM, lookup tables)
+
+Text-specific cleaning
+- Strip HTML/markup; decode entities
+- Normalize punctuation, digits, whitespace
+- Spelling correction/typo fixes (dictionaries, fuzzy match)
+- Tokenization, stemming/lemmatization (if for NLP)
+- Language detection, transliteration, emoji handling (as needed)
+
+Contact and ID fields
+- Validate and format emails, phone numbers, URLs (regex/standards)
+- Address parsing and standardization; geocoding/reverse geocoding
+- Normalize identifiers (SSN, VAT, ISBN) with checksums where applicable
+
+Geospatial data
+- Validate coordinate ranges; remove impossible points
+- Standardize coordinate reference systems (CRS)
+- Snap/clean geometries; handle self-intersections
+- Enforce spatial constraints (within country bounds)
+
+Numerical transformations (when appropriate)
+- Scale/normalize (standardization, min–max, robust scaling)
+- Transform skewed data (log, Box-Cox, Yeo-Johnson)
+- Handle infinities, NaNs, negative zeros
+
+Categorical encoding (borderline between cleaning and prep)
+- Consolidate rare categories; group “other”
+- One-hot/ordinal/target encoding as needed
+
+Privacy and security
+- Detect and mask/redact PII/PHI
+- Pseudonymize or hash identifiers
+- Apply aggregation or differential privacy where required
+- Remove sensitive free-text content
+
+Quality assurance and governance
+- Automated validation tests (unit tests, great expectations-style checks)
+- Data drift and anomaly monitoring
+- Versioning, lineage, and reproducible pipelines
+- Change logs and audit trails
+- Manual spot checks and stakeholder review
+
+Output and delivery
+- Re-check types, constraints, and null handling post-cleaning
+- Document transformations and assumptions
+- Export in standardized, interoperable formats with metadata
+
+This list can serve as a menu: select and order operations based on your data domain, quality goals, and downstream use.

@@ -1,0 +1,119 @@
+This dataset is very messy (mixed formats, missing values, inconsistent text, invalid values). A good data-cleaning pipeline would include:
+
+---
+
+## **Steps for Cleaning the Dataset**
+
+1. **Standardize column names**
+
+   * Keep consistent lowercase with underscores (already mostly clean).
+
+2. **Fix numerical columns**
+
+   * Remove `$`, commas, and convert `price`, `bed`, `bath`, `house_size`, `acre_lot` to numeric.
+   * Replace invalid strings like `"two"`, `"three"`, `"four"`, `"nan"`, `"-"`, `"-1"` with proper integers or `NaN`.
+   * Convert scientific notation values (e.g., `4.200384527089073e-05`) to numeric.
+
+3. **Fix categorical columns**
+
+   * Normalize `status`: map values like `"f"`, `"s"`, `"Unknown"`, `"s"`, `"-"` to `for_sale`, `sold`, or `unknown`.
+   * Standardize `state` names to USPS codes (e.g., "Virginia" → "VA", "California" → "CA").
+   * Handle missing cities and streets as `NaN`.
+
+4. **Dates**
+
+   * Standardize `prev_sold_date` into a uniform `YYYY-MM-DD` format.
+   * Fix inconsistent formats like `12/30/21`, `03/30/22`, `"Unknown"`.
+
+5. **Deduplicate rows**
+
+   * Some duplicates exist (e.g., `48807` appears twice with different cities). Deduplicate based on full record or brokered_by + address.
+
+6. **Outlier handling**
+
+   * Some `house_size` and `acre_lot` are suspiciously small or `-1` (errors). Replace negatives with `NaN`.
+   * Example: `house_size = 0.0001057449494949495` → incorrect unit, should be converted or set to `NaN`.
+
+7. **Brokered_by column**
+
+   * Normalize values: convert `"nan"`, `"-1"`, empty string to `NaN`.
+
+---
+
+## **Python Code for Cleaning**
+
+Here’s a cleaning pipeline in pandas:
+
+```python
+import pandas as pd
+import numpy as np
+
+# Load data
+df = pd.read_csv("housing.csv")
+
+# 1. Standardize price
+df["price"] = (
+    df["price"]
+    .astype(str)
+    .str.replace(r"[^0-9.]", "", regex=True)  # remove $ and commas
+    .replace("", np.nan)
+    .astype(float)
+)
+
+# 2. Convert bed/bath to numeric
+df["bed"] = pd.to_numeric(
+    df["bed"].astype(str).replace({"nan": np.nan, "two": 2, "three": 3, "four": 4, "-1": np.nan}), 
+    errors="coerce"
+)
+df["bath"] = pd.to_numeric(
+    df["bath"].astype(str).replace({"nan": np.nan, "two": 2, "three": 3, "four": 4, "-1": np.nan}), 
+    errors="coerce"
+)
+
+# 3. Fix lot and house size
+df["acre_lot"] = pd.to_numeric(df["acre_lot"], errors="coerce")
+df["house_size"] = pd.to_numeric(df["house_size"], errors="coerce")
+df.loc[df["house_size"] < 100, "house_size"] = np.nan  # remove unrealistic
+
+# 4. Clean status
+df["status"] = df["status"].str.lower().replace({
+    "f": "for_sale", "s": "sold", "-": "unknown", "unknown": "unknown"
+})
+
+# 5. Normalize state names
+us_state_map = {
+    "Virginia":"VA","Texas":"TX","California":"CA","Florida":"FL","Maryland":"MD",
+    "Georgia":"GA","Michigan":"MI","North Carolina":"NC","Illinois":"IL","Colorado":"CO",
+    "Oklahoma":"OK","Idaho":"ID","New Jersey":"NJ","Tennessee":"TN","Kentucky":"KY",
+    "Nevada":"NV","Missouri":"MO","Washington":"WA","Kansas":"KS","South Carolina":"SC",
+    "Wyoming":"WY","Minnesota":"MN","New York":"NY","Indiana":"IN","Ohio":"OH",
+    "Pennsylvania":"PA","Wisconsin":"WI","Rhode Island":"RI","Massachusetts":"MA",
+    "Iowa":"IA","West Virginia":"WV","Arkansas":"AR","Alabama":"AL","Unknown":np.nan,
+    "NC":"NC","CA":"CA","TX":"TX"
+}
+df["state"] = df["state"].replace(us_state_map)
+
+# 6. Dates
+df["prev_sold_date"] = pd.to_datetime(df["prev_sold_date"], errors="coerce")
+
+# 7. Clean brokered_by
+df["brokered_by"] = pd.to_numeric(df["brokered_by"], errors="coerce")
+
+# 8. Deduplicate
+df = df.drop_duplicates()
+
+```
+
+---
+
+After running this, you’ll have a **cleaned dataset** with:
+
+* Numeric price, bed, bath, lot, size.
+* Unified statuses.
+* Standardized state abbreviations.
+* Consistent dates.
+* NaNs for invalid/missing entries.
+
+---
+
+Do you want me to actually **run this cleaning on your dataset and show you the cleaned version in a table**, or just keep the pipeline code?

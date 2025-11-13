@@ -1,0 +1,106 @@
+Below is a clear set of wrangling steps and a ready-to-run Pandas recipe that:
+
+- Merges name fields and the prior sale date
+- Splits the address into street/city/state
+- Formats and converts numeric/date/string columns (incl. padding ZIPs)
+- Renames only where it improves clarity
+- Drops redundant source columns
+
+What you’ll get in the end
+Final columns (and meaning):
+- brokered_by: broker ID (int)
+- broker_name: merged first + surname (str)
+- status: listing status (str, lowercased)
+- price_usd: price as numeric USD (int)
+- bed: bedrooms (int)
+- bath: bathrooms (int)
+- lot_acres: lot size in acres (float)
+- street_address: street address (str)
+- city: city (str)
+- state: full state name (str)
+- zip: 5-digit ZIP code, zero-padded (str)
+- house_sqft: interior size in square feet (int)
+- prev_sold_date: ISO date of previous sale (datetime date)
+
+Columns dropped:
+- broker_first_name, broker_surname (merged into broker_name)
+- address (split)
+- currency (all were "$")
+- price (replaced by price_usd)
+- zip_code (replaced by zip)
+- house_size (replaced by house_sqft)
+- acre_lot (replaced by lot_acres)
+- prev_sold_month, prev_sold_day, prev_sold_year (merged)
+
+Pandas code to perform the wrangling
+- Paste your CSV text (including the header) into a file (e.g., listings.csv), then run this.
+
+import pandas as pd
+
+# Read
+df = pd.read_csv("listings.csv")
+
+# 1) Merge columns
+df["broker_name"] = df["broker_first_name"].str.strip() + " " + df["broker_surname"].str.strip()
+
+# Merge previous sold date (month/day/year) into a single date
+df["prev_sold_date"] = pd.to_datetime(
+    dict(year=df["prev_sold_year"], month=df["prev_sold_month"], day=df["prev_sold_day"]),
+    errors="coerce"
+).dt.date  # keep as date (no time)
+
+# 2) Split address into street_address, city, state
+# Address format: "street, city, State"
+addr = df["address"].str.extract(r"^(.*?),\s*(.*?),\s*([A-Za-z ]+)$")
+addr.columns = ["street_address", "city", "state"]
+df = pd.concat([df, addr], axis=1)
+
+# 3) Format/convert columns
+# Price to numeric and make it explicit USD
+df["price_usd"] = pd.to_numeric(df["price"], errors="coerce").astype("Int64")
+
+# Standardize types for bedrooms/bathrooms/lot size/house size
+df["bed"] = pd.to_numeric(df["bed"], errors="coerce").astype("Int64")
+df["bath"] = pd.to_numeric(df["bath"], errors="coerce").astype("Int64")
+df["lot_acres"] = pd.to_numeric(df["acre_lot"], errors="coerce")
+df["house_sqft"] = pd.to_numeric(df["house_size"], errors="coerce").astype("Int64")
+
+# ZIP: to 5-digit zero-padded string
+df["zip"] = df["zip_code"].astype(str).str.zfill(5)
+
+# Status: keep consistent lower case
+df["status"] = df["status"].str.lower().str.strip()
+
+# 4) Rename only where it improves clarity (done above in new columns)
+# price -> price_usd; acre_lot -> lot_acres; house_size -> house_sqft; zip_code -> zip
+
+# 5) Drop now-redundant source columns
+cols_to_drop = [
+    "broker_first_name", "broker_surname",
+    "currency",
+    "address",
+    "price",
+    "zip_code",
+    "house_size",
+    "acre_lot",
+    "prev_sold_month", "prev_sold_day", "prev_sold_year"
+]
+df = df.drop(columns=cols_to_drop)
+
+# Reorder columns for readability
+final_cols = [
+    "brokered_by", "broker_name", "status", "price_usd",
+    "bed", "bath", "lot_acres",
+    "street_address", "city", "state", "zip",
+    "house_sqft", "prev_sold_date"
+]
+df = df[final_cols]
+
+# Optional: save to a new CSV
+df.to_csv("listings_wrangled.csv", index=False)
+
+Notes and checks
+- ZIP codes like 1262 will be padded to 01262, which is the correct 5-digit format.
+- Currency column was dropped after converting price to price_usd (all currency symbols were $).
+- If any address rows deviate from the "street, city, State" pattern, they will yield NaNs in the split columns. The given data matches the pattern.
+- prev_sold_date uses ISO format (YYYY-MM-DD). If any component is invalid, it becomes NaT/NaN date.

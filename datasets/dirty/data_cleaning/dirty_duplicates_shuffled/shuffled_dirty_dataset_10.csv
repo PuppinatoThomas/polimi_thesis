@@ -1,0 +1,111 @@
+brokered_by;status;price;bed;bath;acre_lot;street;city;state;zip_code;house_size;prev_sold_date;duplicate
+96817;sold;425000;4;3;0.06;33 Pine Ave;Alexandria;Virginia;;2075.0;2022-02-04;-1
+53232;for_sale;330000;2;1;0.3;225 Broadway Ct;Kingston;New York;12401;1062.0;2014-07-01;-1
+75073;for_sale;375000;3;1;0.1;766 Church St;Columbus;Ohio;43206;nan;2020-07-06;-1
+22562;for_sale;210000;3;2;0.15;272 Farm Blvd;Dearborn Heights;Michigan;48125;1960.0;-;-1
+53138;sold;479000;3;3;0.22;47 Lincoln Rd;Bowie;Maryland;20720;-1;2022-01-04;-1
+23017;sold;240000;3;2;0.2;;Moses Lake;Washington;98837;1670.0;2022-03-09;-1
+92736;for_sale;175000;3;2;nan;862 King Blvd;;Oklahoma;74055;1144.0;2017-12-29;-1
+16829;for_sale;1979000;6;6;0.29;400 Adams Ct;Port Washington;New York;11050;5828.0;2017-05-05;-1
+22671;sold;90000;3;2;0.09;553 Third Ct;Saint Louis;Missouri;63115;-1;2022-03-24;75,32
+78460;for_sale;278900;3;2;0.7;95 Meadow Ave;Somerset;Kentucky;42503;1923.0;2016-07-01;-1
+57424;sold;935000;5;5;0.16;409 Wood Ct;Manteca;California;95337;3789.0;2022-02-18;-1
+68269;sold;389854;-1;2;9.7e-05;144 Terrace Blvd;Unknown;Idaho;83605;1574.0;2021-12-17;-1
+81031;sold;219000;3;2;;Unknown;Chambersburg;Pennsylvania;17202;1189.0;2021-11-24;-1
+53377;sold;189900;4;1;0.28;286 Bridge Ln;Saint Louis;Missouri;63114;1624.0;2022-01-18;-1
+109987;Unknown;490000;nan;4;69.0;229 Broadway Ave;Corpus Christi;Texas;78418;;2019-04-03;103,48
+22916;sold;;4;12;0.28;73 Franklin Rd;Jacksonville;North Carolina;28546;3162.0;2022-04-25;-1
+78247;Unknown;339900;7;2;0.28;676 South Blvd;Troy;Illinois;62294;1613.0;;-1
+81824;sold;292677;5;-1;0.29;63 Field Dr;Sumter;South Carolina;29154;;2021-12-22;-1
+;sold;28000;2;3;0.60;977 Adam Blvd;West Ford;Massach.;18886;2215.0;2020-11-19;65
+58970;;949900;8;4;0.23;-;Kensington;;-1;2500.0;2021-12-30;-1
+-1;for_sale;2500;4;2;10.0;675 Circle Dr;Hulbert;Oklahoma;74441;1896.0;2018-04-19;41
+109950;sold;-1;3;11;0.23;-;Fort Worth;Texas;76133;1552.0;2022-01-19;-1
+107955;for_sale;2199000;3;3;0.3;20 First Dr;Hingham;Unknown;2043;3650.0;1992-10-22;-1
+nan;-;6107900;11;1;0.15;380 Valley Ln;-;Ohio;45324;1116.0;2020-08-03;-1
+10726;for_sale;-1;3;12;0.83;226 Square Rd;Brewster;Massachusetts;2631;1368.0;2001-07-06;-1
+102016;f;$374900;three;two;0.14;368 Shore Road;Zephyrhills;FL;33542;6.076388888888889e-05;04/25/19;-1
+32769;-;1300000;7;3;27.59;550 Second Pl;Julian;;92036;986.0;2020-05-15;-1
+34888;sold;389000;3;2;0.22;383 Market St;Houston;Texas;77025;1696.0;2021-12-16;-1
+97679;sold;440000;3;3;0.07;82 Lincoln Ave;Charlotte;North Carolina;;nan;-;-1
+nan;sold;65400;4;2;0.18;219 Field St;Houston;Texas;-1;1626.0;2022-03-31;80
+78184;;385000;12;3;0.23;390 Madison Ct;North Port;Florida;34286;1708.0;2022-03-18;-1
+56084;s;$279900;two;two;-1;593 Elm Avenue;Madison;WI;53704;6.094323921028467e-05;12/17/21;-1
+22671;sold;90000;3;2;0.09;553 Third Ct;Saint Louis;Missouri;63115;-1;2022-03-24;75,8
+24268;for_sale;550000;3;2;0.22;81 Roosevelt Dr;Charlottesville;Virginia;22903;1512.0;2011-09-29;-1
+21986;sold;269900;4;3;0.17;614 Garden Ct;Pooler;Georgia;31322;2368.0;2021-12-30;-1
+10437;sold;350000;3;2;1.07;70 Cedar Dr;Cumming;Georgia;30041;1681.0;;-1
+26543;sold;600000;4;nan;1.08;763 Adams Pl;Melbourne;Florida;32934;10470.0;2022-01-21;-1
+28222;sold;2450000;4;4;0.19;687 Wilson Ave;Los Angeles;California;90064;2751.0;2022-02-22;-1
+33901;for_sale;225000;2;2;0.33;417 East Ct;Greenfield;Indiana;46140;;2017-07-26;-1
+53016;sold;239000;3;2;0.56;Unknown;Oak Ridge;Tennessee;37830;-1;2022-02-02;-1
+101497;for_sale;129900;4;2;1.95;575 King Pl;Eastover;South Carolina;29044;2128.0;2021-09-20;-1
+-1;for_sale;25000;3;3;1.00;675 Circle;Hulbet;Oklaoma;7441;1900.0;2018-4-9;20
+103967;for_sale;635000;3;3;0.23;885 Washington Ave;Iselin;New Jersey;8830;2000.0;2019-02-28;-1
+19903;sold;849500;3;3;0.18;249 South Pl;Houston;Texas;77030;2150.0;-;-1
+81671;sold;325000;3;2;8.36;651 Vista Blvd;Plato;Missouri;65552;1784.0;2021-12-17;-1
+45913;sold;250000;-1;-1;12;94 Washington Ave;Queensbury;New York;12804;nan;2021-11-23;-1
+84534;s;$689900;three;four;0.07;920 Field Drive;Vienna;VA;22180;7.443038337924701e-05;04/22/22;-1
+687;sold;355000;3;2;0.19;272 Terrace Ln;Orlando;Florida;32828;1864.0;2021-12-08;-1
+109887;Unknown;49000;nan;5;6.90;29 Broadway Ave;Corpus Christ;Texss;784188;;2019-4-4;14,103
+7689;sold;98500;4;-1;9.0;272 Broadway Ln;Fairview;Michigan;48621;16.0;2022-04-14;-1
+;for_sale;-1;5;8;0.3;611 Hill Pl;Wichita;-;67207;2696.0;2021-11-12;94
+105798;-;155990;7;3;0.21;-;Albany;Indiana;47320;2009.0;2020-06-19;-1
+53592;for_sale;;4;11;2.1;779 Third Blvd;Mchenry;Illinois;60050;4145.0;2020-04-02;-1
+76215;sold;339000;3;3;0.34;60 Franklin Ave;Bella Vista;Arkansas;72714;2035.0;2021-12-07;-1
+19415;for_sale;309000;3;2;3.0;820 View Ln;Ojibwa;Wisconsin;54862;2025.0;2020-02-04;-1
+22611;for_sale;215000;3;2;0.12;995 Maple Ave;;Illinois;60409;1304.0;2013-08-15;-1
+22611;Unknown;280000;10;2;0.19;952 King Rd;Monroeville;-;15146;1874.0;2022-04-19;-1
+56699;sold;249900;3;2;0.29;115 Roosevelt Pl;Ellisville;Missouri;nan;2037.0;2022-03-04;-1
+53173;s;$350000;three;two;0.9;693 Ridge Place;Harpers Ferry;West VA;25425;0.0001155016069788797;-;-1
+78167;sold;350000;-1;2;62.0;324 Sunset St;Saint Louis Park;Minnesota;55426;1908.0;2022-04-01;-1
+-1;for_sale;26000;2;;0.05;163 Mill St;Tustine;california;9278;-1;2011-11-11;98
+106177;for_sale;399500;3;3;0.27;411 Wilson Ave;-;Georgia;31405;1760.0;2002-06-03;-1
+nan;for_sale;11400;3;3;0.2;88 East Ave;San Antonio;Unknown;78254;2346.0;2004-05-14;70
+15757;for_sale;69900;3;1;0.17;520 View Rd;Enid;Oklahoma;73701;1333.0;2016-06-09;-1
+54093;for_sale;265000;nan;1;53.0;896 Sunset Ct;Marathon;Florida;-1;321.0;Unknown;-1
+;sold;28100;3;2;0.59;977 Adams Blvd;Westford;Massachusetts;1886;2211.0;2021-11-19;18
+79245;for_sale;nan;5;10;0.42;254 Princess Ave;Bettendorf;Iowa;52722;3765.0;2016-11-21;-1
+2765;sold;;3;11;4.44;699 Wilson Dr;Crossville;Tennessee;38555;3352.0;;-1
+2177;s;$479900;three;two;0.13;842 Cedar Drive;Unknown;CO;80550;9.462522956841138e-05;03/18/22;-1
+nan;sold;5136800;4;-1;0.27;285 Center Ln;Fairfax;Virginia;22030;97.0;2021-12-10;-1
+nan;for_sale;11400;3;3;0.2;88 East Ave;San Antonio;Unknown;78254;2346.0;2004-05-14;62
+96014;sold;370000;4;2;nan;-;Spokane;Washington;99207;2084.0;2022-04-05;-1
+22217;sold;898000;3;2;;52 North Blvd;Alhambra;California;91803;1465.0;2022-04-08;-1
+22721;sold;799999;4;4;0.15;900 Baker Ln;Natick;Massachusetts;1760;3422.0;2022-04-05;-1
+31355;s;$2365000;five;five;-1.0;592 Meadow Avenue;Edina;-;55424;0.0001759426652892562;12/30/21;-1
+22671;sold;90000;3;2;0.09;553 Third Ct;Saint Louis;Missouri;63115;-1;2022-03-24;32,8
+104876;-;398000;8;2;0.11;;Chicago;Illinois;nan;1171.0;2021-11-30;-1
+86329;for_sale;699000;4;5;14.25;347 Oak Ln;Wetumpka;Alabama;36092;4758.0;2015-02-19;-1
+78075;sold;280000;2;1;0.06;686 East Ln;Reno;Nevada;89506;851.0;2021-11-19;-1
+65293;for_sale;725000;3;3;1.04;Unknown;Sparks;Nevada;89441;1876.0;2004-09-10;-1
+nan;sold;65400;4;2;0.18;219 Field St;Houston;Texas;-1;1626.0;2022-03-31;29
+5145;;750000;7;4;0.19;59 Park Blvd;Meridian;Idaho;83642;2796.0;2022-01-10;-1
+8;for_sale;nan;3;;35.0;624 River Ln;Cheyenne;Wyoming;82007;9629.0;2022-10-31;-1
+82978;for_sale;335000;3;2;0.18;71 Hill Ln;Temple;Texas;76502;2344.0;2013-05-01;-1
+55214;sold;509900;;3;12;603 Princess St;San Jacinto;California;92583;2383.0;2022-05-03;-1
+45936;f;$539900;three;two;;293 Terrace Court;Skaneateles;NY;13152;6.879878328741965e-05;06/15/15;-1
+53673;for_sale;112900;-1;2;53.0;169 Meadow St;Mount Pleasant;Michigan;48858;1524.0;2012-08-13;-1
+109978;sold;760000;nan;2;0.0088;760 Madison Ln;-;California;92026;1888.0;2021-12-22;-1
+53177;for_sale;105000;3;;0.24;;Woodward;Oklahoma;nan;16.0;Unknown;-1
+57424;for_sale;nan;3;12;0.15;277 Princess Dr;Livermore;California;94550;1785.0;2022-04-22;-1
+78139;f;$425000;one;one;0.58;949 Franklin Boulevard;Unknown;CO;81526;3.540375344352617e-05;07/06/06;-1
+10649;sold;219900;3;nan;0.2;430 Church Rd;Allison Park;Pennsylvania;15101;9698.0;2022-04-13;-1
+75016;sold;317900;2;2;0.22;168 Bridge Pl;-;-;63122;2032.0;2021-11-23;-1
+4630;for_sale;519950;4;3;0.13;906 Mill Blvd;Huntsville;Alabama;35801;2778.0;Unknown;-1
+;for_sale;-1;6;7;3.00;611 Hill Place;Qichita;-;67707;2700.0;2012-11-12;50
+29538;for_sale;1150000;3;2;0.37;223 Lake St;Long Beach;California;90802;1409.0;2016-06-10;-1
+26012;sold;259900;4;2;nan;391 Bridge Rd;Great Falls;;59405;1632.0;2021-11-09;-1
+104873;for_sale;888000;4;4;0.21;210 Church Ln;Houston;Texas;77082;4156.0;2013-09-26;-1
+-1;for_sale;25000;3;;0.06;162 Mill St;Tustin;California;92782;-1;2011-11-14;60
+20385;for_sale;599500;5;3;0.37;217 Church Ln;Calabash;North Carolina;28467;3058.0;2020-03-24;-1
+78200;sold;149000;3;nan;0.15;688 Garfield Ct;Akron;Ohio;44314;11540.0;2022-02-09;-1
+3479;sold;-1;5;7;0.3;864 Lake Ln;Irving;Texas;75060;3110.0;2021-12-09;-1
+85655;sold;249900;3;1;0.22;159 Meadow Rd;Scituate;Rhode Island;2831;1310.0;2022-02-04;-1
+10987;Unknown;500000;nan;3;70.0;229 Broadway Avenue;Corpus-Christi;Texaa;78419;;0219-4-3;14,48
+81311;s;$575000;five;four;nan;827 Elm Court;Leland;NC;28451;0.00010965478650137742;04/22/22;-1
+;sold;20189200;;1;0.0033;655 First St;Stockbridge;Massachusetts;1262;1015.0;2021-11-29;-1
+108243;sold;499000;3;3;0.18;197 Meadow Ct;;Washington;nan;2289.0;2022-03-30;-1
+45807;for_sale;375000;;2;-1;157 Market Pl;New Middletown;Ohio;44442;1747.0;1991-04-17;-1
+-1;for_sale;21756100;6;4;0.35;668 Maple Ave;Saratoga Springs;Unknown;;3625.0;2019-04-19;-1
+59082;s;$249900;three;two;0.41;672 West Place;Stuarts Draft;VA;24477;6.553460743801653e-05;02/14/22;-1

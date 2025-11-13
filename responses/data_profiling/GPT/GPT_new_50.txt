@@ -1,0 +1,79 @@
+Here’s the **data profiling summary** of your dataset:
+
+### Dataset Overview
+
+* **Shape**: 100 rows × 12 columns
+* **Columns**:
+  `brokered_by, status, price, bed, bath, acre_lot, street, city, state, zip_code, house_size, prev_sold_date`
+
+---
+
+### Missing Values
+
+| Column         | Missing Count |
+| -------------- | ------------- |
+| brokered_by    | 29            |
+| status         | 12            |
+| price          | 14            |
+| bed            | 13            |
+| bath           | 13            |
+| acre_lot       | 14            |
+| street         | 9             |
+| city           | 17            |
+| state          | 8             |
+| zip_code       | 35            |
+| house_size     | 6             |
+| prev_sold_date | 11            |
+
+---
+
+### Uniqueness
+
+* `brokered_by`: 38 unique values
+* `status`: 6 unique values (e.g. `"sold"`, `"for_sale"`, `"f"`, `"s"`, `"Unknown"`, `NaN`)
+* `price`: 63 unique values (some as strings with `$`)
+* `bed`: 17 unique values (mixed numeric + words like `"three"`, `"five"`)
+* `bath`: 16 unique values (numeric + `"one"`, `"two"`, etc.)
+* `acre_lot`: 52 unique values (some negative/very small scientific notation)
+* `street`: 55 unique values
+* `city`: 35 unique values
+* `state`: 39 unique values (inconsistent formats: `"CA"` vs `"California"` vs `"Unknown"`)
+* `zip_code`: 39 unique values (some `-1`, some missing)
+* `house_size`: 68 unique values (ranges from scientific notation to thousands)
+* `prev_sold_date`: 60 unique values (mixed formats: `"YYYY-MM-DD"`, `"MM/DD/YY"`, `"Unknown"`, `NaN`)
+
+---
+
+### Sample Records
+
+| brokered_by | status   | price   | bed  | bath  | acre_lot | street            | city     | state          | zip_code | house_size | prev_sold_date |
+| ----------- | -------- | ------- | ---- | ----- | -------- | ----------------- | -------- | -------------- | -------- | ---------- | -------------- |
+| NaN         | sold     | 292677  | five | 3     | 0.0032   | 63 Field Dr       | Sumter   | South Carolina | -1       | 9564.0     | 2021-12-22     |
+| 53138       | sold     | 479000  | NaN  | three | 0.22     | Lincoln Rd, 47    | -        | Unknown        | NaN      | NaN        | 2022-01-04     |
+| 78460       | for_sale | 278900  | 3    | 10    | NaN      | 95 Meadow Ave     | Somerset | NaN            | 42503    | 7.7        | 07/01/16       |
+| 54093       | for_sale | $265000 | 1    | one   | 0.0051   | 896 Sunset Ct     | Marathon | Florida        | 33050    | 321.0      | 09/20/04       |
+| -1          | sold     | NaN     | 9    | 2     | -1       | Terrace Blvd, 144 | Caldwell | Idaho          | 83605    | 1574.0     | 2021-12-17     |
+
+---
+
+### Data Quality Issues
+
+1. **Mixed formats**:
+
+   * `price`: numbers and strings with `$`
+   * `bed`/`bath`: numbers and words (`"three"`, `"five"`)
+   * `prev_sold_date`: inconsistent formats (`2021-12-22` vs `07/01/16`)
+2. **Invalid values**:
+
+   * `acre_lot`: negative or unrealistic scientific notation values
+   * `zip_code`: `-1`, `nan`, empty
+   * `house_size`: sometimes scientific notation instead of square footage
+3. **Inconsistent categories**:
+
+   * `status`: multiple forms (`"sold"`, `"s"`, `"f"`, `"Unknown"`)
+   * `state`: full names vs abbreviations vs `"Unknown"`
+4. **Duplicates**: Likely exists (same property repeated but with different formatting).
+
+---
+
+Do you want me to **clean and standardize** this dataset (e.g., normalize status, convert prices to numbers, unify dates, handle `bed`/`bath` as integers)?

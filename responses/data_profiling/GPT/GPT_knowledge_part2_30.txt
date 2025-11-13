@@ -1,0 +1,208 @@
+Below is a concise, end‑to‑end data profiling of your dataset, tailored to the operations you listed. I’ve mixed concrete findings (e.g., row counts, value distributions, examples) with specific, actionable remediation rules you can implement.
+
+Planning and setup
+- Objective: Assess data quality, discover schema and constraints, quantify issues, and deliver cleansing/standardization rules for a single “property listings” CSV.
+- Scope: 1 table; 12 columns; 100 rows (excluding header).
+- Success criteria: Clear schema/types; validated domains; quantified issues for key fields (status, price, bed, bath, address, zip); candidate key guidance; remediation rules; monitoring tests.
+- Access/method: Flat CSV text; assume UTF‑8.
+- Lineage/ownership: Not provided; recommend capturing source system, extract date, and owner.
+
+Structural/schema profiling
+- Ingested schema (headers):
+  - brokered_by, status, price, bed, bath, acre_lot, street, city, state, zip_code, house_size, prev_sold_date
+- Actual vs intended types (observed heterogeneity):
+  - brokered_by: mix of numeric IDs, -1, empty, “nan”. Should be nullable integer/string ID.
+  - status: categorical with values {sold, for_sale} plus variants s, f, Unknown, -, empty. Should be controlled enum.
+  - price: numeric with “$”, “nan”, -1, empty. Should be nullable numeric (currency).
+  - bed, bath: numeric but includes negatives, words (“two”, “three”, “five”, “four”, “ten”, “twelve”), “nan”, blanks. Should be nullable integers, >= 0.
+  - acre_lot: numeric floats; includes -1, “nan”, extreme small scientific notation values. Should be float >= 0, reasonable range.
+  - street: free text; inconsistent format (number-first vs “Street, number”), “-”, empty.
+  - city: text; includes “Unknown”, empty.
+  - state: mix of full names and 2-letter codes; sometimes empty/Unknown.
+  - zip_code: numeric-like; includes -1, “nan”, 4-digit ZIPs (e.g., 8830), empty. Should be 5-digit string (pad leading zeros).
+  - house_size: numeric; includes -1, very small scientific notation values (clearly erroneous), decimals for what should be integer square footage, empty.
+  - prev_sold_date: mixed formats (YYYY-MM-DD, MM/DD/YY), “Unknown”, “-”, empty. Should be ISO date or null.
+- Constraints detected/missing:
+  - No reliable primary key; brokered_by is not unique and often missing/sentinel.
+  - Many fields require CHECK constraints (e.g., bed/bath >= 0; zip 5 digits; status valid list).
+  - Encoding: appears ASCII/UTF‑8 safe; quoted commas present in street.
+
+Column-level content profiling (selected highlights)
+- Row count: 100
+- Status distribution (exact):
+  - sold: 41
+  - for_sale: 29
+  - s: 11 (likely “sold”)
+  - f: 4 (likely “for_sale”)
+  - Unknown: 4
+  - “-”: 8
+  - empty: 3
+- brokered_by:
+  - Missing as empty: 11
+  - Literal “nan”: 7
+  - Sentinel -1: 8 (should be treated as missing)
+  - Not unique; duplicates common; many plausible numeric IDs otherwise.
+- price:
+  - Present with various forms (plain number, “$…”, empty, -1, “nan”).
+  - Outliers: 94,415,00 (9,441,500) and 12,312,100; very low: 33,200; “-1” sentinel values.
+  - Needs currency stripping, numeric coercion, and non-negative enforcement.
+- bed/bath:
+  - Words present (two, three, four, five, ten, twelve), negatives (-1), “nan”, blanks.
+  - Beds up to 12; baths up to 12; some records have 8–12 baths; likely data errors or multi-unit records—needs domain validation by listing type.
+- acre_lot:
+  - Reasonable values (e.g., 0.1, 0.59, 1.07) mixed with negatives and ultra-small (e.g., 1.151e-05) and large (27.59).
+  - Enforce >= 0; values < 0.001 likely unit/scale errors to be flagged.
+- street:
+  - Inconsistent pattern: “number streetname” vs “streetname, number”; “-”; empty; duplicates across rows.
+  - Recommend address parsing/normalization (libpostal), split number, street, suffix.
+- city/state:
+  - city has “Unknown” or empty in multiple rows; state mixes full names and 2-letter codes; sometimes empty.
+  - Recommend normalizing state to USPS 2-letter; reconcile using ZIP when present.
+- zip_code:
+  - Nonstandard values: -1, “nan”, empty, 4-digit ZIPs (8830, 2043) lacking leading zero; multiple “nan”.
+  - Enforce 5-digit strings with zero-padding; validate city/state/ZIP consistency.
+- house_size:
+  - Mix of plausible integers (851, 1699, 2346) with -1, decimals (e.g., 87.0), and very small scientific notation values (e.g., 0.0001115559), and empty.
+  - Enforce integer >= 0; flag improbable values (< 200 or > 20,000) and scientific notation artifacts.
+- prev_sold_date:
+  - Mixed formats: ISO (2022-03-07), US short (02/14/22), ISO-like with missing leading zeros, “Unknown”, “-”, empty.
+  - Oldest: 1991-04-17; Latest observed ~2022-05-03; many in 2021–2022.
+  - Normalize to ISO 8601; enforce valid dates; timeliness is stale vs current date (2025), so low freshness.
+
+Pattern/format discovery (indicative)
+- status: {sold, for_sale} + variants {s, f, Unknown, -, empty}
+- brokered_by: digits-only ID or placeholders {-1, nan, empty}
+- price: ^\$?\d+(,\d{3})*(\.\d+)?$ plus {-1, nan, empty}
+- bed/bath: ^\d+$, or spelled numbers {one..twelve}, {nan, -1, empty}
+- zip_code: ^\d{5}$ desired; observed {4 digits; digits with -1; nan; empty}
+- prev_sold_date: ISO yyyy-mm-dd or mm/dd/yy; {Unknown, - , empty}
+
+Domain/range validation (recommendations)
+- status allowed: {sold, for_sale}; map s→sold, f→for_sale; treat {Unknown, -, empty} as null.
+- brokered_by: positive integer/string ID or null; disallow -1/nan.
+- price: non-negative (prefer > 0) integer; strip currency symbols; set null on unparsable.
+- bed: integer >= 0; map words to integers; null if unknown.
+- bath: integer >= 0; same mapping; consider supporting half-baths if source allows decimals later.
+- acre_lot: float >= 0; typical range 0–50; flag outliers (< 0.001 or > 20).
+- state: enforce USPS 2-letter; backfill via ZIP where possible.
+- zip_code: 5-digit string; pad leading zeros; ensure city/state/ZIP consistency.
+- house_size: integer >= 0; realistic 200–20,000; flag outside.
+- prev_sold_date: valid date; normalize to ISO; allow null.
+
+Outliers/anomalies (examples)
+- price extremes: 9,441,500; 12,312,100.
+- bath up to 12; bed up to 12 (possible but unusual).
+- acre_lot: 27.59 and 14.25; also extremely small scientific values and negatives.
+- house_size: near-zero scientific notation values, -1, very small (<= 110) compared to addresses implying regular homes—likely unit/parse errors.
+
+Special values and sentinels
+- Common sentinels: -1, “nan”, “Unknown”, “-”, empty strings across multiple columns.
+- Currency symbol “$” in price.
+- Scientific notation leaks in house_size and acre_lot.
+
+Completeness/mandatory checks (high-level)
+- High missingness/placeholder usage in brokered_by, state, zip_code, house_size, prev_sold_date, parts of bed/bath.
+- Address components frequently incomplete (street/city/state/zip not consistently present).
+
+Table-level profiling
+- Duplicates/near-duplicates:
+  - Same address appears multiple times with different statuses or values, e.g.:
+    - 864 Lake Ln, Irving, TX 75060 (multiple rows; varying price/status/house_size; one row has 12 beds)
+    - 272 Terrace Ln, Orlando, FL 32828 (Unknown vs sold)
+    - 88 East Ave, San Antonio, TX 78254 (duplicate with status “for_sale” and “f”)
+    - 675 Circle Dr, 74441 (Unknown city vs Hulbert OK)
+    - 272 Farm Blvd / Farm Blvd, 272 (same entity reversed)
+  - Recommend entity resolution by normalized full address + ZIP; keep latest record per business rule or create a record lifecycle.
+- Candidate keys:
+  - No single column is unique. Candidate composite: normalized_full_address + zip_code + prev_sold_date (still risky). Best: create a surrogate key (hash of normalized address + ZIP + brokered_by if present).
+- Conditional rules (examples to enforce):
+  - If zip_code present, then state must be present and match ZIP’s state; city should match ZIP’s acceptable city list.
+  - If status in {sold}, price should be > 0 and prev_sold_date should be non-null and in the past.
+  - If state is a full name, convert to 2-letter code.
+- Correlations: Expect positive correlation between house_size and price; current data reliability is too low for robust stats without cleansing.
+
+Cross-source/relationship profiling
+- Not applicable here (single file), but internal referential coherence (city/state/ZIP) is weak and needs external reference (e.g., USPS, ZIP→state lookup).
+
+Semi-structured profiling
+- Not applicable (flat CSV).
+
+Data quality dimension assessment (qualitative)
+- Completeness: Low–Medium (widespread missing/placeholder values).
+- Validity: Low–Medium (many domain violations: state/zip mismatch, negative/word numerics).
+- Uniqueness: Low (duplicates/near-duplicates).
+- Accuracy: Unknown (no authoritative reference provided; but format/logic errors suggest issues).
+- Consistency: Low (inconsistent address formats; mixed state formats; date formats).
+- Timeliness: Low (most prev_sold_date <= 2022; current date 2025).
+- Conformity/standardization: Low (mixed formats and encodings for key fields).
+- Integrity: Weak structural constraints; no keys.
+
+Privacy, risk, compliance
+- PII: Street addresses present (quasi-identifiers); no names/emails/phones apparent.
+- If required by policy, treat addresses as sensitive and apply masking in non-prod environments.
+
+Cleansing and standardization rules (implementable)
+- Normalize missing: Convert {“”, “-”, “Unknown”, “nan”, -1} to null across all columns.
+- status: Map {“s”→“sold”, “f”→“for_sale”}; restrict to {sold, for_sale}; null others.
+- price: Strip “$” and commas; cast to integer; set null if <= 0 or unparsable.
+- bed/bath:
+  - Map words to integers: {one:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9, ten:10, eleven:11, twelve:12}.
+  - Coerce to int; set null if negative/unparsable.
+- acre_lot: Coerce to float; set null if negative; flag values < 0.001 as suspect (requires review).
+- Address normalization:
+  - Use a parser (e.g., libpostal) to standardize street number/name/suffix; fix reversed “Street, number” entries.
+  - Trim whitespace; title-case street/city; standardize suffixes (St, Ave, Rd).
+- state:
+  - Map full names to USPS 2-letter; uppercase; null-check.
+- zip_code:
+  - Keep as 5-char string; pad leading zeros; set null if not 5 digits after cleanup.
+  - Enforce city/state/ZIP coherence with a ZIP reference; fix obvious cases (e.g., NJ “8830”→“08830”; MA “2043”→“02043”).
+- house_size:
+  - Coerce to integer; set null if < 200 or > 20,000 or scientific-notation artifacts; consider also rejecting non-integers.
+- prev_sold_date:
+  - Parse via flexible parser; output ISO 8601 (YYYY-MM-DD); set null if invalid or “Unknown”.
+- Deduplication/entity resolution:
+  - Create normalized_full_address = normalized_street + city + state + zip.
+  - Use it to group duplicates; choose survivorship rules (e.g., prefer non-null price; latest prev_sold_date; non-negative house_size).
+- Surrogate key: Compute a stable hash ID of normalized_full_address (+ unit if applicable).
+
+Quality checks to operationalize (Great Expectations/Soda/DBT tests)
+- Non-null rules: status, normalized_full_address, state (2-letter), zip_code (5-digit) when address present.
+- Accepted values: status in {sold, for_sale}.
+- Ranges: bed >= 0 and <= 12; bath >= 0 and <= 12; price > 0 (if status = sold); acre_lot >= 0 and <= 50; house_size between 200 and 20,000 (or null).
+- Pattern checks: zip_code matches ^\d{5}$; state matches ^[A-Z]{2}$.
+- Cross-field: ZIP→state match; if price present then numeric and non-negative; if status=sold then prev_sold_date not null and <= today.
+- Duplicates: No duplicate surrogate keys; flag duplicates by normalized_full_address+zip+status where business rules require uniqueness.
+- Drift: Monitor distributions for price/bed/bath/acre_lot; alert on significant shifts.
+
+Error/invalid value categorization (examples)
+- Placeholder missingness: “-”, “Unknown”, “nan”, -1 in multiple columns.
+- Format violations: price with currency symbols; 4-digit ZIPs; mixed state formats.
+- Semantic violations: negative bed/bath; implausible house_size/acre_lot; ultra-small scientific notation values; reversed address patterns.
+
+Reporting and governance
+- Produce a data dictionary (recommended types, constraints) and a scorecard (counts of nulls, invalids) after cleansing.
+- Track issues (e.g., ZIP/state mismatches, negative fields) and assign remediation.
+- Schedule incremental profiling on each new extract; alert on threshold breaches.
+
+Small set of concrete findings to kick off remediation
+- Exact stats provided:
+  - Rows: 100
+  - Status distribution: sold=41; for_sale=29; s=11; f=4; Unknown=4; “-”=8; empty=3
+- Clear duplicates/variants to merge:
+  - 88 East Ave, San Antonio, TX 78254 (rows with status for_sale and f)
+  - 864 Lake Ln, Irving, TX 75060 (multiple rows; one with implausible 12 beds)
+  - 675 Circle Dr, 74441 (Unknown city vs Hulbert, OK; same ZIP)
+  - 272 Farm Blvd vs “Farm Blvd, 272” (same entity; normalize)
+  - 272 Terrace Ln, Orlando, FL 32828 (Unknown vs sold)
+- Obvious ZIP fixes:
+  - Iselin, NJ “8830” → “08830”
+  - Hingham, MA “2043” → “02043”
+- State normalization needed across many rows: North Carolina/NC, Texas/TX, California/CA, etc.
+- Replace all sentinels {-1, “-”, “Unknown”, “nan”} with nulls before validations.
+
+If you want, I can provide a ready-to-run pandas/Great Expectations script that:
+- Ingests this CSV
+- Applies the cleaning rules above (mappings, coercions, normalization)
+- Computes full per-column metrics (non-null counts, invalid counts, distinct, min/max, percentiles)
+- Exports a profile report and a cleansed CSV with a surrogate key and deduplicated records.

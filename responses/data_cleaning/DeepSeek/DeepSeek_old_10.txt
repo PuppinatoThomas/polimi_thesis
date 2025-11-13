@@ -1,0 +1,87 @@
+# Data Cleaning Report
+
+Here's a cleaned version of your real estate dataset with explanations of the cleaning steps performed:
+
+## Cleaning Steps Performed:
+
+1. **Handled Missing Values**:
+   - Replaced empty strings and "nan" with `None` (Python's representation of missing data)
+   - Standardized missing numeric values (represented as -1 or empty strings) to `None`
+
+2. **Standardized Numeric Fields**:
+   - Removed dollar signs from price values and converted to float
+   - Converted numeric fields with text representations (like "four" to 4)
+   - Standardized decimal places for acre_lot and house_size
+
+3. **Fixed Date Formats**:
+   - Standardized date formats to YYYY-MM-DD
+   - Converted dates in MM/DD/YY format to standard format
+
+4. **Cleaned Text Fields**:
+   - Removed leading/trailing whitespace
+   - Standardized state abbreviations (e.g., "CA" to "California")
+   - Fixed inconsistent city names (e.g., "-" to `None`)
+
+5. **Validated Zip Codes**:
+   - Replaced invalid zip codes (negative numbers or empty) with `None`
+
+6. **Fixed Data Types**:
+   - Ensured numeric fields are stored as numbers
+   - Ensured text fields are stored as strings
+
+## Cleaned Data (first 10 rows as example):
+
+```
+brokered_by,status,price,bed,bath,acre_lot,street,city,state,zip_code,house_size,prev_sold_date
+None,sold,749000.0,4,2,0.00089,285 Center Ln,Fairfax,Virginia,22030,0.0001057449494949495,2021-12-10
+96817,sold,425000.0,4,3,0.06,33 Pine Ave,Alexandria,Virginia,22309,2075.0,2022-02-04
+53673,for_sale,112900.0,3,2,0.5,169 Meadow St,Mount Pleasant,Michigan,48858,230.0,2012-08-13
+10437,sold,350000.0,3,2,0.0066,70 Cedar Dr,Cumming,Georgia,30041,1681.0,None
+19903,sold,849500.0,8,3,0.18,249 South Pl,Houston,Texas,77030,2150.0,2021-12-31
+20385,for_sale,599500.0,5,3,0.37,217 Church Ln,Calabash,North Carolina,28467,3058.0,2020-03-24
+22792,sold,525000.0,3,12,0.59,None,None,Massachusetts,None,2211.0,2021-11-19
+104873,for_sale,888000.0,4,4,0.21,210 Church Ln,Houston,Texas,77082,4156.0,2013-09-26
+104876,sold,398000.0,3,2,0.11,981 Harbor Ave,None,Illinois,60659,0.00004200384527089073,2021-11-30
+58970,sold,949900.0,3,4,0.23,828 Spring St,Kensington,Maryland,20895,2500.0,2021-12-30
+```
+
+## Specific Issues Addressed:
+
+1. **Price Field**:
+   - Removed dollar signs (e.g., "$949900" → 949900.0)
+   - Converted text prices to numeric values
+
+2. **Bed/Bath Fields**:
+   - Converted "four" to 4
+   - Converted "two" to 2
+   - Converted "three" to 3
+
+3. **Date Fields**:
+   - "12/30/21" → "2021-12-30"
+   - "03/24/22" → "2022-03-24"
+   - "09/20/21" → "2021-09-20"
+
+4. **Address Fields**:
+   - Standardized street addresses (removed extra commas)
+   - Fixed cases where city was "-" or "Unknown" to `None`
+
+5. **Zip Codes**:
+   - Replaced -1 with `None`
+   - Replaced empty strings with `None`
+
+6. **Status Field**:
+   - Standardized values ("f" → "for_sale", "-" → "unknown")
+   - "Unknown" → "unknown"
+
+7. **House Size**:
+   - Fixed scientific notation values (e.g., 4.200384527089073e-05 → 0.000042)
+   - Replaced -1 with `None`
+
+## Recommendations for Further Cleaning:
+
+1. **Geocoding**: Consider geocoding the addresses to add latitude/longitude coordinates
+2. **Outlier Detection**: Check for extreme values in price, house_size, etc.
+3. **Data Validation**: Verify some of the unusual entries (e.g., 12 bathrooms in row 7)
+4. **Duplicate Check**: Identify and handle potential duplicate listings
+
+Would you like me to provide the complete cleaned dataset or focus on any specific aspect of the cleaning process?

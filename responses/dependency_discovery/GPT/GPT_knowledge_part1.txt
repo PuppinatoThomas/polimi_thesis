@@ -1,0 +1,16 @@
+- Unique column combination (UCC) discovery
+- Candidate key and primary key inference
+- Functional dependency (FD) discovery
+- Approximate/soft FD discovery (with error thresholds)
+- Conditional functional dependency (CFD) discovery
+- Inclusion dependency (IND) discovery (including composite)
+- Approximate/conditional IND (CIND) discovery
+- Foreign key detection (from INDs + uniqueness)
+- Order dependency (OD) discovery
+- Multivalued dependency (MVD) discovery
+- Join dependency (JD) discovery
+- Denial constraint (DC) mining
+- Differential dependency (DD) discovery
+- Matching dependency (MD) discovery
+- Minimal/canonical cover computation and redundancy pruning
+- Confidence/support scoring and validation of discovered dependencies

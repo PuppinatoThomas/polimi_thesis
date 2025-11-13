@@ -1,0 +1,267 @@
+Looking at this real estate dataset, I can see multiple data quality issues that need to be addressed. Let me perform a comprehensive cleaning following the workflow you outlined:
+
+## Phase 1: Initial Assessment & Discovery
+
+### Data Quality Issues Identified:
+
+1. **Missing Values**: Empty strings, "nan", "-1", "Unknown", "-"
+2. **Inconsistent Formatting**: 
+   - Text case inconsistencies ("five" vs "5")
+   - Date formats mixed (YYYY-MM-DD, MM/DD/YY, MM/DD/YYYY)
+   - Currency symbols mixed with numbers
+3. **Structural Errors**:
+   - Numerical values stored as text ("five", "three")
+   - Invalid numerical values (negative acreage, tiny house sizes)
+   - Addresses with street numbers in the street field
+4. **Outliers**: Extreme prices, impossible house sizes
+5. **Data Type Issues**: Mixed types in most columns
+
+## Phase 2: Core Cleaning Operations
+
+Here's the step-by-step cleaning process:
+
+```python
+import pandas as pd
+import numpy as np
+from datetime import datetime
+
+# Load the data
+df = pd.read_csv('real_estate_data.csv')
+
+# 1. Handle Missing Data
+def clean_missing_values(df):
+    # Replace common missing value indicators with NaN
+    missing_indicators = ['', 'nan', 'NaN', 'NULL', 'null', '-', '-1', 'Unknown', 'unknown']
+    df = df.replace(missing_indicators, np.nan)
+    
+    # For brokered_by, keep NaN but note these are direct sales
+    df['brokered_by'] = df['brokered_by'].replace({np.nan: 'Direct'})
+    
+    # For price - remove $ and convert to float, then impute median by status
+    df['price'] = df['price'].astype(str).str.replace('$', '', regex=False).str.replace(',', '')
+    df['price'] = pd.to_numeric(df['price'], errors='coerce')
+    price_median_by_status = df.groupby('status')['price'].median()
+    df['price'] = df.apply(
+        lambda row: price_median_by_status[row['status']] if pd.isna(row['price']) else row['price'],
+        axis=1
+    )
+    
+    return df
+
+# 2. Standardize Text Formats
+def standardize_text_formats(df):
+    # Convert all text to lowercase and strip whitespace
+    text_columns = ['brokered_by', 'status', 'street', 'city', 'state']
+    for col in text_columns:
+        df[col] = df[col].astype(str).str.lower().str.strip()
+    
+    # Standardize state abbreviations
+    state_mapping = {
+        'sc': 'south carolina', 'fl': 'florida', 'id': 'idaho', 'md': 'maryland',
+        'ky': 'kentucky', 'nv': 'nevada', 'ca': 'california', 'in': 'indiana',
+        'tx': 'texas', 'wa': 'washington', 'co': 'colorado', 'ma': 'massachusetts',
+        'ga': 'georgia', 'nc': 'north carolina', 'ut': 'utah', 'mo': 'missouri',
+        'mi': 'michigan', 'wi': 'wisconsin', 'tn': 'tennessee', 'oh': 'ohio',
+        'nj': 'new jersey', 'ok': 'oklahoma', 'il': 'illinois', 'pa': 'pennsylvania',
+        'al': 'alabama', 'mn': 'minnesota', 'va': 'virginia'
+    }
+    df['state'] = df['state'].map(state_mapping).fillna(df['state'])
+    
+    return df
+
+# 3. Convert Numerical Text to Numbers
+def convert_text_numbers(df):
+    number_words = {
+        'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
+        'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
+        'eleven': 11
+    }
+    
+    for col in ['bed', 'bath']:
+        df[col] = df[col].astype(str).str.lower()
+        df[col] = df[col].replace(number_words)
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+    
+    return df
+
+# 4. Clean and Convert Numerical Columns
+def clean_numerical_columns(df):
+    # Clean acre_lot - remove negative values and impossibly small values
+    df['acre_lot'] = pd.to_numeric(df['acre_lot'], errors='coerce')
+    df['acre_lot'] = df['acre_lot'].apply(lambda x: x if x > 0 and x < 1000 else np.nan)
+    
+    # Clean house_size - fix scientific notation errors and impossibly small values
+    df['house_size'] = pd.to_numeric(df['house_size'], errors='coerce')
+    # Values like 4.9070247933884296e-05 are clearly errors (0.000049 sq ft)
+    df['house_size'] = df['house_size'].apply(
+        lambda x: x if pd.isna(x) or (x > 100 and x < 50000) else np.nan
+    )
+    
+    # Clean zip_code
+    df['zip_code'] = pd.to_numeric(df['zip_code'], errors='coerce')
+    df['zip_code'] = df['zip_code'].apply(
+        lambda x: x if pd.isna(x) or (x > 1000 and x < 99999) else np.nan
+    )
+    
+    return df
+
+# 5. Standardize Date Formats
+def standardize_dates(df):
+    def parse_date(date_str):
+        if pd.isna(date_str):
+            return np.nan
+        date_str = str(date_str)
+        for fmt in ['%Y-%m-%d', '%m/%d/%y', '%m/%d/%Y', '%Y-%m-%d']:
+            try:
+                return datetime.strptime(date_str, fmt)
+            except ValueError:
+                continue
+        return np.nan
+    
+    df['prev_sold_date'] = df['prev_sold_date'].apply(parse_date)
+    return df
+
+# 6. Handle Outliers
+def handle_outliers(df):
+    # Price outliers - use IQR method
+    Q1 = df['price'].quantile(0.25)
+    Q3 = df['price'].quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    
+    # Cap outliers rather than remove (preserve data)
+    df['price'] = df['price'].clip(lower=lower_bound, upper=upper_bound)
+    
+    return df
+
+# 7. Parse Address Fields
+def parse_addresses(df):
+    # Extract street number and name from street field
+    def parse_street(street):
+        if pd.isna(street):
+            return np.nan, np.nan
+        street = str(street)
+        if ',' in street:
+            parts = street.split(',')
+            if len(parts) == 2:
+                return parts[0].strip(), parts[1].strip()
+        return np.nan, street
+    
+    street_data = df['street'].apply(parse_street)
+    df['street_number'] = street_data.apply(lambda x: x[0])
+    df['street_name'] = street_data.apply(lambda x: x[1])
+    
+    return df
+
+# 8. Standardize Status Values
+def standardize_status(df):
+    status_mapping = {
+        's': 'sold', 'f': 'for_sale', 'sold': 'sold', 
+        'for_sale': 'for_sale', 'for_sale': 'for_sale'
+    }
+    df['status'] = df['status'].map(status_mapping)
+    return df
+
+# Apply all cleaning functions
+def clean_real_estate_data(df):
+    df = clean_missing_values(df)
+    df = standardize_text_formats(df)
+    df = convert_text_numbers(df)
+    df = clean_numerical_columns(df)
+    df = standardize_dates(df)
+    df = handle_outliers(df)
+    df = parse_addresses(df)
+    df = standardize_status(df)
+    
+    # Remove duplicates based on key fields
+    df = df.drop_duplicates(subset=['street', 'city', 'state', 'price', 'bed', 'bath'])
+    
+    return df
+
+# Execute the cleaning
+cleaned_df = clean_real_estate_data(df)
+```
+
+## Phase 3: Advanced Cleaning & Transformation
+
+```python
+# Feature Engineering
+def engineer_features(df):
+    # Calculate price per square foot
+    df['price_per_sqft'] = df['price'] / df['house_size']
+    df['price_per_sqft'] = df['price_per_sqft'].replace([np.inf, -np.inf], np.nan)
+    
+    # Create bedroom-bathroom ratio
+    df['bed_bath_ratio'] = df['bed'] / df['bath']
+    df['bed_bath_ratio'] = df['bed_bath_ratio'].replace([np.inf, -np.inf], np.nan)
+    
+    # Bin house sizes
+    size_bins = [0, 1000, 2000, 3000, 5000, float('inf')]
+    size_labels = ['Small', 'Medium', 'Large', 'X-Large', 'Mansion']
+    df['house_size_category'] = pd.cut(df['house_size'], bins=size_bins, labels=size_labels)
+    
+    # Extract year from previous sale date
+    df['prev_sold_year'] = df['prev_sold_date'].dt.year
+    
+    return df
+
+cleaned_df = engineer_features(cleaned_df)
+```
+
+## Phase 4: Final Verification & Documentation
+
+### Data Validation Checks:
+```python
+def validate_data(df):
+    validation_checks = {
+        'Prices are positive': (df['price'] > 0).all(),
+        'Bedrooms are reasonable': (df['bed'] >= 0).all() and (df['bed'] <= 20).all(),
+        'Bathrooms are reasonable': (df['bath'] >= 0).all() and (df['bath'] <= 20).all(),
+        'Acreage is positive': (df['acre_lot'] > 0).all() if not df['acre_lot'].isna().all() else True,
+        'House sizes are reasonable': ((df['house_size'] > 100) & (df['house_size'] < 50000)).all() if not df['house_size'].isna().all() else True
+    }
+    
+    for check, result in validation_checks.items():
+        print(f"{check}: {'PASS' if result else 'FAIL'}")
+    
+    return validation_checks
+
+validation_results = validate_data(cleaned_df)
+```
+
+### Final Data Quality Report:
+```python
+def generate_quality_report(df):
+    print("=== DATA QUALITY REPORT ===")
+    print(f"Total records: {len(df)}")
+    print(f"Total columns: {len(df.columns)}")
+    print("\nMissing Values:")
+    missing_data = df.isnull().sum()
+    for col, missing_count in missing_data.items():
+        missing_pct = (missing_count / len(df)) * 100
+        print(f"  {col}: {missing_count} ({missing_pct:.1f}%)")
+    
+    print("\nData Types:")
+    print(df.dtypes)
+    
+    print("\nSample of Cleaned Data:")
+    return df.head()
+
+quality_report = generate_quality_report(cleaned_df)
+```
+
+## Summary of Cleaning Operations Performed:
+
+1. **Missing Values**: Replaced placeholders with NaN, imputed prices by status
+2. **Text Standardization**: Lowercased all text, standardized state names
+3. **Numerical Conversion**: Converted word numbers to digits, cleaned invalid values
+4. **Date Standardization**: Unified multiple date formats
+5. **Outlier Treatment**: Capped extreme prices using IQR method
+6. **Address Parsing**: Split street field into number and name
+7. **Status Standardization**: Unified status values
+8. **Feature Engineering**: Added price/sqft, bed/bath ratio, size categories
+9. **Data Validation**: Implemented business rule checks
+10. **Documentation**: Generated comprehensive quality report
+
+The cleaned dataset is now ready for analysis with consistent formats, reasonable value ranges, and enhanced features for real estate analytics.

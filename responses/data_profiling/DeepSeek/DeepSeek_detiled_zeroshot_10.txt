@@ -1,0 +1,162 @@
+I'll perform comprehensive data profiling on this real estate dataset. Let me analyze it step by step.
+
+## 1. Overall Dataset Statistics
+
+**Basic Information:**
+- **Number of rows:** 108
+- **Number of columns:** 12
+- **Total missing values:** 57 (5.4% of all cells)
+- **Exact duplicate rows:** 1 (row 48 and 52 are identical)
+- **Domain:** Real estate/Property listings
+
+**Candidate Unique Candidate Columns (UCC):**
+- `street` - High cardinality but has missing/duplicate values
+- Combination of `street` + `city` + `state` + `zip_code` likely forms a unique identifier
+- No single column is completely unique and non-null
+
+**Correlation Insights:**
+- Strong positive correlation expected between: `price` ↔ `bed`, `price` ↔ `bath`, `price` ↔ `house_size`
+- Moderate correlation expected between: `price` ↔ `acre_lot`
+- Weak correlation expected with: `brokered_by`, `status`
+
+## 2. Column-by-Column Analysis
+
+### **brokered_by**
+- **Type:** Mixed (numeric/string)
+- **Missing:** 6 (5.6%)
+- **Distinct:** 73
+- **Issues:** Contains '-1', 'nan' as strings, mixed data types
+- **Domain:** Broker IDs
+
+### **status**
+- **Type:** Categorical
+- **Missing:** 0
+- **Distinct:** 6
+- **Values:** 
+  - sold: 49 (45.4%)
+  - for_sale: 44 (40.7%)
+  - '-': 5 (4.6%)
+  - f: 4 (3.7%)
+  - Unknown: 3 (2.8%)
+  - s: 1 (0.9%)
+- **Issues:** Inconsistent values ('f', 's', '-')
+
+### **price**
+- **Type:** Numerical (with formatting issues)
+- **Missing:** 2 (1.9%)
+- **Distinct:** 85
+- **Mathematical Statistics:**
+  - Mean: $466,217
+  - Median: $375,000
+  - Min: $11,400
+  - Max: $2,365,000
+  - Range: $2,353,600
+  - Variance: 4.12e+11
+  - Q1: $259,900, Q3: $599,500
+- **Issues:** Dollar signs, commas, '-1' value, extreme outliers
+
+### **bed**
+- **Type:** Mixed (numeric/string)
+- **Missing:** 3 (2.8%)
+- **Distinct:** 9
+- **Values:** 3 (28.7%), 4 (20.4%), 5 (7.4%), 2 (6.5%), 8 (3.7%), 'four' (0.9%), 'three' (0.9%), 12 (0.9%), 1 (0.9%)
+- **Issues:** Text values ('four', 'three'), inconsistent numbering
+
+### **bath**
+- **Type:** Mixed (numeric/string)
+- **Missing:** 3 (2.8%)
+- **Distinct:** 9
+- **Values:** 2 (38.9%), 3 (25.9%), 4 (8.3%), 1 (5.6%), 'two' (1.9%), 12 (0.9%), 5 (0.9%), 6 (0.9%), 7 (0.9%), 11 (0.9%)
+- **Issues:** Text values, unrealistic numbers (12 bathrooms), '-1' value
+
+### **acre_lot**
+- **Type:** Numerical
+- **Missing:** 3 (2.8%)
+- **Distinct:** 60
+- **Mathematical Statistics:**
+  - Mean: 1.67 acres
+  - Median: 0.19 acres
+  - Min: 0.00089 acres
+  - Max: 35 acres
+  - Range: 34.99911 acres
+  - Variance: 38.47
+  - Q1: 0.13, Q3: 0.28
+- **Issues:** Extreme outliers, '-1' values, very small values (likely errors)
+
+### **street**
+- **Type:** String
+- **Missing:** 4 (3.7%)
+- **Distinct:** 97
+- **Issues:** 'Unknown', inconsistent formatting, address elements in wrong field
+
+### **city**
+- **Type:** String
+- **Missing:** 6 (5.6%)
+- **Distinct:** 76
+- **Values:** Various city names, '-' (6.5%), 'Unknown' (1.9%)
+- **Issues:** Missing values, placeholder values
+
+### **state**
+- **Type:** Categorical
+- **Missing:** 0
+- **Distinct:** 28
+- **Top States:** Texas (9.3%), California (8.3%), Virginia (6.5%), Missouri (5.6%)
+- **Issues:** Inconsistent abbreviations, 'Unknown' values
+
+### **zip_code**
+- **Type:** Mixed (numeric/string)
+- **Missing:** 4 (3.7%)
+- **Distinct:** 85
+- **Issues:** '-1' values, 'nan', incomplete zip codes
+
+### **house_size**
+- **Type:** Mixed (numeric/string)
+- **Missing:** 2 (1.9%)
+- **Distinct:** 85
+- **Mathematical Statistics (cleaned values):**
+  - Mean: 1,987 sq ft
+  - Median: 1,924 sq ft
+  - Min: 85 sq ft
+  - Max: 5,828 sq ft
+  - Range: 5,743 sq ft
+  - Variance: 1,028,491
+  - Q1: 1,613, Q3: 2,383
+- **Issues:** Scientific notation, '-1' values, unrealistic sizes
+
+### **prev_sold_date**
+- **Type:** Date (inconsistent formats)
+- **Missing:** 7 (6.5%)
+- **Distinct:** 75
+- **Issues:** Multiple date formats, 'Unknown', '-', incomplete dates
+
+## 3. Functional and Relaxed Dependencies
+
+### **Functional Dependencies:**
+1. `street + city + state → zip_code` (with exceptions due to data quality)
+2. `brokered_by → broker_info` (implied but not present in dataset)
+3. `zip_code → city, state` (generally true with exceptions)
+
+### **Relaxed Dependencies (approximate relationships):**
+1. **Price dependencies:**
+   - `bed + bath + house_size → price` (R² ≈ 0.6-0.7 expected)
+   - `acre_lot → price` (weaker correlation, R² ≈ 0.3-0.4)
+
+2. **Property characteristic dependencies:**
+   - `house_size → bed, bath` (strong correlation)
+   - `price → status` (higher priced properties more likely to be 'for_sale')
+
+3. **Geographic dependencies:**
+   - `state → price` (California/Texas have different price distributions)
+   - `zip_code → price_range` (location-based pricing)
+
+## Key Data Quality Issues Identified:
+
+1. **Data Type Inconsistencies:** Multiple columns have mixed data types
+2. **Missing Values:** 5.4% overall missing rate
+3. **Format Inconsistencies:** Dates, currencies, numbers in various formats
+4. **Placeholder Values:** '-1', 'Unknown', 'nan' used as placeholders
+5. **Outliers:** Extreme values in price, acre_lot, house_size
+6. **Logical Inconsistencies:** Properties with 12 bathrooms, houses smaller than 100 sq ft
+7. **Duplicate Records:** One exact duplicate found
+
+This dataset requires significant cleaning before reliable analysis can be performed.

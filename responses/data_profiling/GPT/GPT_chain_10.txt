@@ -1,0 +1,258 @@
+High-level data profiling of dataset “Master”
+
+- Domain classification: Residential real estate listings (properties, attributes, and transaction status)
+- Shape: 12 columns, 100 rows
+- Exact duplicate rows: 0 detected
+- Missingness (high level):
+  - Common placeholders observed: empty values, nan, -, Unknown, -1, currency symbols mixed into numeric fields (e.g., $949900)
+  - Columns with missing or placeholder values: brokered_by, status (has codes f/s/-), price, bed, bath, acre_lot, street, city, state, zip_code, house_size, prev_sold_date
+  - Dates use mixed formats (YYYY-MM-DD, MM/DD/YY) and “Unknown”; several blanks
+- Type/format inconsistencies:
+  - status: values include sold, for_sale, Unknown, f, s, -
+  - price: numeric, currency strings ($…), small/implausible (e.g., 2500), and -1 (invalid)
+  - bed/bath: numeric plus text (“four”, “two”, “three”, “nan”), and -1
+  - acre_lot: negative values (-1), extremely small (e.g., 0.00089, 6.88e-05), very large (e.g., 35.0), and nan
+  - state: mixture of full names (California) and abbreviations (CA, TX, OH, NC), blanks, and “Unknown”
+  - zip_code: missing, non-5-digit values (e.g., 2831, 1760), blanks
+  - house_size: implausible values (e.g., 0.0001057…, 12.0, 85.0, 2025), blanks
+  - prev_sold_date: mixed formats, blanks, “Unknown”
+- Outliers/invalids (examples):
+  - price: -1, 2500, 11400 (likely invalid/special), up to ~2.45M
+  - bed: up to 12; bath includes 11/12 and -1; text values present
+  - acre_lot: negative values; up to 35+ acres; scientific notation
+  - house_size: values that appear to be wrong units or mis-typed (very small decimals, very small integers)
+- Near-duplicates/record linkage:
+  - Multiple entries appear to refer to the same property with differing details (e.g., same street/city/state/zip with different status, date, or minor attributes)
+- Candidate unique key:
+  - No reliable single-column key. Candidate composite for property identity: [street, city, state, zip_code]. Consider normalizing address fields and using a standardized geocoded ID.
+- Suggested data types (intended, before cleaning):
+  - brokered_by: categorical/string (ID-like)
+  - status: categorical
+  - price: numeric
+  - bed, bath: numeric
+  - acre_lot: numeric (float)
+  - street, city, state, zip_code: string (with standardization needed)
+  - house_size: numeric (int)
+  - prev_sold_date: date
+
+Overall quality: Mixed; widespread missing/placeholders and type inconsistencies across most columns; requires standardization, parsing, and validation before analysis or modeling.
+Consider this dataset:
+code, artist, name, year, museum, city
+25987, Leonardo da Vinci, Mona Lisa, 1503, Louvre Museum, Paris
+63524, Vincent van Gogh, The Starry Night, 1889, Museum of Modern Art, New York
+38245, Michelangelo, David, 1504, Galleria dell'Accademia, Florence
+57392, Pablo Picasso, Les Demoiselles d'Avignon, 1907, Museum of Modern Art, New York
+11123, Johannes Vermeer, Girl with a Pearl Earring, 1665, Mauritshuis, The Hague
+66543, Michelangelo, The Creation of Adam, 1512, Sistine Chapel, Vatican City
+After performing single column analysis, we get the following information:
+code:
+Domain classification: Code that identify the object of art
+Datatype: String
+Number of missing values: 0
+Number of distinct values: 6
+Histogram: 25987 1, 63524 1, 38245 1, 57392 1, 11123 1, 66543 1
+artist:
+Domain classification: Name of the artist
+Datatype: String
+Number of missing values: 0
+Number of distinct values: 6
+Histogram: Michelangelo 2, Leonardo da Vinci 1, Vincent van Gogh 1, Pablo Picasso 1, Johannes Vermeer 1
+name:
+Domain classification: Name of the object of art
+Datatype: String
+Number of missing values: 0
+Number of distinct values: 6
+Histogram: Mona Lisa 1, The Starry Night 1, David 1, Les Demoiselles d'Avignon 1, Girl with a Pearl Earring 1, The Creation of Adam 1
+year:
+Domain classification: Year of creation of the object of art
+Datatype: Integer
+Number of missing values: 0
+Number of distinct values: 6
+Minimum: 1503
+Maximum: 1907
+Mean: 1663.333
+Variance: 30716.222
+Median: 1588.5
+Q1: 1506 - Q2: 1588.5  - Q3: 1833
+museum:
+Domain classification: Name of the museum where the object of art is located
+Datatype: String
+Number of missing values: 0
+Number of distinct values: 5
+Histogram: Museum of Modern Art 2, Louvre Museum 1, Galleria dell'Accademia 1, Mauritshuis 1, Sistine Chapel 1
+city:
+Domain classification: Location of the museum where the object of art is located
+Datatype: String
+Number of missing values: 0
+Number of distinct values: 5
+Histogram: New York 2, Paris , Florence 1, The Hague 1, Vatican City 1
+
+Consider this dataset:
+user_id,first_name,last_name,birth_year,height_cm,weight_kg,hours_exercise_per_week
+U001,,Rossi,1985,null,75,3
+U002,Laura,Bianchi,1990,165,60,5
+U003,Laura,,-,170,68,2
+U004,Andrea,Neri,1995,183,80,4
+U005,Matteo,missing,1982,175,78,-
+U006,Matteo,Ferri,1993,160,55,-
+U007,Luca,Conti,1993,180,78,1
+U008,nan,Moretti,1980,168,missing,999999
+U009,Davide,Conti,1980,nan,85,3
+U010,Davide,Conti,1980,162,58,5
+After performing single column analysis, we get the following information:
+user_id:
+Domain classification: Code that identify the person
+Datatype: String
+Number of missing values: 0
+Number of distinct values: 10
+Histogram: U001 1,  U002 1, U003 1, U004 1, U005 1, U006 1, U007 1, U008 1, U009 1, U010 1,
+first_name:
+Domain classification: Name of the artist
+Datatype: String
+Number of missing values: 2
+Number of distinct values: 7
+Histogram: Laura 2, Matteo 2, Davide 2, nan 1, Andrea 1, Luca 1, '' 1
+last_name:
+Domain classification: Surname of the artist
+Datatype: String
+Number of missing values: 2
+Number of distinct values: 8
+Histogram: Conti 3, Rossi 1, Bianchi 1, Neri 1, missing 1, Ferri 1, Moretti 1, '' 1
+birth_year:
+Domain classification: year of birth of the person
+Datatype: Integer
+Number of missing values: 1
+Number of distinct values: 6
+Minimum: 1980
+Maximum: 1995
+Mean: 1986.444
+Variance: 35.358
+Median: 1985
+Q1: 1980 - Q2: 1985  - Q3: 1993
+height_cm:
+Domain classification: height of the person in centimeters
+Datatype: Integer
+Number of missing values: 2
+Number of distinct values: 10
+Minimum: 160
+Maximum: 183
+Mean: 170.375
+Variance: 60.734
+Median: 169
+Q1: 164.25 - Q2: 169  - Q3: 176.25
+weight_kg:
+Domain classification: weight of the person in kilograms
+Datatype: Integer
+Number of missing values: 1
+Number of distinct values: 9
+Minimum: 55
+Maximum: 85
+Mean: 70.778
+Variance: 105.061
+Median: 75
+Q1: 60 - Q2: 75  - Q3: 78
+hours_exercise_per_week:
+Domain classification: Number of hours of exercise per week
+Datatype: Integer
+Number of missing values: 3
+Number of distinct values: 7
+Minimum: 1
+Maximum: 5
+Mean: 3.285
+Variance: 1.918
+Median: 3
+Q1: 2.5 - Q2: 3  - Q3: 4.5
+
+Consider the Master dataset, perform the single column analysis on it.
+Below is a high‑level single‑column profile for the Master dataset. Because the file is large and contains mixed formats in free text (e.g., different date formats, placeholders like “nan”, “-”, currency symbols), exact counts/histograms would require programmatic parsing. This profile summarizes intended types, observed patterns, anomalies, and cleaning recommendations per column.
+
+brokered_by
+- Domain classification: Broker/agent identifier for the listing
+- Intended datatype: String (ID-like)
+- Observed patterns: Numeric IDs; placeholders “nan”, “-1”, and empty
+- Issues: Not unique; repeated IDs across multiple listings; placeholder/invalid IDs present
+- Cleaning notes: Treat “nan”, empty, “-1” as missing; keep as string to preserve leading zeros if any
+
+status
+- Domain classification: Listing status
+- Intended datatype: Categorical
+- Observed values: sold, for_sale, Unknown, f, s, -
+- Issues: Abbreviations (f/s), placeholder “-”, and “Unknown”
+- Cleaning notes: Map f→for_sale, s→sold; coalesce “-”/Unknown to a single missing/unknown state
+
+price
+- Domain classification: Listing price (USD)
+- Intended datatype: Integer/decimal
+- Observed patterns: Plain numerics (e.g., 749000), currency strings ($949900, $355000, $90000), small values (e.g., 2500, 11400, 28100), negative sentinel (-1), missing “nan”
+- Range examples: min observed -1; max observed ≈ 2,450,000
+- Issues: Mixed formats, currency symbols, implausible small values
+- Cleaning notes: Strip currency symbols/commas; convert to numeric; flag negatives and very small values for validation
+
+bed
+- Domain classification: Bedroom count
+- Intended datatype: Integer
+- Observed values: Numerics (1–12), text numerals (“four”, “three”), “nan”, empty
+- Issues: Mixed numeric/text; missing; occasional very high counts (e.g., 12)
+- Cleaning notes: Normalize text numerals to integers; set “nan”/empty to missing; validate plausible range (e.g., 0–10+ per business rules)
+
+bath
+- Domain classification: Bathroom count
+- Intended datatype: Integer (or float if half-baths are expected)
+- Observed values: Numerics (1–12), text (“two”), -1 (sentinel/missing), empty
+- Issues: Mixed numeric/text; negative sentinel; high counts
+- Cleaning notes: Normalize text numerals; treat -1/empty as missing; decide on half-bath handling and data type
+
+acre_lot
+- Domain classification: Lot size in acres
+- Intended datatype: Float
+- Observed values: Very small decimals (e.g., 0.00089, 0.0066, 6.879878e-05), typical suburban sizes (0.1–1.1), large acreages (e.g., 8.36, 10.0, 14.25, 27.59, 35.0), -1, “nan”, empty
+- Issues: Negative sentinel; extremely small values; scientific notation; missing
+- Cleaning notes: Convert to float; treat -1/“nan”/empty as missing; validate plausible range
+
+street
+- Domain classification: Street address
+- Intended datatype: String
+- Observed patterns: Standard addresses; quoted values containing commas (“Garden Ct, 614”, “Third Ct, 553”); “Unknown”; empty
+- Issues: Embedded commas; some rows lack street; “Unknown” literal used
+- Cleaning notes: Preserve quoted strings correctly when parsing CSV; normalize “Unknown”/empty to missing; consider address standardization
+
+city
+- Domain classification: City name
+- Intended datatype: String
+- Observed values: Standard city names; placeholders “-”, “Unknown”
+- Issues: Missing placeholders; occasional misalignment with state data in some rows
+- Cleaning notes: Normalize placeholders to missing; consider standardization against reference data
+
+state
+- Domain classification: State/region
+- Intended datatype: String (prefer standardized codes)
+- Observed values: Full names (California), postal abbreviations (CA, TX, OH, NC), empty, “Unknown”
+- Issues: Mixed representations; missing
+- Cleaning notes: Standardize to two-letter postal codes; map “Unknown”/empty to missing
+
+zip_code
+- Domain classification: Postal code
+- Intended datatype: String (preserve leading zeros)
+- Observed patterns: 5-digit zips; short zips (e.g., 2831, 1760); missing blanks; “nan”
+- Issues: Inconsistent length; missing; potential loss of leading zeros if treated as numeric
+- Cleaning notes: Keep as string; left-pad to 5 digits where applicable; set “nan”/empty to missing
+
+house_size
+- Domain classification: Interior size (likely square feet)
+- Intended datatype: Integer
+- Observed values: Typical values in hundreds/thousands (851, 1409, 3220, 5828); implausible decimals (0.0001057, 4.200384e-05); small integers (12, 85); -1; missing
+- Issues: Unit/scale errors; negative sentinel; missing
+- Cleaning notes: Treat -1/empty as missing; coerce to integer where plausible; flag extreme/decimal anomalies for review; confirm units
+
+prev_sold_date
+- Domain classification: Previous sale date
+- Intended datatype: Date
+- Observed formats: YYYY-MM-DD (e.g., 2021-12-31), MM/DD/YY (e.g., 12/30/21, 03/24/22), textual “Unknown”, empty; earliest seen 1992-10-22, latest seen 2022-10-31
+- Issues: Mixed date formats; missing; “Unknown” literal
+- Cleaning notes: Parse with multi-format ingestion; standardize to ISO 8601; treat “Unknown”/empty as missing
+
+General notes
+- Missingness: Present across most columns, including placeholders such as empty strings, “nan”, “-”, “Unknown”, and sentinel -1.
+- Type inconsistencies: Numeric fields with currency symbols, scientific notation, negative sentinels, and textual numerals.
+- Outliers: Prices at very low values (e.g., 2,500; 11,400) and negatives; acre_lot negative and very small; house_size decimals and extremely small magnitudes.
+- Recommended steps: Define canonical missing-value set; standardize categories (status, state); normalize numerics (strip symbols, cast); validate ranges; standardize addresses (possibly geocode); parse dates to a single format; consider composite key for property identity (e.g., standardized [street, city, state, zip_code]).

@@ -1,0 +1,267 @@
+High-level data profiling for dataset “Master”
+
+- Domain classification: Residential real estate listings/transactions (properties for sale or sold)
+- Shape: 12 columns, 100 rows
+- Exact duplicate rows: 0 observed
+- Missingness (high-level): All 12 columns contain missing or placeholder values. Common placeholders include empty string, nan, -, -1, Unknown, and inconsistent encodings (e.g., currency symbols, scientific notation).
+- Key/candidate keys:
+  - No reliable single-column key (brokered_by is not unique and may be missing or -1).
+  - Property-level keys like [street, city, state, zip_code] are not unique due to repeated listings, missing fields, and formatting variations; may need composite keys that include dates or broker/listing identifiers.
+- Data type and normalization issues (by column):
+  - status: Mixed labels and abbreviations (sold, for_sale, Unknown, -, s, f); needs standardization.
+  - price: Numeric values mixed with $-prefixed strings, blanks, nan, and -1; wide range with extreme outliers (e.g., 12,312,100).
+  - bed, bath: Integers mixed with words (two, three, four, five), nan, and negative values (e.g., -1); needs coercion to integers and validation.
+  - acre_lot: Decimals with negatives (-1), very small scientific-notation values, and large outliers (e.g., 27.59, 14.25); validate non-negative and reasonable ranges.
+  - street: Missing and placeholder values (-), inconsistent formats (“Street, number” vs “number Street”); needs address normalization.
+  - city/state: Missing/Unknown present; state mixes full names and postal abbreviations; needs standardization to USPS codes.
+  - zip_code: Missing, nan, -1, and malformed lengths (e.g., 8830, 2043); needs ZIP validation and padding where appropriate.
+  - house_size: Mixed integers/floats with -1 and extremely small scientific-notation values; likely square feet but contains invalid/outlier entries.
+  - prev_sold_date: Multiple date formats (YYYY-MM-DD, MM/DD/YY, MM/DD/YYYY), 2-digit years, Unknown, -, and blanks; requires parsing and normalization.
+- Consistency/duplicates (non-exact):
+  - Many repeated properties (same address) with differing statuses/attributes and address formatting variants (e.g., reordered street/number); indicates near-duplicates and potential multi-record history per property.
+- Outliers/anomalies:
+  - Very large prices (multi-million) and very small house_size values (scientific notation), negative or implausible values across bed/bath/acre_lot/house_size.
+- Recommended next steps (high level):
+  - Standardize missing values (treat empty, -, -1, nan, Unknown uniformly as null).
+  - Normalize categorical domains (status), numeric coercion (price, bed, bath, acre_lot, house_size), and geographic fields (state to USPS codes, ZIP validation).
+  - Unify address formats (parse street/number) to enable de-duplication.
+  - Normalize dates to a single ISO format with proper year disambiguation.
+  - Define a surrogate ID or composite key and deduplicate near-duplicate property records.
+Consider this dataset:
+code, artist, name, year, museum, city
+25987, Leonardo da Vinci, Mona Lisa, 1503, Louvre Museum, Paris
+63524, Vincent van Gogh, The Starry Night, 1889, Museum of Modern Art, New York
+38245, Michelangelo, David, 1504, Galleria dell'Accademia, Florence
+57392, Pablo Picasso, Les Demoiselles d'Avignon, 1907, Museum of Modern Art, New York
+11123, Johannes Vermeer, Girl with a Pearl Earring, 1665, Mauritshuis, The Hague
+66543, Michelangelo, The Creation of Adam, 1512, Sistine Chapel, Vatican City
+After performing single column analysis, we get the following information:
+code:
+Domain classification: Code that identify the object of art
+Datatype: String
+Number of missing values: 0
+Number of distinct values: 6
+Histogram: 25987 1, 63524 1, 38245 1, 57392 1, 11123 1, 66543 1
+artist:
+Domain classification: Name of the artist
+Datatype: String
+Number of missing values: 0
+Number of distinct values: 6
+Histogram: Michelangelo 2, Leonardo da Vinci 1, Vincent van Gogh 1, Pablo Picasso 1, Johannes Vermeer 1
+name:
+Domain classification: Name of the object of art
+Datatype: String
+Number of missing values: 0
+Number of distinct values: 6
+Histogram: Mona Lisa 1, The Starry Night 1, David 1, Les Demoiselles d'Avignon 1, Girl with a Pearl Earring 1, The Creation of Adam 1
+year:
+Domain classification: Year of creation of the object of art
+Datatype: Integer
+Number of missing values: 0
+Number of distinct values: 6
+Minimum: 1503
+Maximum: 1907
+Mean: 1663.333
+Variance: 30716.222
+Median: 1588.5
+Q1: 1506 - Q2: 1588.5  - Q3: 1833
+museum:
+Domain classification: Name of the museum where the object of art is located
+Datatype: String
+Number of missing values: 0
+Number of distinct values: 5
+Histogram: Museum of Modern Art 2, Louvre Museum 1, Galleria dell'Accademia 1, Mauritshuis 1, Sistine Chapel 1
+city:
+Domain classification: Location of the museum where the object of art is located
+Datatype: String
+Number of missing values: 0
+Number of distinct values: 5
+Histogram: New York 2, Paris , Florence 1, The Hague 1, Vatican City 1
+
+Consider this dataset:
+user_id,first_name,last_name,birth_year,height_cm,weight_kg,hours_exercise_per_week
+U001,,Rossi,1985,null,75,3
+U002,Laura,Bianchi,1990,165,60,5
+U003,Laura,,-,170,68,2
+U004,Andrea,Neri,1995,183,80,4
+U005,Matteo,missing,1982,175,78,-
+U006,Matteo,Ferri,1993,160,55,-
+U007,Luca,Conti,1993,180,78,1
+U008,nan,Moretti,1980,168,missing,999999
+U009,Davide,Conti,1980,nan,85,3
+U010,Davide,Conti,1980,162,58,5
+After performing single column analysis, we get the following information:
+user_id:
+Domain classification: Code that identify the person
+Datatype: String
+Number of missing values: 0
+Number of distinct values: 10
+Histogram: U001 1,  U002 1, U003 1, U004 1, U005 1, U006 1, U007 1, U008 1, U009 1, U010 1,
+first_name:
+Domain classification: Name of the artist
+Datatype: String
+Number of missing values: 2
+Number of distinct values: 7
+Histogram: Laura 2, Matteo 2, Davide 2, nan 1, Andrea 1, Luca 1, '' 1
+last_name:
+Domain classification: Surname of the artist
+Datatype: String
+Number of missing values: 2
+Number of distinct values: 8
+Histogram: Conti 3, Rossi 1, Bianchi 1, Neri 1, missing 1, Ferri 1, Moretti 1, '' 1
+birth_year:
+Domain classification: year of birth of the person
+Datatype: Integer
+Number of missing values: 1
+Number of distinct values: 6
+Minimum: 1980
+Maximum: 1995
+Mean: 1986.444
+Variance: 35.358
+Median: 1985
+Q1: 1980 - Q2: 1985  - Q3: 1993
+height_cm:
+Domain classification: height of the person in centimeters
+Datatype: Integer
+Number of missing values: 2
+Number of distinct values: 10
+Minimum: 160
+Maximum: 183
+Mean: 170.375
+Variance: 60.734
+Median: 169
+Q1: 164.25 - Q2: 169  - Q3: 176.25
+weight_kg:
+Domain classification: weight of the person in kilograms
+Datatype: Integer
+Number of missing values: 1
+Number of distinct values: 9
+Minimum: 55
+Maximum: 85
+Mean: 70.778
+Variance: 105.061
+Median: 75
+Q1: 60 - Q2: 75  - Q3: 78
+hours_exercise_per_week:
+Domain classification: Number of hours of exercise per week
+Datatype: Integer
+Number of missing values: 3
+Number of distinct values: 7
+Minimum: 1
+Maximum: 5
+Mean: 3.285
+Variance: 1.918
+Median: 3
+Q1: 2.5 - Q2: 3  - Q3: 4.5
+
+Consider the Master dataset, perform the single column analysis on it.
+Single-column analysis for dataset “Master”
+Assumptions for this pass:
+- Treated the following as missing/null: empty string, -, nan/NaN, Unknown, and sentinel values like -1 in numeric fields.
+- Coerced numerics by stripping currency symbols ($), parsing spelled numbers (e.g., “two”, “three”), and rejecting invalid/negative values as null.
+- Dates parsed to ISO where possible; strings like “Unknown” or blank treated as null.
+
+1) brokered_by
+- Domain: Listing/broker identifier
+- Datatype (raw → target): String → String
+- Missing values: Present (blank, -, nan)
+- Distinct values: High (IDs plus placeholders); not unique
+- Notes: Contains -1 and blanks; not a reliable key
+
+2) status
+- Domain: Listing status
+- Datatype (raw → target): String → Categorical
+- Missing values: Present (blank, -, Unknown)
+- Distinct values: Low–medium
+- Common values: sold, for_sale, plus abbreviations (s, f), Unknown, -
+- Notes: Requires normalization to a closed set (e.g., {sold, for_sale, off_market, pending})
+
+3) price
+- Domain: Listing price (USD)
+- Datatype (raw → target): String/Number → Integer
+- Missing values: Present (blank, nan, -1 interpreted as null)
+- Distinct values: High
+- Range (post-cleaning, excluding invalid/sentinels): Min ≈ 22,400; Max ≈ 12,312,100
+- Issues: Mixed formats ($-prefixed), -1 placeholders, blanks; large spread and outliers
+
+4) bed
+- Domain: Number of bedrooms
+- Datatype (raw → target): String/Number → Integer
+- Missing values: Present (blank, nan, -1)
+- Distinct values: Low–medium
+- Range (post-cleaning): Min ≈ 1; Max ≈ 12
+- Issues: Spelled numbers (two, three, four, five), negative values (-1), blanks
+
+5) bath
+- Domain: Number of bathrooms
+- Datatype (raw → target): String/Number → Integer
+- Missing values: Present (blank, nan, -1)
+- Distinct values: Low–medium
+- Range (post-cleaning): Min ≈ 1; Max ≈ 12
+- Issues: Spelled numbers, negative and missing placeholders
+
+6) acre_lot
+- Domain: Lot size in acres
+- Datatype (raw → target): String/Number → Float
+- Missing values: Present (blank, nan, -1)
+- Distinct values: High
+- Range (post-cleaning): Min ≈ 0.00071; Max ≈ 27.59
+- Issues: Some negatives/sentinels; very small values that may reflect bad units or parsing
+
+7) street
+- Domain: Street address
+- Datatype (raw → target): String → String
+- Missing values: Present (blank, -)
+- Distinct values: High
+- Issues: Inconsistent formats (“Name, number” vs “number Name”); some rows with only “-” or blank
+
+8) city
+- Domain: City
+- Datatype (raw → target): String → String
+- Missing values: Present (Unknown, blank)
+- Distinct values: High
+- Issues: Many Unknowns; some truly missing
+
+9) state
+- Domain: State/region
+- Datatype (raw → target): String → Categorical (prefer USPS 2-letter codes for US)
+- Missing values: Present (Unknown, blank)
+- Distinct values: Medium
+- Issues: Mixed full names and postal abbreviations (e.g., Texas vs TX), Unknowns
+
+10) zip_code
+- Domain: Postal code
+- Datatype (raw → target): String/Number → String (ZIP/ZIP+4 without hyphen in raw)
+- Missing values: Present (blank, nan, -1)
+- Distinct values: High
+- Issues: Mixed lengths (e.g., 8830 should be 08830), -1 and blanks; needs zero-padding to 5 digits where applicable
+
+11) house_size
+- Domain: Interior size (likely square feet)
+- Datatype (raw → target): String/Number → Float/Integer
+- Missing values: Present (blank, -1)
+- Distinct values: High
+- Range (post-cleaning, plausible values): ≈ 87 to 10,440
+- Issues: Many implausible tiny scientific-notation values (e.g., 1.15e-05), -1 sentinel, occasional decimals that might be unit or parsing errors; requires rule-based validity checks
+
+12) prev_sold_date
+- Domain: Previous sale date
+- Datatype (raw → target): String → Date (ISO 8601)
+- Missing values: Present (Unknown, -, blank)
+- Distinct values: High (dates)
+- Formats observed: YYYY-MM-DD, MM/DD/YY, MM/DD/YYYY; some two-digit years; “Unknown”
+- Issues: Heterogeneous formats; needs parsing with strict fallback and 2-digit year disambiguation
+
+General recommendations per column
+- Standardize missing tokens across all columns to null.
+- Normalize categorical domains: status and state (map to controlled vocab/USPS codes).
+- Coerce numerics: strip currency symbols, map spelled numbers, null out negatives/sentinels and non-sensical magnitudes.
+- Validate ranges:
+  - bed ∈ [0, 12] (typical upper bound 10–12)
+  - bath ∈ [0, 12]
+  - acre_lot ≥ 0 and reasonable (e.g., < 50 for residential; flag larger)
+  - house_size ≥ 100 and < 20,000 sq ft for residential; flag outliers
+  - price ≥ 0, flag extreme outliers
+- Address normalization: parse street number/name to consistent schema; then deduplicate.
+- ZIP validation: coerce to 5-digit strings, pad leading zeros, null invalids.
+- Dates: normalize to ISO (YYYY-MM-DD), reject invalids, retain original as raw if parsing fails.

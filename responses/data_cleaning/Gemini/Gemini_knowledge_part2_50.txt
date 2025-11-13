@@ -1,0 +1,326 @@
+Okay, I will perform the data cleaning operations you've outlined on the provided dataset.  I'll use Python with the Pandas library to accomplish this.  Since I can't directly execute code, I'll provide the code and explain the steps.  I'll focus on the most common and impactful cleaning tasks, given the nature of the data.
+
+**1. Setup and Initial Inspection**
+
+```python
+import pandas as pd
+import numpy as np
+import io
+
+# Load the data (replace with your actual file path or data source)
+data = """brokered_by,status,price,bed,bath,acre_lot,street,city,state,zip_code,house_size,prev_sold_date
+,sold,292677,five,3,0.0032,63 Field Dr,Sumter,South Carolina,-1,9564.0,2021-12-22
+53138,sold,479000,nan,three,0.22,"Lincoln Rd, 47",-,Unknown,nan,,2022-01-04
+78460,for_sale,278900,3,10,,95 Meadow Ave,Somerset,,42503,7.7,07/01/16
+54093,for_sale,$265000,1,one,0.0051,896 Sunset Ct,Marathon,Florida,33050,321,09/20/04
+-1,sold,,9,2,-1,"Terrace Blvd, 144",Caldwell,Idaho,83605,1574,2021-12-17
+,-,$249900,3,2,0.0084,672 West Pl,Stuarts Draft,Unknown,24477,1827,-
+10437,sold,nan,three,7,1.07,"Cedar Dr, 70",,Unknown,-1,1681,2022-02-23
+-1,for_sale,$425000,3,2,0.83,-,Brewster,Massachusetts,2631,4.9070247933884296e-05,
+53138,sold,nan,nan,3,nan,"Lincoln Rd, 47",,Maryland,20720,59.0,2022-01-04
+-1,Unknown,26700,8,nan,0.7,-,Unknown,KY,nan,nan,07/01/16
+nan,,725000,7,8,-1,715 Terrace Dr,Sparks,NV,,6.729224058769513e-05,2004-09-10
+nan,for_sale,nan,three,3,0.06,-,Tustin,California,92782,6.91574839302112e-05,11/14/11
+nan,for_sale,13400,four,3,0.21,195 Spring Ave,,IN,-1,-1,06/19/20
+,sold,$339900,three,2,,,Unknown,,-1,1613,01/26/22
+54093,for_sale,95700,one,8,,-,,,,321,2004-09-20
+-1,f,888000,four,4,-1,210 Church Ln,,Texas,nan,9714.0,09/26/13
+,f,999000,3,2,0.15,277 Princess Dr,Livermore,California,nan,1785,2022-04-22
+65293,f,725000,3,three,-1,Unknown,Sparks,,nan,1876,2004-09-10
+,Unknown,699000,4,5,14.25,347 Oak Ln,Unknown,Alabama,36092,0.0001706697658402204,02/19/15
+,,389000,three,two,0.22,383 Market St,-,TX,77025,60.0,Unknown
+81316,s,68700,4,nan,0.27,285 Center Ln,Fairfax,Virginia,22030,0.0001057449494949495,2021-12-10
+82978,for_sale,68500,3,2,0.18,"Hill Ln, 71",Unknown,Texas,76502,-1,
+,sold,525000,nan,2,0.59,-,Westford,Massachusetts,nan,2211,2021-11-19
+20385,f,599500,5,three,0.37,Unknown,,Unknown,28467,-1,
+81112,Unknown,115900,4,6,0.15,380 Valley Ln,Unknown,Ohio,-1,1116,2020-08-03
+-1,f,,,3,27.59,,Julian,California,92036,986,2020-05-15
+nan,sold,27100,3,9,0.0038,"Harbor Ave, 981",Chicago,Illinois,-1,1171,2021-11-30
+-1,sold,585000,3,3,-1,Unknown,Crossville,,,8640.0,Unknown
+nan,sold,57800,-1,2,0.2,,Unknown,WA,nan,1670,2022-03-09
+96817,,425000,4,3,0.06,"Pine Ave, 33",Unknown,Virginia,,2075,02/04/22
+-1,f,335000,3,-1,nan,71 Hill Ln,Temple,TX,76502,-1,2013-05-01
+-1,sold,749000,4,two,0.01,285 Center Ln,Fairfax,Virginia,,2948,12/10/21
+78139,for_sale,425000,1,nan,0.014,949 Franklin Blvd,Palisade,CO,81526,987,Unknown
+-1,for_sale,$265000,7,1,0.03,"Sunset Ct, 896",Marathon,Florida,nan,1.1514290633608815e-05,2004-09-20
+-1,for_sale,nan,5,6,0.42,254 Princess Ave,,-,nan,3765,2016-11-21
+,sold,409900,two,nan,2.12,655 First St,Unknown,Massachusetts,1262,1015,2021-11-29
+104873,for_sale,-1,4,4,0.21,210 Church Ln,Houston,TX,-1,4156,2013-09-26
+53556,f,375000,5,three,0.0076,611 Hill Pl,-,,nan,2696,2021-11-12
+94681,sold,409900,-1,nan,0.00076,655 First St,Stockbridge,MA,-1,1015,
+-1,f,999000,3,2,0.014,"Princess Dr, 277",,CA,94550,1785,2022-04-22
+-1,sold,$479900,three,8,0.13,-,,Unknown,-1,9537.0,2022-03-18
+26012,sold,259900,4,two,0.0066,,,Montana,nan,1632,
+nan,for_sale,20900,7,6,,"Mill St, 162",,California,,6.91574839302112e-05,-
+79245,for_sale,599900,5,nan,-1,254 Princess Ave,,-,52722,-1,
+-1,sold,24400,8,three,0.0042,699 Wilson Dr,Crossville,Tennessee,38555,0.0001202364554637282,04/15/22
+nan,,30700,2,2,0.22,"Bridge Pl, 168",-,Missouri,nan,70.0,2021-11-23
+56084,sold,66000,2,2,nan,593 Elm Ave,Unknown,Wisconsin,,1699,2021-12-17
+nan,for_sale,,5,3,0.3,"Hill Pl, 611",Unknown,Kansas,,-1,
+53377,-,59700,4,1,0.28,"Bridge Ln, 286",Saint Louis,Missouri,63114,89.0,01/18/22
+nan,s,98500,4,one,0.0022,"Broadway Ln, 272",Fairview,Michigan,nan,110.0,04/14/22
+7689,sold,$98500,4,1,-1,"Broadway Ln, 272",Fairview,Michigan,48621,2064,2022-04-14
+78184,sold,385000,11,3,-1,"Madison Ct, 390",Unknown,,34286,1708,2022-03-18
+48807,,375000,3,3,0.00054,,San Antonio,TX,78254,2346,2004-05-14
+-1,s,$239000,3,two,0.56,829 Main Blvd,Oak Ridge,Unknown,37830,-1,2022-02-02
+48807,f,375000,11,3,0.2,-,San Antonio,Texas,78254,nan,2004-05-14
+-1,s,370000,nan,2,0.011,224 Lincoln St,Spokane,Washington,99207,7.475321395775941e-05,-
+20385,f,599500,9,3,0.37,Unknown,-,North Carolina,28467,6278.0,2020-03-24
+51274,,$774000,six,4,0.35,668 Maple Ave,Saratoga Springs,-,-1,,04/19/19
+53377,,189900,4,10,0.0023,-,Saint Louis,,63114,1624,01/18/22
+22217,s,,3,2,-1,52 North Blvd,Unknown,CA,nan,1465,
+10726,f,40500,3,2,0.012,226 Square Rd,,Massachusetts,nan,4.9070247933884296e-05,
+52946,for_sale,$150000,7,2,10.0,675 Circle Dr,Hulbert,Oklahoma,74441,1896,04/19/18
+-1,sold,$339900,3,2,0.013,676 South Blvd,Troy,Illinois,-1,1613,2022-01-26
+16829,,350000,4,2,0.18,,Houston,TX,77021,1626,-
+10437,sold,350000,,-1,0.0017,70 Cedar Dr,Cumming,GA,30041,6.029757805325987e-05,-
+nan,s,$350000,3,2,,"Cedar Dr, 70",Unknown,Unknown,30041,1681,2022-02-23
+,s,239000,3,-1,-1,829 Main Blvd,,Tennessee,-1,1724,02/02/22
+59082,Unknown,249900,,2,0.41,"West Pl, 672",Unknown,Unknown,nan,90.0,2022-02-14
+32769,for_sale,1300000,2,8,,"Second Pl, 550",Julian,CA,nan,120.0,05/15/20
+-1,sold,2365000,5,5,0.19,592 Meadow Ave,-,Minnesota,55424,4905,12/30/21
+-1,for_sale,635000,3,three,,885 Washington Ave,Iselin,NJ,8830,2000,02/28/19
+79245,for_sale,$599900,five,,0.42,254 Princess Ave,-,-,52722,3765,2016-11-21
+nan,sold,292677,8,nan,0.29,"Field Dr, 63",-,SC,29154,0.00010904499540863178,12/22/21
+nan,s,350000,4,2,0.18,219 Field St,Unknown,TX,77021,-1,03/31/22
+81031,Unknown,219000,9,10,0.31,,-,Pennsylvania,17202,140.0,11/24/21
+26012,Unknown,73300,4,2,0.13,,Great Falls,Montana,,5.8539944903581265e-05,2021-11-09
+nan,Unknown,425000,,nan,0.06,-,Alexandria,-,nan,2075,2022-02-04
+-1,sold,$385000,three,10,0.23,390 Madison Ct,Unknown,Florida,nan,1708,2022-03-18
+86329,-,nan,4,,14.25,"Oak Ln, 347",,Alabama,nan,0.0001706697658402204,2015-02-19
+23017,s,240000,nan,,0.01,922 Square Ave,Unknown,Washington,-1,1670,2022-03-09
+nan,sold,240000,three,two,0.2,922 Square Ave,-,WA,98837,1670,-
+nan,,nan,three,2,nan,"North Blvd, 52",,California,91803,5.2549644168962354e-05,2022-04-08
+34888,,$389000,-1,two,0.22,383 Market St,Houston,TX,77025,1696,
+-1,f,32300,,2,nan,"Lake St, 223",Unknown,CA,90802,1409,2016-06-10
+51274,for_sale,$774000,11,four,0.35,668 Maple Ave,Saratoga Springs,Utah,,3625,04/19/19
+-1,,53500,4,3,0.0024,195 Spring Ave,Albany,IN,47320,7.206295913682277e-05,2020-06-19
+22611,-,-1,four,2,0.19,-,-,Pennsylvania,15146,57.0,2022-04-19
+34888,s,,3,two,nan,383 Market St,-,Unknown,77025,1696,2021-12-16
+nan,f,nan,11,3,0.002,885 Washington Ave,Iselin,New Jersey,-1,,2019-02-28
+10726,Unknown,425000,,6,0.83,226 Square Rd,Unknown,MA,,-1,Unknown
+,-,699000,4,five,48.0,347 Oak Ln,,Alabama,nan,9708.0,Unknown
+22792,sold,525000,three,2,0.015,Unknown,Westford,Unknown,1886,2211,2021-11-19
+68269,sold,,3,2,0.005,"Terrace Blvd, 144",Caldwell,ID,83605,58.0,2021-12-17
+nan,f,32100,10,2,0.37,223 Lake St,-,California,,-1,
+53016,sold,$239000,7,8,0.56,,Oak Ridge,Tennessee,-1,,-
+nan,sold,385000,3,,-1,390 Madison Ct,North Port,-,34286,1708,-
+,for_sale,115900,,1,0.00066,380 Valley Ln,Unknown,OH,,4.003099173553719e-05,Unknown
+81311,sold,575000,5,7,,Unknown,Leland,Unknown,28451,3057,04/22/22
+82978,,335000,10,,0.18,"Hill Ln, 71",Temple,Texas,nan,2344,2013-05-01
+52946,f,nan,,10,10.0,675 Circle Dr,Hulbert,Oklahoma,74441,1896,2018-04-19
+"""
+df = pd.read_csv(io.StringIO(data))
+
+print(df.head())
+print(df.info())
+print(df.describe())
+```
+
+This code snippet does the following:
+
+*   **Imports Libraries:** Imports `pandas` for data manipulation, `numpy` for numerical operations, and `io` for reading the data from a string.
+*   **Loads Data:**  Loads the data from the string into a Pandas DataFrame.  In a real application, you'd replace this with `pd.read_csv('your_file.csv')`.
+*   **Initial Inspection:**
+    *   `df.head()`: Prints the first few rows to get a sense of the data.
+    *   `df.info()`: Provides information about data types and missing values.
+    *   `df.describe()`:  Provides summary statistics for numerical columns.
+
+**2. Handling Missing Values**
+
+```python
+# Replace various representations of missing values with NaN
+df.replace(['nan', 'Unknown', ''], np.nan, inplace=True)
+df.replace(['-1', -1], np.nan, inplace=True)
+df.replace(['-'], np.nan, inplace=True)
+
+# Impute missing values in numerical columns with the median
+for col in ['price', 'acre_lot', 'house_size']:
+    if df[col].dtype in ['int64', 'float64']:
+        df[col].fillna(df[col].median(), inplace=True)
+
+# Impute missing zip_code with the mode
+df['zip_code'].fillna(df['zip_code'].mode()[0], inplace=True)
+
+# For categorical columns, impute with the mode
+for col in ['brokered_by', 'status', 'city', 'state']:
+    df[col].fillna(df[col].mode()[0], inplace=True)
+
+# Handle missing values in 'bed' and 'bath' columns
+df['bed'].fillna(df['bed'].mode()[0], inplace=True)
+df['bath'].fillna(df['bath'].mode()[0], inplace=True)
+
+# Impute missing 'prev_sold_date' with a placeholder value
+df['prev_sold_date'].fillna('No Data', inplace=True)
+
+print(df.isnull().sum()) # Check remaining missing values
+```
+
+Explanation:
+
+*   **Standardize Missing Value Representations:**  The dataset uses various strings like "nan", "Unknown", "-", "", and numerical values like -1 to represent missing data.  This step replaces all of them with `np.nan`, which Pandas recognizes as a missing value.
+*   **Numerical Imputation (Median):**  For numerical columns (`price`, `acre_lot`, `house_size`), missing values are imputed using the median.  The median is more robust to outliers than the mean.  The code checks the `dtype` to ensure it's a numerical column before attempting imputation.
+*   **Categorical Imputation (Mode):** For categorical columns (`brokered_by`, `status`, `city`, `state`), missing values are imputed using the mode (most frequent value).
+*   **Specific Column Imputation:**  Missing values in 'bed' and 'bath' are imputed with the mode.
+*   **'prev_sold_date' Imputation:** Missing dates are replaced with the string "No Data".  This is a reasonable approach when you want to indicate that the information is unavailable.
+*   **Verification:** `df.isnull().sum()` prints the number of missing values in each column after imputation, allowing you to verify the result.
+
+**3. Data Type Conversion and Cleaning**
+
+```python
+# Clean the 'price' column: Remove '$' and convert to numeric
+df['price'] = df['price'].astype(str).str.replace('$', '', regex=False)
+df['price'] = pd.to_numeric(df['price'], errors='coerce') # Convert to numeric, coerce errors to NaN
+df['price'].fillna(df['price'].median(), inplace=True) # Impute any new NaNs
+
+# Convert 'zip_code' to string to handle mixed types and missing values
+df['zip_code'] = df['zip_code'].astype(str)
+
+# Clean 'bed' and 'bath' columns: Convert string representations to numeric
+def convert_to_numeric(value):
+    if isinstance(value, str):
+        value = value.lower()
+        if value == 'one':
+            return 1
+        elif value == 'two':
+            return 2
+        elif value == 'three':
+            return 3
+        elif value == 'four':
+            return 4
+        elif value == 'five':
+            return 5
+        elif value == 'six':
+            return 6
+        elif value == 'seven':
+            return 7
+        elif value == 'eight':
+            return 8
+        elif value == 'nine':
+            return 9
+        elif value == 'ten':
+            return 10
+        else:
+            return np.nan  # Handle unknown string values as NaN
+    return value
+
+df['bed'] = df['bed'].apply(convert_to_numeric)
+df['bath'] = df['bath'].apply(convert_to_numeric)
+
+# Convert 'bed' and 'bath' to numeric, impute missing values
+df['bed'] = pd.to_numeric(df['bed'], errors='coerce')
+df['bath'] = pd.to_numeric(df['bath'], errors='coerce')
+
+df['bed'].fillna(df['bed'].median(), inplace=True)
+df['bath'].fillna(df['bath'].median(), inplace=True)
+
+# Convert 'prev_sold_date' to datetime
+df['prev_sold_date'] = pd.to_datetime(df['prev_sold_date'], errors='coerce')
+
+print(df.dtypes)
+```
+
+Explanation:
+
+*   **Price Cleaning:**
+    *   Removes the `$` sign from the `price` column.
+    *   Converts the `price` column to a numeric data type.  `errors='coerce'` will turn any values that can't be converted into `NaN`.
+    *   Imputes any newly created `NaN` values with the median.
+*   **Zip Code Conversion:** Converts the `zip_code` column to a string. This is important because zip codes can sometimes be read as numbers, and leading zeros can be dropped.  Converting to string preserves the zip code format.
+*   **Bed and Bath Cleaning:**
+    *   Defines a function `convert_to_numeric` to convert string representations of numbers (e.g., "one", "two") to their numerical equivalents.
+    *   Applies this function to the 'bed' and 'bath' columns.
+    *   Converts the 'bed' and 'bath' columns to numeric data types.
+    *   Imputes any newly created `NaN` values with the median.
+*   **Date Conversion:** Attempts to convert the `prev_sold_date` column to datetime objects.  `errors='coerce'` will handle invalid date formats by converting them to `NaN`.
+
+**4. Outlier Handling (Example - Price)**
+
+```python
+# Outlier handling for 'price' using IQR
+Q1 = df['price'].quantile(0.25)
+Q3 = df['price'].quantile(0.75)
+IQR = Q3 - Q1
+
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+# Cap outliers
+df['price'] = np.where(df['price'] < lower_bound, lower_bound, df['price'])
+df['price'] = np.where(df['price'] > upper_bound, upper_bound, df['price'])
+
+print(df.describe()) # Check the updated statistics
+```
+
+Explanation:
+
+*   **IQR Method:**  Calculates the Interquartile Range (IQR) for the `price` column.
+*   **Define Bounds:**  Defines the lower and upper bounds for outlier detection using the IQR method.
+*   **Capping:**  Replaces values below the lower bound with the lower bound and values above the upper bound with the upper bound.  This is a capping/flooring approach.
+
+**5. String Manipulation (Example - Street)**
+
+```python
+# Trim whitespace from 'street' column
+df['street'] = df['street'].str.strip()
+
+# Convert 'city', 'state', and 'street' to lowercase
+df['city'] = df['city'].str.lower()
+df['state'] = df['state'].str.lower()
+df['street'] = df['street'].str.lower()
+
+print(df[['street', 'city', 'state']].head())
+```
+
+Explanation:
+
+*   **Whitespace Removal:** Removes leading and trailing whitespace from the `street` column.
+*   **Case Conversion:** Converts the `city`, `state`, and `street` columns to lowercase for consistency.
+
+**6. Data Consistency and Validation (Example - Zip Code)**
+
+```python
+# Pad zip codes with leading zeros to ensure consistent length (5 digits)
+df['zip_code'] = df['zip_code'].str.pad(5, fillchar='0')
+
+# Remove zip codes that are still NaN after padding
+df = df[df['zip_code'] != 'nan']
+
+print(df['zip_code'].head())
+```
+
+Explanation:
+
+*   **Padding:** Pads the `zip_code` column with leading zeros to ensure a consistent length of 5 digits.
+*   **Removal of NaN Zip Codes:** Removes rows where the zip code is still 'nan' after the padding operation.
+
+**7. Encoding Categorical Variables (Example - State)**
+
+```python
+# One-Hot Encode the 'state' column
+df = pd.get_dummies(df, columns=['state'], prefix='state', dummy_na=False)
+
+print(df.head())
+```
+
+Explanation:
+
+*   **One-Hot Encoding:** Uses `pd.get_dummies` to perform one-hot encoding on the `state` column.  This creates new binary columns for each unique state.  `dummy_na=False` ensures that missing values are not encoded into a separate category.
+
+**8. Documentation**
+
+It's crucial to document each step taken during the data cleaning process.  This includes:
+
+*   **Rationale:** Why was this step necessary?
+*   **Method:** What method was used?
+*   **Impact:** What was the result of this step?
+
+**Important Considerations:**
+
+*   **Domain Knowledge:**  The specific cleaning steps will depend heavily on your understanding of the data and the real estate domain.
+*   **Iterative Process:** Data cleaning is often an iterative process. You may need to revisit earlier steps as you discover new issues.
+*   **Data Loss:** Be careful when deleting data.  Consider imputation or other methods to preserve as much information as possible.
+*   **Reproducibility:**  Make sure your code is well-documented and can be easily reproduced.
+
+This comprehensive approach should give you a solid foundation for cleaning your real estate dataset. Remember to adapt the code and techniques to the specific characteristics of your data and your analysis goals.
+

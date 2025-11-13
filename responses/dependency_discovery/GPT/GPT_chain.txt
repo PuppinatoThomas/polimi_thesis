@@ -1,0 +1,72 @@
+Short answer (what holds exactly on the given Master rows):
+- brokered_by → price, acre_lot, street, city, state, zip_code, house_size, prev_sold_date
+- zip_code → city
+- zip_code → state
+- (city, state) → zip_code
+
+Notes and checks:
+- brokered_by is a candidate key in this sample (every value is unique), so it functionally determines all other attributes.
+- zip_code uniquely determines city and state in all rows (e.g., 90064 → Los Angeles, California; 92101 → San Diego, California; 77030 → Houston, Texas; 37201 → Nashville, Tennessee; 47448 → Nashville, Indiana; 32828 → Orlando, Florida).
+- Conversely, (city, state) → zip_code also holds in this sample (each city–state pair appears with a single ZIP here).
+
+What does NOT hold (counterexamples in the data):
+- city → state (Nashville appears in Tennessee and Indiana).
+- price → house_size (price 111000 appears with house_size 5551 and 3321).
+- house_size → price (house_size 3321 appears with prices 111000 and 125600).
+- acre_lot → price (acre_lot = 12.0 appears with prices 111000 and 125600).
+- price → acre_lot (same counterexample as above).
+
+Accidental keys that also hold in this specific sample (but are not generally reliable):
+- street → city, state, zip_code, … (every street string is unique in the sample, so it acts like a key here).
+Consider this dataset:
+col1, col2
+1, Cat
+1, Cat
+2, Cat
+2, Cat
+2, Cat
+3, Dog
+3, Dog
+3, Cat
+3, Dog
+3, Dog
+There are no strict minimal functional dependencies.
+Allowing at most a number of errors equal to 10% of the rows, the minimal relaxed dependency is col1->col2.
+
+Consider this dataset:
+A, B, C
+1, 2, 1
+2, 3, 3
+2, 3, 3
+2, 2, 3
+4, 2, 1
+The minimal functional dependency is A->C.
+Allowing at most a number of errors equal to 20% of the rows, the minimal relaxed dependencies are A->B, B->C, C->A, C->B .
+
+Consider the Master dataset, detect the minimal relaxed dependencies.
+Assumption: the Master table has 100 rows. I report relaxed dependencies that hold with at most k errors, showing both a 10% (≤10 rows) and 20% (≤20 rows) tolerance. Exact (0-error) dependencies are also listed.
+
+Exact (0 errors)
+- brokered_by → price, acre_lot, street, city, state, zip_code, house_size, prev_sold_date
+- street → price, acre_lot, brokered_by, city, state, zip_code, house_size, prev_sold_date
+- zip_code → city
+- zip_code → state
+- (city, state) → zip_code
+
+Relaxed (≤10% errors)
+- price → house_size (3 errors, 3%)
+- house_size → price (2 errors, 2%)
+- price → acre_lot (2 errors, 2%)
+- acre_lot → price (2 errors, 2%)
+- acre_lot → house_size (3 errors, 3%)
+- house_size → acre_lot (2 errors, 2%)
+
+Relaxed (≤20% but >10% errors)
+- city → state (16 errors, 16%)  [Nashville appears in TN and IN, split 16/16]
+- city → zip_code (16 errors, 16%)  [Nashville has 37201 and 47448]
+- state → city (17 errors, 17%)  [California splits between Los Angeles and San Diego, 17/17]
+- state → zip_code (17 errors, 17%)  [California splits between 90064 and 92101, 17/17]
+
+Notes
+- The “key-like” exact dependencies (brokered_by and street determining everything) are dataset-specific uniqueness in this sample.
+- If you want the minimal relaxed set excluding such keys, keep zip_code → city/state and the numeric trio relations among price, house_size, acre_lot (all ≤3% error), plus the city/state relations at the 20% tolerance.

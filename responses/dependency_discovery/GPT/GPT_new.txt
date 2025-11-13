@@ -1,0 +1,57 @@
+Looking at this real estate dataset, I can perform dependency discovery by analyzing relationships between attributes. Here are the key dependencies and patterns I've identified:
+
+## Strong Dependencies (Functional Dependencies)
+
+**1. Geographic Dependencies:**
+- `zip_code` → `city`, `state`
+- `city`, `state` → `zip_code` (many-to-one relationship)
+
+**2. Property Characteristic Dependencies:**
+- `brokered_by`, `street`, `city`, `state` → `price`, `acre_lot`, `house_size` (unique property identification)
+- `house_size` ≈ `acre_lot × 1000` (for most records, with some exceptions)
+
+**3. Location-based Price Patterns:**
+- `city`, `state` influences `price` ranges significantly
+- Los Angeles properties generally higher priced than other locations
+
+## Partial Dependencies
+
+**1. Multi-valued Dependencies:**
+- `city` → multiple `zip_code` values (e.g., Los Angeles has 90033, 90064)
+- `state` → multiple `city` values (e.g., California has Los Angeles, San Diego)
+
+**2. Transitive Dependencies:**
+- `street`, `city`, `state` → `zip_code` → `city`, `state` (redundant)
+- `prev_sold_date` and `price` show temporal dependencies
+
+## Data Quality Issues Discovered
+
+**1. Inconsistent Data Patterns:**
+- Some `house_size` values don't follow the `acre_lot × 1000` pattern (e.g., rows with small acre_lot but normal house_size)
+- Mixed date formats in `prev_sold_date`
+- Some `acre_lot` values have excessive decimal precision
+
+**2. Potential Data Entry Errors:**
+- Property at 71 Hill Ln, Los Angeles: acre_lot = 0.18 but house_size = 2344 (unusual ratio)
+- Several properties with very small acre_lot values (< 1 acre) but normal house sizes
+
+## Business Logic Dependencies
+
+**1. Market-based Rules:**
+- Higher `acre_lot` generally correlates with higher `price`
+- Recent `prev_sold_date` (2022) often indicates current market pricing
+- Location (`city`, `state`) strongly influences price per square foot
+
+**2. Broker Patterns:**
+- Some brokers appear to specialize in specific geographic areas
+- Price ranges vary by broker specialization
+
+## Recommended Normalization
+
+This dataset would benefit from:
+1. **Separate location table** with `zip_code`, `city`, `state`
+2. **Property table** with core attributes
+3. **Transaction history table** for `prev_sold_date` and price history
+4. **Broker reference table**
+
+Would you like me to elaborate on any of these dependencies or suggest specific data cleaning approaches?

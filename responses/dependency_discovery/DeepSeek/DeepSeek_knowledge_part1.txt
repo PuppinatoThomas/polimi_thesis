@@ -1,0 +1,34 @@
+Of course. Here is a list of dependency discovery operations I would perform on a dataset, structured as a workflow.
+
+### 1. Data Profiling & Initial Inspection
+*   **Examine Schema & Data Types:** Identify columns, data types (integer, string, date, etc.), and check for nullability constraints defined in the schema.
+*   **Calculate Basic Statistics:** Generate summary statistics (count, unique values, min, max, mode, frequency) for each column to understand data distribution and identify potential key columns.
+
+### 2. Uniqueness and Key Discovery
+*   **Identify Candidate Keys:** Find columns or sets of columns with unique values for every row (e.g., `CustomerID`, `TransactionID`).
+*   **Identify Primary Key Candidates:** Select the most appropriate candidate key to be the dataset's primary identifier.
+*   **Check for Duplicate Rows:** Discover if entire rows are duplicated, indicating a lack of a defined primary key.
+
+### 3. Foreign Key & Relationship Discovery
+*   **Find Referential Integrity Links:** Identify if values in one column (a potential foreign key) are a subset of values in another column (a potential primary key from the same or a different table).
+*   **Cross-Table Analysis:** Analyze joins between tables to confirm parent-child relationships (e.g., `Orders.CustomerID` references `Customers.CustomerID`).
+
+### 4. Functional Dependency Discovery
+*   **Column-to-Column Dependency:** For a given dataset/table, determine if the value in one column can be used to reliably predict the value in another (e.g., `City` -> `PostalCode`).
+*   **Partial and Transitive Dependency:** Identify if a non-key column depends on only part of a composite primary key or on another non-key column.
+
+### 5. Statistical Dependency Analysis
+*   **Calculate Correlation Matrices:** Measure linear relationships between numerical columns to find highly correlated pairs (e.g., `Height` and `Weight`).
+*   **Compute Association Rules (for categorical data):** Use algorithms like Apriori to find frequent co-occurrences (e.g., "If {Bread, Butter} are purchased, then {Jam} is also purchased").
+*   **Analyze Mutual Information:** Quantify the mutual dependence between two variables, effective for both numerical and categorical data.
+
+### 6. Semantic & Domain Rule Discovery
+*   **Identify Business Rules:** Discover implicit rules like "`ShipDate` must be on or after `OrderDate`" or "`Salary` must be within a specific range for a given `JobTitle`."
+*   **Validate Data against Known Domains:** Check if column values adhere to expected formats or sets (e.g., `CountryCode` follows ISO standards, `ProductCategory` is from a predefined list).
+
+### 7. Multi-Column and Conditional Dependency
+*   **Discover Multi-Valued Dependencies (MVD):** Identify situations where a set of attributes determines another set, but not uniquely, often leading to redundancy.
+*   **Analyze Conditional Functional Dependencies (CFD):** Find dependencies that hold only under certain conditions (e.g., "In the USA, `City` -> `State`").
+
+### 8. Data Lineage and Provenance Analysis
+*   **Trace Data Origins:** Determine the source and transformations applied to the data, understanding how dependent columns are derived from upstream sources.

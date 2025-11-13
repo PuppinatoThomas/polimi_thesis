@@ -1,0 +1,63 @@
+I profiled your dataset, and here are the findings:
+
+### Dataset Overview
+
+* **Shape:** 100 rows × 12 columns
+* **Columns:** `brokered_by, status, price, bed, bath, acre_lot, street, city, state, zip_code, house_size, prev_sold_date`
+
+---
+
+### Missing Values
+
+* `brokered_by`: 7 missing
+* `price`: 2 missing
+* `bed`: 3 missing
+* `bath`: 2 missing
+* `acre_lot`: 3 missing
+* `street`: 3 missing
+* `city`: 2 missing
+* `state`: 1 missing
+* `zip_code`: 7 missing
+* `house_size`: 2 missing
+* `prev_sold_date`: 2 missing
+
+---
+
+### Unique Values
+
+* `status`: 6 unique (`sold, for_sale, f, -, Unknown, s`) → some irregular entries
+* `bed`: 10 unique (`3, 4, 8, two, nan, three, four...`) → mixed text/numbers
+* `bath`: 11 unique (`2, 3, -1, nan, 12...`) → includes invalid values
+* `price`: 83 unique (some with `$`, some numeric, some `-1`)
+
+---
+
+### Data Types
+
+* Numeric columns (`brokered_by, acre_lot, zip_code, house_size`) are floats but have placeholder values like `-1`, `nan`
+* `price`, `bed`, `bath` are **object** type due to mixed formats
+* `prev_sold_date` is stored as **string** (not parsed into dates)
+
+---
+
+### Data Quality Issues
+
+1. **Inconsistent formats**
+
+   * `price` has `$949900`, `90000`, and `-1`.
+   * `bed`/`bath` contain words (`two`, `three`) and invalid values (`-1`, `12` baths).
+   * `prev_sold_date` has mixed date formats (`2021-12-10`, `12/30/21`, `Unknown`).
+
+2. **Placeholders for missing data**
+
+   * `-1`, `nan`, `Unknown` used instead of proper missing values.
+   * Some rows have missing `street`, `city`, or `state`.
+
+3. **Duplicates / inconsistencies**
+
+   * Some properties appear more than once with slightly different info (e.g., `"162 Mill St, Tustin, CA"` twice).
+   * Same ID appears with different values (e.g., `109987` with two different prices).
+
+---
+
+Would you like me to **(a)** clean and standardize this dataset (fix numeric/text/date inconsistencies, replace placeholders, unify formats), or **(b)** generate detailed statistics (distribution of prices, beds, baths, etc.) in its current messy form?

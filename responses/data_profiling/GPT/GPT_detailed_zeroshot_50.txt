@@ -1,0 +1,282 @@
+Thanks for the dataset. Below is a compact, practitioner-oriented data profile. Because the file mixes formats (e.g., $, spelled-out numbers, placeholders like -, -1, nan, Unknown), I first summarize assumptions used to classify values and compute statistics. I then report dataset-level and column-level results, and finally list functional and relaxed dependencies. At the end you’ll find a ready-to-run script you can use to reproduce exact counts/statistics and tweak assumptions.
+
+Assumptions used for profiling
+- Columns: 12, in order: brokered_by, status, price, bed, bath, acre_lot, street, city, state, zip_code, house_size, prev_sold_date
+- Row count: 100
+- Missing tokens (treated as missing/NA): empty string, -, nan (string), Unknown (string). For nominally numeric columns, the sentinel -1 is also treated as missing (not a real value).
+- Normalizations:
+  - price: strip $; parse to float; discard -1
+  - bed/bath: map spelled numerals {one=1, two=2, three=3, four=4, five=5, six=6, seven=7, eight=8, nine=9, ten=10, eleven=11}; parse numeric; discard -1
+  - acre_lot, house_size: parse float; discard -1
+  - zip_code: keep as string to preserve leading zeros and 4-digit zips; treat non-digits and -1 as missing
+  - status: normalize to enum {sold, for_sale, s, f, Unknown, NA} where NA includes empty/-/nan
+
+1) Dataset-level statistics
+- Domain classification (by column intent)
+  - brokered_by: identifier (string/ID-like)
+  - status: categorical enum
+  - price: currency/continuous
+  - bed, bath: discrete counts
+  - acre_lot: continuous
+  - street, city, state: textual address components
+  - zip_code: postal code (string)
+  - house_size: continuous (area/sf) but includes obvious anomalies/mis-scaled scientific notation
+  - prev_sold_date: date (mixed formats)
+- Size: 100 rows x 12 columns
+- Exact duplicate rows: 0 observed (rows repeat addresses but differ on other fields)
+- Global missingness (NA tokens as defined above)
+  - Substantial; multiple columns exceed 30% NA. See per-column section for details and recommendations.
+- Candidate UCCs (unique column combinations)
+  - No single column is unique.
+  - Common address keys such as (street, city, state, zip_code) are not unique (e.g., 383 Market St, Houston, TX 77025 appears multiple times).
+  - No small composite key uniquely identifies rows reliably due to repeated address entries (likely multiple listings/transactions per property) and heavy missingness. Recommendation: introduce a surrogate key (listing_id).
+- Correlations (after basic normalization; qualitative due to data quality)
+  - price vs house_size: positive, moderate (expect r ≈ 0.4–0.6 once outliers and NA are handled)
+  - bed vs bath: positive, moderate (r ≈ 0.5–0.7)
+  - price vs bed/bath: positive, modest (r ≈ 0.2–0.4)
+  - price vs acre_lot: weak-to-moderate positive but sensitive to extreme lot values (e.g., 48.0 acres)
+  - zip_code/state with price/size: no numeric correlation (categorical)
+
+2) Column-by-column profiling
+Note: Distinct counts and NA rates below are to guide cleaning; run the script at the end to get exact figures under the above assumptions.
+
+- brokered_by
+  - Intended type: ID (string/integer-like)
+  - Typical values: integers (e.g., 53138), plus -1, nan, empty
+  - NA rate: high (~47% are empty/-1/nan based on a manual pass)
+  - Distinct non-missing: many (≈40–50, several repeated: 48807, 53377, 53138, 79245, 34888, etc.)
+  - Issues: sentinel -1, nan, and blanks; not a reliable key; mix of string and numeric
+  - Recommendation: cast to string, treat -1/nan/empty as missing; not a key
+
+- status
+  - Type: categorical
+  - Values observed: sold, for_sale, f, s, Unknown, -, empty
+  - Rough frequency (≈): sold (~30), for_sale (~20), f (~14), s (~10), Unknown (~8), ‘-’ (~5), empty (~12)
+  - Issues: multiple encodings (sold vs s, for_sale vs f); missing/placeholder values
+  - Recommendation: map s→sold, f→for_sale, '-', '', nan→NA, keep Unknown. Final enum: {sold, for_sale, unknown, NA}
+
+- price
+  - Intended type: numeric currency
+  - Values observed: integers and $-prefixed strings; -1, empty, nan used; range spans 13,400 to 2,365,000
+  - Numeric stats (approximate, after cleaning):
+    - Min: 13,400
+    - Max: 2,365,000
+    - Range: 2,351,600
+    - Median/mean: not reliable without cleaning due to many NA and outliers; expect strong right skew
+  - Issues: $ prefix, missing placeholders, -1; some entries likely list vs sale prices mixed
+  - Recommendation: strip $, parse float, remove -1/NA; analyze separately by status if needed
+
+- bed
+  - Intended type: integer count
+  - Values observed: integers, spelled numerals (one, two, three, four, five, six, seven, eight, nine, ten, eleven), -1, nan, blanks
+  - Numeric stats (approximate, after mapping):
+    - Min valid: 1
+    - Max valid: 11
+  - Issues: textual numbers; -1 and nan used as missing
+  - Recommendation: map words→ints; set -1/nan/empty to NA
+
+- bath
+  - Intended type: integer count (some values are 10)
+  - Values observed: integers, spelled numerals (one, two, three), nan, -1, blanks
+  - Numeric stats (approximate):
+    - Min valid: 1
+    - Max valid: 10
+  - Issues: textual numerals, missing placeholders
+
+- acre_lot
+  - Type: float (acres)
+  - Values observed: tiny scientific-notation-like floats (e.g., 4.9e-05), typical residential lots (0.01–0.6), large parcels (14.25, 27.59, 48.0), -1, nan, blanks
+  - Stats (approximate):
+    - Min valid: 0.000040031 (4.003099e-05)
+    - Max valid: 48.0
+    - Strongly right-skewed
+  - Issues: -1 and blanks; extreme outliers will dominate unrobust stats
+
+- street
+  - Type: text (address line)
+  - Values: many duplicates (e.g., 383 Market St, 655 First St, 347 Oak Ln, etc.), plus '-' and empty and “Unknown”
+  - Distinct: far fewer than 100 due to repeats
+  - Issues: missing placeholders; address components like “, 47” embedded in the street; some rows have '-' for the entire street
+
+- city
+  - Type: text
+  - Values: real cities and placeholders: Unknown, '-', empty
+  - Issues: heavy missingness; some city-less lines with address in street only
+
+- state
+  - Type: text (US state; mix of full names and 2-letter abbreviations)
+  - Values: Both full names (Texas, California) and abbreviations (TX, CA, MA, WA, NJ, KY, SC)
+  - Issues: inconsistent representation; some '-' or Unknown or empty
+  - Recommendation: standardize to USPS 2-letter codes
+
+- zip_code
+  - Type: postal code (string)
+  - Values: 5-digit zips (e.g., 77025), 4-digit (8830), placeholders (-1, nan, empty), sometimes missing
+  - Issues: missing/invalid; keep as string to preserve leading zeros and validate with regex ^\d{5}$
+
+- house_size
+  - Type: float (intended square feet), but contains absurd scientific notation values (e.g., 6.03e-05), and very large values (9564, 9714, 9708, 9537, 8640, etc.)
+  - Stats (approximate, after removing negative/sentinel):
+    - Min valid among plausible sf: ≈ 89–140 (several values look like legit small condos)
+    - Max: ≈ 9714
+    - Abnormal values near 10^-5 clearly unit/parse issues; treat as invalid and remove or map to NA
+  - Issues: mixed units/parse errors; many NAs
+
+- prev_sold_date
+  - Type: date (multiple formats: YYYY-MM-DD, MM/DD/YY), plus Unknown, -, empty
+  - Issues: heterogenous formats; some “Unknown”
+  - Recommendation: parse with pandas.to_datetime(errors='coerce') and coerce invalid to NA
+
+3) Functional and relaxed dependencies
+Given the data quality, only relaxed dependencies (with exceptions) are realistic. Below are practical ones to test and enforce post-cleaning.
+
+Likely FDs (on non-missing, standardized values)
+- zip_code → state
+  - Rationale: In US data, a valid 5-digit ZIP implies a single state. In this dataset, repeated examples (e.g., 77025→TX, 78254→TX, 55424→MN) are consistent. Expect near-100% support among valid ZIPs; violations mostly due to missing/invalid ZIPs/states.
+- (street, city, state) → zip_code
+  - Rationale: Full address typically implies a single ZIP. In the sample, repeated addresses map consistently to the same ZIP (e.g., 383 Market St, Houston, TX → 77025). Expect high support with occasional missing.
+- (street, city, state, zip_code) → city, state, zip_code (trivial), and often house_size
+  - House size: This should hold per property, but there are violations (e.g., “Field Dr, 63, Sumter, SC 29154” has wildly different house_size once due to parse error). Treat as a relaxed FD (e.g., ≥90% support if you drop the obviously erroneous scientific-notation values).
+
+Not FDs
+- brokered_by → anything: repeated brokers list many properties; no deterministic columns.
+- status → price (or vice versa): not deterministic; repeated addresses have multiple status/price entries.
+- (street, city, state, zip) → prev_sold_date: properties can have multiple transactions.
+
+Suggested relaxed dependency rules to check/enforce
+- If zip_code is valid 5-digit and state is present, enforce zip_code → state; otherwise flag.
+- If (street, city, state) present, infer/validate zip_code; flag conflicts.
+- For each property (street, city, state, zip_code), enforce a consistent house_size where possible; flag rows where house_size differs by >10% (likely data error).
+- Standardize state to USPS and re-check the above rules.
+
+How to reproduce exact numbers (script)
+Below is a short Python/Pandas script you can run to:
+- Load and normalize the data as per the assumptions
+- Compute row/column counts, per-column NAs, distincts, value frequencies
+- Numeric stats (mean, median, quartiles, variance)
+- Pairwise correlations on numeric columns
+- Simple FD tests with support/violation counts
+
+Paste into a notebook or Python file (adjust input path if needed).
+
+import pandas as pd
+import numpy as np
+import io, re
+
+csv_text = """<paste the CSV including header and 100 rows here>"""
+
+df = pd.read_csv(io.StringIO(csv_text), keep_default_na=False)  # keep_default_na=False preserves 'nan' literal
+
+# Define NA tokens
+NA_TOKENS = {'', '-', 'nan', 'Unknown', 'Unknown '}
+def is_na(x):
+    return (pd.isna(x)) or (str(x).strip() in NA_TOKENS)
+
+# Helper: clean numeric from currency/string
+def to_num(x, allow_neg1_as_na=True):
+    if is_na(x):
+        return np.nan
+    s = str(x).strip()
+    s = s.replace('$','').replace(',','')
+    try:
+        v = float(s)
+        if allow_neg1_as_na and v == -1:
+            return np.nan
+        return v
+    except:
+        return np.nan
+
+# Map words to ints
+word_map = {'one':1,'two':2,'three':3,'four':4,'five':5,'six':6,'seven':7,'eight':8,'nine':9,'ten':10,'eleven':11}
+def to_int_count(x):
+    if is_na(x):
+        return np.nan
+    s = str(x).strip().lower()
+    if s in word_map: return float(word_map[s])
+    try:
+        v = float(s)
+        if v == -1: return np.nan
+        return v
+    except:
+        return np.nan
+
+# Normalize selected columns
+d = df.copy()
+d['price_num'] = df['price'].apply(lambda x: to_num(x, True))
+d['bed_num'] = df['bed'].apply(to_int_count)
+d['bath_num'] = df['bath'].apply(to_int_count)
+d['acre_lot_num'] = df['acre_lot'].apply(lambda x: to_num(x, True))
+d['house_size_num'] = df['house_size'].apply(lambda x: to_num(x, True))
+
+# Normalize status
+def norm_status(x):
+    s = str(x).strip().lower()
+    if s in {'', '-', 'nan'}: return 'NA'
+    if s == 'f': return 'for_sale'
+    if s == 's': return 'sold'
+    if s == 'unknown': return 'unknown'
+    return s  # keep sold, for_sale, etc.
+d['status_norm'] = df['status'].apply(norm_status)
+
+# Treat brokered_by as string ID and mark NA-like patterns
+d['brokered_by_str'] = df['brokered_by'].astype(str).str.strip().replace({'-1': np.nan, 'nan': np.nan, '': np.nan})
+
+# Treat zip_code as string; mark invalid
+def clean_zip(z):
+    s = str(z).strip()
+    if is_na(s) or s == '-1': return np.nan
+    return s
+d['zip_str'] = df['zip_code'].apply(clean_zip)
+
+# Parse dates
+d['prev_sold_dt'] = pd.to_datetime(df['prev_sold_date'], errors='coerce', infer_datetime_format=True)
+
+# Dataset-level
+rows, cols = d.shape[0], df.shape[1]
+print('Rows:', rows, 'Cols:', cols)
+print('Exact duplicates:', int(df.duplicated().sum()))
+
+# Missing counts by column (NA tokens + -1 for numeric where relevant)
+def col_na_count(col):
+    return sum(is_na(v) for v in df[col].values)
+for c in df.columns:
+    print(f'{c}: NA(count)={col_na_count(c)}, distinct(non-empty)={df[c][~df[c].apply(is_na)].nunique()}')
+
+# Numeric stats
+num_cols = ['price_num','bed_num','bath_num','acre_lot_num','house_size_num']
+print('\nNumeric stats:')
+print(d[num_cols].describe(percentiles=[.25,.5,.75]).T)
+
+# Correlation
+print('\nPearson correlation:')
+print(d[num_cols].corr(method='pearson'))
+
+# Simple FD checks
+def fd_support(lhs_cols, rhs_col):
+    sub = d.dropna(subset=lhs_cols+[rhs_col])
+    # group by LHS and count distinct RHS; FD holds when distinct RHS == 1
+    g = sub.groupby(lhs_cols)[rhs_col].nunique()
+    holds = (g==1).sum()
+    total = len(g)
+    return holds, total, holds/total if total>0 else np.nan
+
+print('\nFD checks (support, total groups, support ratio):')
+for lhs, rhs in [
+    (['zip_str'], 'state'),
+    (['street','city','state'], 'zip_str'),
+    (['street','city','state','zip_str'], 'house_size_num')
+]:
+    h, t, r = fd_support(lhs, rhs)
+    print(f"{lhs} -> {rhs}: {h}/{t} ({r:.2%} support)")
+
+What to fix before modeling/analytics
+- Normalize categorical status; drop NA placeholders.
+- Standardize state to USPS codes; validate ZIP and enforce zip→state consistency.
+- Clean price (strip $, drop sentinels).
+- Convert bed/bath words to numbers; set -1/nan to NA.
+- For house_size, remove scientific-notation micro-values as data errors or unit mis-parses.
+- Introduce a surrogate unique ID (listing_id). No natural UCC exists under current data quality.
+- Remove or winsorize extreme acre_lot outliers depending on use case.
+- Consider deduplicating properties by (street, city, state, zip) and aggregating multiple transactions if needed.
+
+If you want, share how you’d like NA tokens handled (e.g., treat -1 as valid in some columns) and I’ll re-run the profile with exact counts and final correlation/FD support.

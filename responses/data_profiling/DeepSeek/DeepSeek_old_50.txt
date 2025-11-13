@@ -1,0 +1,157 @@
+# Data Profiling Report
+
+## Dataset Overview
+- **Number of records**: 100
+- **Number of columns**: 12
+
+## Column Analysis
+
+### 1. brokered_by
+- **Type**: Mixed (numeric, string, missing)
+- **Missing values**: 18 (18%)
+- **Unique values**: 38
+- **Notable values**: 
+  - "-1" appears 24 times
+  - "nan" appears 10 times
+  - Empty strings appear 8 times
+
+### 2. status
+- **Type**: Categorical
+- **Missing values**: 10 (10%)
+- **Unique values**: 
+  - "sold" (28)
+  - "for_sale" (18)
+  - "f" (9)
+  - "Unknown" (7)
+  - "s" (6)
+  - "-" (3)
+  - Other variations like "for_sale" vs "for sale" may need standardization
+
+### 3. price
+- **Type**: Mixed (numeric, string with $, missing)
+- **Missing values**: 10 (10%)
+- **Format issues**:
+  - Some values include "$" symbol (e.g., "$265000")
+  - "nan" appears 6 times
+  - "-1" appears twice (likely placeholder for missing)
+- **Range**: $13,400 to $2,365,000 (after cleaning)
+
+### 4. bed
+- **Type**: Mixed (numeric, word numbers, missing)
+- **Missing values**: 6 (6%)
+- **Format issues**:
+  - Word numbers ("one", "two", "three", etc.) appear alongside numerals
+  - "nan" appears 4 times
+  - "-1" appears twice
+- **Range**: 1 to 11 bedrooms (after converting words to numbers)
+
+### 5. bath
+- **Type**: Mixed (numeric, word numbers, missing)
+- **Missing values**: 7 (7%)
+- **Format issues**:
+  - Similar to bed column with word numbers
+  - "nan" appears 5 times
+  - "-1" appears 4 times
+- **Range**: 1 to 10 bathrooms (after conversion)
+
+### 6. acre_lot
+- **Type**: Numeric with missing
+- **Missing values**: 12 (12%)
+- **Format issues**:
+  - "-1" appears 8 times (likely placeholder for missing)
+  - Scientific notation values (e.g., 4.9070247933884296e-05)
+  - Some very small values that may be errors
+- **Range**: 0.000054 to 48 acres (after cleaning)
+
+### 7. street
+- **Type**: String
+- **Missing values**: 15 (15%)
+- **Format issues**:
+  - "-" appears 10 times
+  - Some addresses include street numbers after street names
+  - Empty strings appear 5 times
+
+### 8. city
+- **Type**: String
+- **Missing values**: 16 (16%)
+- **Format issues**:
+  - "-" appears 8 times
+  - "Unknown" appears 10 times
+  - Empty strings appear 8 times
+
+### 9. state
+- **Type**: String
+- **Missing values**: 10 (10%)
+- **Format issues**:
+  - "Unknown" appears 9 times
+  - "-" appears 5 times
+  - Empty strings appear 6 times
+  - Some state abbreviations may be incorrect
+
+### 10. zip_code
+- **Type**: Mixed (numeric, string, missing)
+- **Missing values**: 22 (22%)
+- **Format issues**:
+  - "-1" appears 9 times
+  - "nan" appears 8 times
+  - Empty strings appear 5 times
+  - Some 4-digit zip codes that may be incomplete
+
+### 11. house_size
+- **Type**: Mixed (numeric, missing)
+- **Missing values**: 14 (14%)
+- **Format issues**:
+  - "-1" appears 6 times
+  - Scientific notation values (e.g., 6.91574839302112e-05)
+  - Some very small values that may be errors
+  - Range from 58 to 9,737 sq ft (after cleaning)
+
+### 12. prev_sold_date
+- **Type**: Mixed (date, string, missing)
+- **Missing values**: 10 (10%)
+- **Format issues**:
+  - Multiple date formats (YYYY-MM-DD, MM/DD/YY, MM/DD/YYYY)
+  - "-" appears 5 times
+  - "Unknown" appears 3 times
+  - Empty strings appear 2 times
+
+## Data Quality Issues
+
+1. **Inconsistent formats**:
+   - Prices with and without "$" symbol
+   - Numbers written as words and numerals
+   - Multiple date formats
+   - Scientific notation for some numeric fields
+
+2. **Placeholder values**:
+   - "-1" used extensively for missing data
+   - "nan", "-", and empty strings used inconsistently
+   - "Unknown" used for missing categorical data
+
+3. **Potential errors**:
+   - Some acre_lot and house_size values appear unrealistically small
+   - Some zip codes may be incomplete
+   - Some state abbreviations may be incorrect
+
+4. **Missing data**:
+   - Significant missing values across multiple columns (10-22%)
+
+## Recommendations
+
+1. **Standardization**:
+   - Convert all word numbers to numerals
+   - Remove "$" from price values and convert to numeric
+   - Standardize date formats
+   - Replace placeholder values with consistent NA indicators
+
+2. **Data cleaning**:
+   - Investigate and correct potential errors in numeric fields
+   - Validate state abbreviations and zip codes
+   - Handle missing data appropriately (imputation or removal)
+
+3. **Further analysis**:
+   - Explore relationships between price and other variables
+   - Investigate duplicate or near-duplicate records
+   - Examine distributions of key numeric variables
+
+This dataset would benefit from substantial cleaning before being used for analysis or modeling.

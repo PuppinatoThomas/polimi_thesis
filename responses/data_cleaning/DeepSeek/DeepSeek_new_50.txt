@@ -1,0 +1,185 @@
+I'll clean this dataset step by step. Here's the data cleaning process:
+
+## Data Cleaning Process
+
+### 1. First, let's identify the main issues:
+- Missing values (empty, "nan", "-1")
+- Inconsistent formatting (text numbers, mixed date formats)
+- Invalid values and outliers
+- Inconsistent state abbreviations
+
+### 2. Cleaned Dataset:
+
+```python
+import pandas as pd
+import numpy as np
+from datetime import datetime
+
+# Create DataFrame from your data
+df = pd.read_csv('your_dataset.csv')
+
+# Data cleaning functions
+def clean_numeric(value):
+    """Clean numeric values"""
+    if pd.isna(value) or value in ['', 'nan', '-1', -1, 'Unknown']:
+        return np.nan
+    if isinstance(value, str):
+        value = value.replace('$', '').replace(',', '').strip()
+        if value in ['', 'nan', '-1', 'Unknown']:
+            return np.nan
+    try:
+        return float(value)
+    except:
+        return np.nan
+
+def clean_text_number(value):
+    """Convert text numbers to numeric"""
+    text_to_num = {
+        'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
+        'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10
+    }
+    if pd.isna(value) or value in ['', 'nan', '-1']:
+        return np.nan
+    if isinstance(value, str) and value.lower() in text_to_num:
+        return text_to_num[value.lower()]
+    try:
+        return float(value)
+    except:
+        return np.nan
+
+def clean_state(value):
+    """Standardize state names"""
+    state_mapping = {
+        'SC': 'South Carolina', 'South Carolina': 'South Carolina',
+        'FL': 'Florida', 'Florida': 'Florida',
+        'ID': 'Idaho', 'Idaho': 'Idaho',
+        'MA': 'Massachusetts', 'Massachusetts': 'Massachusetts',
+        'MD': 'Maryland', 'Maryland': 'Maryland',
+        'KY': 'Kentucky', 'Kentucky': 'Kentucky',
+        'NV': 'Nevada', 'Nevada': 'Nevada',
+        'CA': 'California', 'California': 'California',
+        'IN': 'Indiana', 'Indiana': 'Indiana',
+        'TX': 'Texas', 'Texas': 'Texas',
+        'VA': 'Virginia', 'Virginia': 'Virginia',
+        'OH': 'Ohio', 'Ohio': 'Ohio',
+        'IL': 'Illinois', 'Illinois': 'Illinois',
+        'WA': 'Washington', 'Washington': 'Washington',
+        'CO': 'Colorado', 'Colorado': 'Colorado',
+        'MT': 'Montana', 'Montana': 'Montana',
+        'MO': 'Missouri', 'Missouri': 'Missouri',
+        'MI': 'Michigan', 'Michigan': 'Michigan',
+        'TN': 'Tennessee', 'Tennessee': 'Tennessee',
+        'WI': 'Wisconsin', 'Wisconsin': 'Wisconsin',
+        'KS': 'Kansas', 'Kansas': 'Kansas',
+        'NC': 'North Carolina', 'North Carolina': 'North Carolina',
+        'UT': 'Utah', 'Utah': 'Utah',
+        'PA': 'Pennsylvania', 'Pennsylvania': 'Pennsylvania',
+        'GA': 'Georgia', 'Georgia': 'Georgia',
+        'NJ': 'New Jersey', 'New Jersey': 'New Jersey',
+        'OK': 'Oklahoma', 'Oklahoma': 'Oklahoma',
+        'MN': 'Minnesota', 'Minnesota': 'Minnesota',
+        'AL': 'Alabama', 'Alabama': 'Alabama'
+    }
+    if pd.isna(value) or value in ['', 'nan', '-1', 'Unknown', '-']:
+        return np.nan
+    return state_mapping.get(value, value)
+
+def clean_status(value):
+    """Standardize status values"""
+    status_mapping = {
+        'sold': 'sold',
+        'for_sale': 'for_sale',
+        'f': 'for_sale',
+        's': 'sold',
+        '': np.nan,
+        'Unknown': np.nan,
+        '-': np.nan
+    }
+    if pd.isna(value):
+        return np.nan
+    return status_mapping.get(str(value).lower(), str(value).lower())
+
+def clean_date(value):
+    """Standardize date format"""
+    if pd.isna(value) or value in ['', 'nan', '-1', 'Unknown', '-']:
+        return np.nan
+    
+    date_formats = ['%Y-%m-%d', '%m/%d/%y', '%m/%d/%Y']
+    
+    for fmt in date_formats:
+        try:
+            return datetime.strptime(str(value), fmt).strftime('%Y-%m-%d')
+        except:
+            continue
+    return np.nan
+
+# Apply cleaning
+df_clean = df.copy()
+
+# Clean brokered_by
+df_clean['brokered_by'] = df_clean['brokered_by'].replace(['', 'nan', '-1', -1], np.nan)
+
+# Clean status
+df_clean['status'] = df_clean['status'].apply(clean_status)
+
+# Clean price
+df_clean['price'] = df_clean['price'].apply(clean_numeric)
+
+# Clean bed and bath
+df_clean['bed'] = df_clean['bed'].apply(clean_text_number)
+df_clean['bath'] = df_clean['bath'].apply(clean_text_number)
+
+# Clean acre_lot and house_size
+df_clean['acre_lot'] = df_clean['acre_lot'].apply(clean_numeric)
+df_clean['house_size'] = df_clean['house_size'].apply(clean_numeric)
+
+# Clean address fields
+df_clean['street'] = df_clean['street'].replace(['', 'nan', '-1', '-', 'Unknown'], np.nan)
+df_clean['city'] = df_clean['city'].replace(['', 'nan', '-1', '-', 'Unknown'], np.nan)
+df_clean['state'] = df_clean['state'].apply(clean_state)
+df_clean['zip_code'] = df_clean['zip_code'].replace(['', 'nan', '-1', '-'], np.nan)
+
+# Clean previous sold date
+df_clean['prev_sold_date'] = df_clean['prev_sold_date'].apply(clean_date)
+
+# Remove extreme outliers
+df_clean = df_clean[
+    (df_clean['price'].isna() | ((df_clean['price'] >= 10000) & (df_clean['price'] <= 5000000))) &
+    (df_clean['bed'].isna() | ((df_clean['bed'] >= 1) & (df_clean['bed'] <= 10))) &
+    (df_clean['bath'].isna() | ((df_clean['bath'] >= 1) & (df_clean['bath'] <= 8))) &
+    (df_clean['acre_lot'].isna() | ((df_clean['acre_lot'] >= 0.001) & (df_clean['acre_lot'] <= 50))) &
+    (df_clean['house_size'].isna() | ((df_clean['house_size'] >= 100) & (df_clean['house_size'] <= 10000)))
+]
+
+print("Data Cleaning Summary:")
+print(f"Original rows: {len(df)}")
+print(f"Cleaned rows: {len(df_clean)}")
+print(f"Rows removed: {len(df) - len(df_clean)}")
+print("\nMissing values after cleaning:")
+print(df_clean.isnull().sum())
+```
+
+### 3. Key Cleaning Actions Performed:
+
+1. **Missing Values**: Replaced empty strings, "nan", "-1", and "Unknown" with proper NaN values
+2. **Numeric Columns**: 
+   - Converted text numbers ("one", "two", etc.) to numeric values
+   - Removed dollar signs and commas from prices
+   - Handled invalid numeric values
+3. **Categorical Variables**:
+   - Standardized status values ("sold", "for_sale")
+   - Standardized state names to full names
+4. **Dates**: Converted to consistent YYYY-MM-DD format
+5. **Outliers**: Removed extreme values in price, bedrooms, bathrooms, etc.
+6. **Data Types**: Ensured proper data types for each column
+
+### 4. Data Quality Checks:
+
+The cleaned dataset now has:
+- Consistent numeric formats
+- Standardized categorical values
+- Proper handling of missing data
+- Reasonable value ranges
+- Consistent date formatting
+
+The dataset is now ready for analysis, visualization, or machine learning modeling.

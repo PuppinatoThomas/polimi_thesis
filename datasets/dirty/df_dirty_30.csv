@@ -1,0 +1,131 @@
+brokered_by,status,price,bed,bath,acre_lot,street,city,state,zip_code,house_size,prev_sold_date
+78247,sold,339900,3,-,0.28,676 South Blvd,Troy,,62294,-,2022-01-26
+nan,sold,nan,4,2,nan,-,nan,Montana,59405,,2021-11-09
+97679,,440000,nan,3,-,nan,Charlotte,North Carolina,-,2053,-
+Michael Hudson,s,$249900,9999,0,-0.48,"West Pl, 672",,VA,24,6.553460743801653e-05,02/14/22
+Michael Alwin,s,$425000,9999,0,-0.16,"Pine Ave, 33",nan,,,7.443038337924701e-05,02/04/22
+687,sold,355000,3,,0.19,,-,Florida,-,1864,nan
+Sophia Miller,-,$155990,9999,0,-1.47,"Spring Ave, 195",,IN,47,7.206295913682277e-05,
+-,for_sale,10906,-,3,0.3,,,Kansas,67207,2696,2021-11-12
+David Haley,f,$425000,9999,0,-0.49,"Franklin Blvd, 949",nan,CO,81,3.540375344352617e-05,07/06/06
+57424,for_sale,nan,-,2,0.15,nan,Livermore,,,1785,2022-04-22
+Richard Carpenter,s,,9999,0,-1.1,"Church Rd, 430",,PA,15,4.261363636363637e-05,04/13/22
+nan,s,-,9999,0,-0.75,"Lake Ln, 864",Budapest,nan,75,0.00011155589990817264,12/09/21
+-,nan,$350000,9999,nan,-1.28,"Cedar Dr, 70",,GA,30,6.029757805325987e-05,02/23/22
+Michael Alwin,s,$425000,9999,0,-0.16,"Pine Ave, 33",nan,nan,,7.443038337924701e-05,02/04/22
+Charles Antonoff,f,$210000,9999,0,-1.84,"Farm Blvd, 272",Amsterdam,MI,48,7.030532598714416e-05,
+16829,sold,366116,-,2,0.18,219 Field St,nan,nan,,nan,2022-03-31
+53232,-,nan,2,1,nan,-,Kingston,,,1062,
+51274,for_sale,774000,6,4,,,Saratoga Springs,-,,,2019-04-19
+Charles Williams,s,$225000,-,nan,-0.28,"Second Ln, 414",nan,,76,5.567033976124885e-05,nan
+nan,f,$112900,-,0,,-,Lisbon,MI,48,5.4665977961432504e-05,08/13/12
+53138,sold,nan,3,3,0.22,47 Lincoln Rd,Bowie,Maryland,20720,2375,2022-01-04
+81316,sold,,4,2,0.27,285 Center Ln,-,Virginia,22030,2948,2021-12-10
+78247,sold,345487,3,-,0.28,676 South Blvd,Troy,,62294,-,2022-01-26
+Robert Johnson,nan,-,9999,0,-1.91,-,-,IL,,4.200384527089073e-05,11/30/21
+nan,sold,23058,4,2,nan,-,nan,Montana,59405,,2021-11-09
+22792,sold,525000,3,2,0.59,977 Adams Blvd,Westford,Massachusetts,1886,2211,2021-11-19
+-,for_sale,150000,4,2,,675 Circle Dr,nan,Oklahoma,74441,,
+54093,,265000,,1,0.03,-,Marathon,nan,33050,321,-
+,,175000,3,nan,0.26,862 King Blvd,Owasso,,,,2017-12-29
+Anne Antonoff,s,$409900,-,,,"First St, 655",Bruxelles,MA,12,3.640811524334252e-05,11/29/21
+78460,for_sale,278900,-,2,0.7,95 Meadow Ave,Somerset,Kentucky,42503,nan,2016-07-01
+2765,sold,585000,-,3,,699 Wilson Dr,Crossville,Tennessee,38555,3352,2022-04-15
+nan,sold,799999,4,4,nan,nan,Natick,Massachusetts,nan,3422,nan
+8,for_sale,517300,3,2,35.0,624 River Ln,Cheyenne,-,82007,,2022-10-31
+22671,sold,90000,-,2,0.09,553 Third Ct,nan,Missouri,63115,1152,2022-03-24
+7689,sold,98500,,1,9.0,,Fairview,Michigan,48621,2064,2022-04-14
+Joseph Johnson,f,-,nan,nan,-,"Church St, 766",nan,OH,43,4.763544536271809e-05,07/06/20
+,-,1300000,2,3,27.59,550 Second Pl,Julian,nan,,986,2020-05-15
+Joseph Garcia,s,$189900,9999,0,-,nan,nan,nan,63,5.825298438934803e-05,01/18/22
+-,for_sale,115900,4,-,0.15,380 Valley Ln,Fairborn,Ohio,45324,1116,2020-08-03
+nan,for_sale,-,3,,,162 Mill St,Tustin,California,92782,1928,nan
+22916,,376000,4,3,0.28,nan,Jacksonville,North Carolina,,-,2022-04-25
+104873,for_sale,888000,,4,0.21,210 Church Ln,,Texas,77082,-,2013-09-26
+20385,for_sale,599500,5,3,0.37,217 Church Ln,,,28467,3058,2020-03-24
+55214,nan,509900,3,3,0.2,603 Princess St,nan,California,92583,-,2022-05-03
+Sophia Miller,-,$155990,9999,0,-1.47,"Spring Ave, 195",,IN,47,-,
+-,,725000,,3,1.04,715 Terrace Dr,Sparks,Nevada,89441,1876,2004-09-10
+7689,sold,98500,nan,1,9.0,,Fairview,Michigan,48621,2064,2022-04-14
+78075,sold,280000,2,1,-,686 East Ln,Reno,nan,89506,nan,2021-11-19
+Julia Johnson,s,$317900,9999,0,-0.46,"Bridge Pl, 168",Prague,MO,63,7.288797061524334e-05,11/23/21
+Joseph Garcia,s,224990,9999,0,-,nan,nan,nan,63,5.825298438934803e-05,01/18/22
+-,s,$479900,9999,0,-,"Cedar Dr, 842",Madrid,CO,nan,9.462522956841138e-05,-
+78200,sold,149000,3,-,,688 Garfield Ct,Akron,-,44314,1560,2022-02-09
+-,,757516,,3,1.04,715 Terrace Dr,Sparks,Nevada,89441,1876,2004-09-10
+Julia Alwin,,$375000,,-,-,"East Ave, 88",,-,78,8.415117079889807e-05,-
+96014,sold,,4,2,0.12,nan,Spokane,Washington,,2084,2022-04-05
+19903,nan,nan,nan,3,0.18,249 South Pl,-,Texas,77030,2150,2021-12-31
+81824,,292677,5,3,0.29,63 Field Dr,Sumter,South Carolina,29154,3040,
+-,for_sale,-,-,3,0.3,,,Kansas,67207,2696,2021-11-12
+21986,-,269900,4,3,0.17,614 Garden Ct,,-,31322,2368,2021-12-30
+-,s,,9999,0,-1.57,"Field Dr, 920",Vienna,nan,22,,04/22/22
+24268,for_sale,-,3,,0.22,81 Roosevelt Dr,-,Virginia,22903,1512,2011-09-29
+,-,1321021,2,3,27.59,550 Second Pl,Julian,nan,,986,2020-05-15
+nan,sold,,4,3,1.08,,Melbourne,Florida,32934,3056,2022-01-21
+16829,,1979000,6,nan,0.29,400 Adams Ct,Port Washington,nan,11050,,nan
+10726,for_sale,425000,3,2,0.83,-,Brewster,Massachusetts,,,-
+56699,nan,249900,3,2,,115 Roosevelt Pl,Ellisville,Missouri,63011,2037,2022-03-04
+nan,sold,389854,3,-,0.15,144 Terrace Blvd,Caldwell,Idaho,,nan,
+nan,for_sale,-,3,,,162 Mill St,,California,92782,1928,nan
+53138,sold,6529,3,3,0.22,47 Lincoln Rd,Bowie,Maryland,20720,2375,2022-01-04
+nan,sold,239000,3,-,0.56,829 Main Blvd,,nan,37830,1724,2022-02-02
+Michael Alwin,f,$374900,9999,0,-1.29,"Shore Rd, 368",Berlin,FL,33,6.076388888888889e-05,04/25/19
+Julia Brown,-,$279900,-,nan,-1.45,"Elm Ave, 593",Lisbon,WI,53,6.094323921028467e-05,nan
+William Miller,s,$350000,9999,,-1.16,"Ridge Pl, 693",-,,25,0.0001155016069788797,-
+nan,s,$2365000,9999,nan,-1.24,,,nan,55,nan,12/30/21
+45807,,375000,3,nan,-,157 Market Pl,-,nan,44442,1747,nan
+103967,for_sale,635000,3,3,0.23,-,Iselin,New Jersey,8830,2000,nan
+Julia Alwin,,393937,,-,-,"East Ave, 88",,-,78,8.415117079889807e-05,-
+101497,for_sale,129900,4,2,1.95,575 King Pl,-,nan,29044,nan,2021-09-20
+16829,sold,350000,-,2,0.18,219 Field St,nan,nan,,nan,2022-03-31
+81824,,341037,5,3,0.29,63 Field Dr,Sumter,South Carolina,29154,3040,
+22217,sold,898000,3,-,0.21,52 North Blvd,,-,91803,1465,-
+Robert Davis,,,-,0,-1.75,nan,-,IL,60,0.00014868141643709825,04/02/20
+nan,nan,,3,3,0.3,20 First Dr,Hingham,Massachusetts,2043,3650,1992-10-22
+Michael Hudson,s,$249900,9999,0,-0.48,"West Pl, 672",,,24,6.553460743801653e-05,02/14/22
+15757,-,,3,1,0.17,,nan,-,73701,,2016-06-09
+81316,sold,,4,2,nan,285 Center Ln,-,Virginia,22030,2948,2021-12-10
+nan,for_sale,699000,nan,nan,14.25,347 Oak Ln,Wetumpka,Alabama,36092,4758,2015-02-19
+104873,for_sale,925602,,4,0.21,210 Church Ln,,Texas,77082,-,2013-09-26
+58970,-,949900,3,4,0.23,828 Spring St,,Maryland,20895,2500,2021-12-30
+57424,for_sale,nan,-,2,-,nan,Livermore,,,1785,2022-04-22
+nan,,-,3,,0.19,nan,nan,Idaho,,2796,2022-01-10
+22611,for_sale,215000,-,2,0.12,-,Calumet City,Illinois,60409,,2013-08-15
+57424,sold,,5,nan,0.16,409 Wood Ct,Manteca,California,95337,3789,
+22217,sold,898000,3,2,0.21,52 North Blvd,,-,91803,1465,-
+34888,sold,nan,3,-,-,nan,Houston,Texas,77025,-,2021-12-16
+-,nan,-,9999,,-1.42,"Lake St, 223",Amsterdam,CA,90,5.054092056932966e-05,06/10/16
+20385,for_sale,599500,5,3,0.37,-,,,28467,3058,2020-03-24
+Richard Swift,s,$280000,9999,0,-1.24,"King Rd, 952",Prague,PA,-,6.722050045913683e-05,04/19/22
+Joseph Martinez,s,nan,nan,,-1.09,"Meadow Ct, 197",London,WA,99,8.210657713498622e-05,nan
+4630,for_sale,519950,,3,0.13,906 Mill Blvd,Huntsville,Alabama,35801,2778,
+2765,sold,585000,-,3,,699 Wilson Dr,Crossville,Tennessee,38555,-,2022-04-15
+nan,sold,240000,-,2,0.2,922 Square Ave,Moses Lake,Washington,98837,nan,nan
+81031,sold,219000,3,2,0.31,73 Lake Ln,,,17202,,
+Anne Antonoff,s,416183,-,,,"First St, 655",Bruxelles,MA,12,3.640811524334252e-05,11/29/21
+45913,nan,-,3,2,0.86,nan,Queensbury,New York,12804,1883,
+Richard Rodriguez,f,$399500,9999,0,nan,nan,Madrid,-,31,6.313131313131313e-05,06/03/02
+-,for_sale,774000,6,4,,,Saratoga Springs,-,,,2019-04-19
+nan,sold,425784,3,-,0.15,144 Terrace Blvd,Caldwell,Idaho,,nan,
+,sold,nan,3,2,-,760 Madison Ln,Escondido,California,92026,-,2021-12-22
+-,sold,339000,-,3,0.34,60 Franklin Ave,,Arkansas,72714,2035,2021-12-07
+,sold,nan,,2,8.36,651 Vista Blvd,,Missouri,65552,1784,2021-12-17
+109987,for_sale,490000,3,4,,229 Broadway Ave,-,Texas,nan,2416,2019-04-03
+28222,sold,2450000,4,4,0.19,-,Los Angeles,California,,2751,2022-02-22
+22792,sold,553551,3,2,0.59,977 Adams Blvd,Westford,Massachusetts,1886,2211,2021-11-19
+78167,-,350000,3,2,,324 Sunset St,-,,,1908,2022-04-01
+85655,sold,249900,3,1,nan,159 Meadow Rd,Scituate,-,-,1310,nan
+78460,for_sale,310375,-,2,0.7,95 Meadow Ave,Somerset,Kentucky,42503,nan,2016-07-01
+,for_sale,309000,3,2,3.0,,,,-,,2020-02-04
+-,,$539900,9999,0,-1.32,"Terrace Ct, 293",Stockholm,NY,-,nan,06/15/15
+33901,for_sale,225000,2,2,0.33,417 East Ct,Greenfield,-,,1456,nan
+-,nan,-,9999,,-1.42,"Lake St, 223",,CA,90,5.054092056932966e-05,06/10/16
+103967,for_sale,641089,3,3,0.23,-,Iselin,New Jersey,8830,2000,nan
+78184,sold,385000,,3,0.23,,nan,-,34286,1708,
+79245,for_sale,599900,nan,5,0.42,254 Princess Ave,-,Iowa,52722,3765,-
+Charles Davis,-,$105000,9999,0,-,"Court Ct, 434",-,OK,-,7.303145087235997e-05,06/29/07
+-,for_sale,136049,4,-,0.15,380 Valley Ln,Fairborn,Ohio,45324,1116,2020-08-03
+-,s,,9999,0,-,"Elm Ct, 827",nan,nan,28,nan,
+82978,for_sale,,3,2,0.18,71 Hill Ln,,Texas,76502,2344,2013-05-01
+-,for_sale,150000,4,2,,675 Circle Dr,nan,Oklahoma,74441,,

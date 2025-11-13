@@ -1,0 +1,143 @@
+# Data Profiling Report
+
+## Dataset Overview
+- **Total Records**: 100
+- **Columns**: 12
+
+## Column-by-Column Analysis
+
+### 1. brokered_by
+- **Type**: Mixed (numeric and string)
+- **Missing Values**: 6 (6.0%)
+- **Unique Values**: 62
+- **Notable Issues**: 
+  - Contains "-1" and "nan" as missing value indicators
+  - Some blank values (empty strings)
+
+### 2. status
+- **Type**: Categorical
+- **Missing Values**: 0
+- **Unique Values**: 6 ('sold', 'for_sale', 'f', '-', 'Unknown', 's')
+- **Notable Issues**: 
+  - Inconsistent values ('f' likely means 'for_sale')
+  - '-' used as unknown/missing
+  - 'Unknown' as a category
+
+### 3. price
+- **Type**: Mixed (numeric and string)
+- **Missing Values**: 2 (2.0%)
+- **Unique Values**: 89
+- **Notable Issues**: 
+  - Some values have dollar signs ('$949900')
+  - One negative value (-1)
+  - One extremely low value (2500) that may be an error
+  - Contains "nan" as missing value
+
+### 4. bed
+- **Type**: Mixed (numeric and string)
+- **Missing Values**: 3 (3.0%)
+- **Unique Values**: 11 (including 'four' and 'three' as text)
+- **Notable Issues**: 
+  - Text values ('four', 'three') mixed with numbers
+  - One record with unusually high value (12 bedrooms)
+
+### 5. bath
+- **Type**: Mixed (numeric and string)
+- **Missing Values**: 4 (4.0%)
+- **Unique Values**: 10 (including 'two' as text and '-1')
+- **Notable Issues**: 
+  - Text values ('two') mixed with numbers
+  - One record with unusually high value (12 bathrooms)
+  - Negative value (-1) present
+
+### 6. acre_lot
+- **Type**: Numeric (with some inconsistencies)
+- **Missing Values**: 3 (3.0%)
+- **Unique Values**: 72
+- **Notable Issues**: 
+  - Contains negative values (-1)
+  - Some extremely small values (e.g., 4.200384527089073e-05)
+  - Some extremely large values (35.0, 27.59)
+  - Scientific notation present in some values
+
+### 7. street
+- **Type**: String
+- **Missing Values**: 4 (4.0%)
+- **Unique Values**: 89
+- **Notable Issues**: 
+  - Some addresses are reversed ("Third Ct, 553")
+  - "Unknown" used as a value
+  - Blank values present
+
+### 8. city
+- **Type**: String
+- **Missing Values**: 6 (6.0%)
+- **Unique Values**: 62
+- **Notable Issues**: 
+  - "-" used as missing value indicator
+  - "Unknown" used as a value
+  - Blank values present
+
+### 9. state
+- **Type**: String
+- **Missing Values**: 2 (2.0%)
+- **Unique Values**: 28
+- **Notable Issues**: 
+  - Some abbreviations inconsistent (CA vs California)
+  - "-" used as missing value indicator
+  - "Unknown" used as a value
+
+### 10. zip_code
+- **Type**: Mixed (numeric and string)
+- **Missing Values**: 6 (6.0%)
+- **Unique Values**: 77
+- **Notable Issues**: 
+  - Contains "-1" as missing value indicator
+  - Some blank values
+  - Some 4-digit codes that may be incomplete
+
+### 11. house_size
+- **Type**: Mixed (numeric and string)
+- **Missing Values**: 2 (2.0%)
+- **Unique Values**: 86
+- **Notable Issues**: 
+  - Contains "-1" as missing value indicator
+  - Some extremely small values (6.879878328741965e-05)
+  - Scientific notation present
+  - Mixed units suspected (some values seem too small to be square footage)
+
+### 12. prev_sold_date
+- **Type**: String (dates in inconsistent formats)
+- **Missing Values**: 8 (8.0%)
+- **Unique Values**: 74
+- **Notable Issues**: 
+  - Multiple date formats (YYYY-MM-DD, MM/DD/YY, MM/DD/YYYY)
+  - "-" used as missing value indicator
+  - "Unknown" used as a value
+  - Some future dates (2022-10-31)
+
+## Data Quality Issues Summary
+
+1. **Inconsistent Missing Value Indicators**: Uses "nan", "-", "-1", blank, and "Unknown" interchangeably
+2. **Mixed Data Types**: Several numeric columns contain text values
+3. **Date Format Inconsistency**: Multiple date formats in prev_sold_date
+4. **Outliers/Implausible Values**: 
+   - Extremely small/large acre_lot values
+   - House sizes that seem implausible (both very small and very large)
+   - Price outliers (both high and low)
+5. **Address Format Issues**: Some addresses are reversed or incomplete
+6. **Categorical Value Inconsistency**: 
+   - Status has multiple representations of the same state
+   - State names sometimes abbreviated, sometimes not
+
+## Recommendations for Data Cleaning
+
+1. Standardize missing value representations
+2. Convert numeric columns to proper numeric types, handling text entries
+3. Standardize date formats
+4. Validate and clean address information
+5. Check and correct outliers in numeric fields
+6. Standardize categorical values (status, state)
+7. Investigate implausible property characteristics (e.g., 12 bathrooms, extremely small house sizes)
+
+This dataset would benefit significantly from cleaning before being used for analysis. The mixed data types and inconsistent representations make direct analysis challenging.

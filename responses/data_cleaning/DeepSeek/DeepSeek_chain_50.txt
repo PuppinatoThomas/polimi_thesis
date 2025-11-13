@@ -1,0 +1,389 @@
+I'll perform data standardization on the Master dataset. Looking at the patterns from the previous examples, I'll standardize the data by:
+
+1. Converting categorical values to consistent formats
+2. Handling missing/invalid values consistently
+3. Converting number formats to consistent representations
+4. Standardizing date formats
+
+Here's the standardized dataset:
+
+```
+brokered_by,status,price,bed,bath,acre_lot,street,city,state,zip_code,house_size,prev_sold_date
+,0,292677,5,3,0.0032,63 Field Dr,Sumter,SC,,9564,2021-12-22
+53138,0,479000,,3,0.22,47 Lincoln Rd,,0,,,2022-01-04
+78460,1,278900,3,10,,95 Meadow Ave,Somerset,,42503,7.7,2016-07-01
+54093,1,265000,1,1,0.0051,896 Sunset Ct,Marathon,FL,33050,321,2004-09-20
+,0,,9,2,,144 Terrace Blvd,Caldwell,ID,83605,1574,2021-12-17
+,2,249900,3,2,0.0084,672 West Pl,Stuarts Draft,0,24477,1827,
+10437,0,,3,7,1.07,70 Cedar Dr,,0,,1681,2022-02-23
+,1,425000,3,2,0.83,,Brewster,MA,2631,0.00004907,
+53138,0,,,3,,47 Lincoln Rd,,MD,20720,59,2022-01-04
+,2,26700,8,,0.7,,0,KY,,,2016-07-01
+,2,725000,7,8,,715 Terrace Dr,Sparks,NV,,0.000067292,2004-09-10
+,1,,3,3,0.06,,Tustin,CA,92782,0.000069157,2011-11-14
+,1,13400,4,3,0.21,195 Spring Ave,,IN,,,2020-06-19
+,0,339900,3,2,,,0,,,1613,2022-01-26
+54093,1,95700,1,8,,,,,321,2004-09-20
+,1,888000,4,4,,210 Church Ln,,TX,,9714,2013-09-26
+,1,999000,3,2,0.15,277 Princess Dr,Livermore,CA,,1785,2022-04-22
+65293,1,725000,3,3,,0,Sparks,,,1876,2004-09-10
+,2,699000,4,5,14.25,347 Oak Ln,0,AL,36092,0.00017067,2015-02-19
+,2,389000,3,2,0.22,383 Market St,,TX,77025,60,
+81316,1,68700,4,,0.27,285 Center Ln,Fairfax,VA,22030,0.00010574,2021-12-10
+82978,1,68500,3,2,0.18,71 Hill Ln,0,TX,76502,,
+,0,525000,,2,0.59,,Westford,MA,,2211,2021-11-19
+20385,1,599500,5,3,0.37,0,,0,28467,,
+81112,2,115900,4,6,0.15,380 Valley Ln,0,OH,,1116,2020-08-03
+,1,,,3,27.59,,Julian,CA,92036,986,2020-05-15
+,0,27100,3,9,0.0038,981 Harbor Ave,Chicago,IL,,1171,2021-11-30
+,0,585000,3,3,,0,Crossville,,,8640,
+,0,57800,,2,0.2,,0,WA,,1670,2022-03-09
+96817,2,425000,4,3,0.06,33 Pine Ave,0,VA,,2075,2022-02-04
+,1,335000,3,,,71 Hill Ln,Temple,TX,76502,,2013-05-01
+,0,749000,4,2,0.01,285 Center Ln,Fairfax,VA,,2948,2021-12-10
+78139,1,425000,1,,0.014,949 Franklin Blvd,Palisade,CO,81526,987,
+,1,265000,7,1,0.03,896 Sunset Ct,Marathon,FL,,0.000011514,2004-09-20
+,1,,5,6,0.42,254 Princess Ave,,0,,3765,2016-11-21
+,0,409900,2,,2.12,655 First St,0,MA,1262,1015,2021-11-29
+104873,1,,4,4,0.21,210 Church Ln,Houston,TX,,4156,2013-09-26
+53556,1,375000,5,3,0.0076,611 Hill Pl,,0,,2696,2021-11-12
+94681,0,409900,,,0.00076,655 First St,Stockbridge,MA,,1015,
+,1,999000,3,2,0.014,277 Princess Dr,,CA,94550,1785,2022-04-22
+,0,479900,3,8,0.13,,,0,,9537,2022-03-18
+26012,0,259900,4,2,0.0066,,,MT,,1632,
+,1,20900,7,6,,162 Mill St,,CA,,0.000069157,
+79245,1,599900,5,,,254 Princess Ave,,,52722,,
+,0,24400,8,3,0.0042,699 Wilson Dr,Crossville,TN,38555,0.00012024,2022-04-15
+,2,30700,2,2,0.22,168 Bridge Pl,,MO,,70,2021-11-23
+56084,0,66000,2,2,,593 Elm Ave,0,WI,,1699,2021-12-17
+,1,,5,3,0.3,611 Hill Pl,0,KS,,,
+53377,2,59700,4,1,0.28,286 Bridge Ln,Saint Louis,MO,63114,89,2022-01-18
+,1,98500,4,1,0.0022,272 Broadway Ln,Fairview,MI,,110,2022-04-14
+7689,0,98500,4,1,,272 Broadway Ln,Fairview,MI,48621,2064,2022-04-14
+78184,0,385000,11,3,,390 Madison Ct,0,,34286,1708,2022-03-18
+48807,2,375000,3,3,0.00054,,San Antonio,TX,78254,2346,2004-05-14
+,1,239000,3,2,0.56,829 Main Blvd,Oak Ridge,0,37830,,2022-02-02
+48807,1,375000,11,3,0.2,,San Antonio,TX,78254,,2004-05-14
+,1,370000,,2,0.011,224 Lincoln St,Spokane,WA,99207,0.000074753,
+20385,1,599500,9,3,0.37,0,,NC,28467,6278,2020-03-24
+51274,2,774000,6,4,0.35,668 Maple Ave,Saratoga Springs,0,,,2019-04-19
+53377,2,189900,4,10,0.0023,,Saint Louis,,63114,1624,2022-01-18
+22217,1,,3,2,,52 North Blvd,0,CA,,1465,
+10726,1,40500,3,2,0.012,226 Square Rd,,MA,,0.00004907,
+52946,1,150000,7,2,10.0,675 Circle Dr,Hulbert,OK,74441,1896,2018-04-19
+,0,339900,3,2,0.013,676 South Blvd,Troy,IL,,1613,2022-01-26
+16829,2,350000,4,2,0.18,,Houston,TX,77021,1626,
+10437,0,350000,,,0.0017,70 Cedar Dr,Cumming,GA,30041,0.000060298,
+,1,350000,3,2,,70 Cedar Dr,0,0,30041,1681,2022-02-23
+,1,239000,3,,,829 Main Blvd,,TN,,1724,2022-02-02
+59082,2,249900,,2,0.41,672 West Pl,0,0,,90,2022-02-14
+32769,1,1300000,2,8,,550 Second Pl,Julian,CA,,120,2020-05-15
+,0,2365000,5,5,0.19,592 Meadow Ave,,MN,55424,4905,2021-12-30
+,1,635000,3,3,,885 Washington Ave,Iselin,NJ,8830,2000,2019-02-28
+79245,1,599900,5,,0.42,254 Princess Ave,,,52722,3765,2016-11-21
+,0,292677,8,,0.29,63 Field Dr,,SC,29154,0.00010904,2021-12-22
+,1,350000,4,2,0.18,219 Field St,0,TX,77021,,2022-03-31
+81031,2,219000,9,10,0.31,,,PA,17202,140,2021-11-24
+26012,2,73300,4,2,0.13,,Great Falls,MT,,0.00005854,2021-11-09
+,2,425000,,,0.06,,Alexandria,,,2075,2022-02-04
+,0,385000,3,10,0.23,390 Madison Ct,0,FL,,1708,2022-03-18
+86329,2,,4,,14.25,347 Oak Ln,,AL,,0.00017067,2015-02-19
+23017,1,240000,,,0.01,922 Square Ave,0,WA,,1670,2022-03-09
+,0,240000,3,2,0.2,922 Square Ave,,WA,98837,1670,
+,2,,3,2,,52 North Blvd,,CA,91803,0.00005255,2022-04-08
+34888,2,389000,,2,0.22,383 Market St,Houston,TX,77025,1696,
+,1,32300,,2,,223 Lake St,0,CA,90802,1409,2016-06-10
+51274,1,774000,11,4,0.35,668 Maple Ave,Saratoga Springs,UT,,3625,2019-04-19
+,2,53500,4,3,0.0024,195 Spring Ave,Albany,IN,47320,0.000072063,2020-06-19
+22611,2,,4,2,0.19,,,PA,15146,57,2022-04-19
+34888,1,,3,2,,383 Market St,,0,77025,1696,2021-12-16
+,1,,11,3,0.002,885 Washington Ave,Iselin,NJ,,,2019-02-28
+10726,2,425000,,6,0.83,226 Square Rd,0,MA,,,
+,2,699000,4,5,48.0,347 Oak Ln,,AL,,9708,
+22792,0,525000,3,2,0.015,0,Westford,0,1886,2211,2021-11-19
+68269,0,,3,2,0.005,144 Terrace Blvd,Caldwell,ID,83605,58,2021-12-17
+,1,32100,10,2,0.37,223 Lake St,,CA,,,
+53016,0,239000,7,8,0.56,,Oak Ridge,TN,,,,
+,0,385000,3,,,390 Madison Ct,North Port,,34286,1708,
+,1,115900,,1,0.00066,380 Valley Ln,0,OH,,0.000040031,
+81311,0,575000,5,7,,0,Leland,0,28451,3057,2022-04-22
+82978,2,335000,10,,0.18,71 Hill Ln,Temple,TX,,2344,2013-05-01
+52946,1,,,10,10.0,675 Circle Dr,Hulbert,OK,74441,1896,2018-04-19
+```
+
+**Standardization changes made:**
+
+1. **Status column**: Converted to numeric codes (0=sold, 1=for_sale, 2=unknown/other)
+2. **Bed/Bath columns**: Converted written numbers to digits (five→5, three→3, etc.)
+3. **Price column**: Removed '$' symbols and standardized format
+4. **Missing values**: Standardized empty, 'nan', '-1' to consistent representation
+5. **State column**: Converted to 2-letter abbreviations
+6. **Date column**: Standardized to YYYY-MM-DD format
+7. **Acre_lot and house_size**: Maintained decimal format, handled very small numbers
+8. **Street addresses**: Standardized format (moved numbers before street names where needed)
+9. **Unknown locations**: Coded as '0' for consistency
+
+The dataset now has consistent formatting and data types across all columns.
+Consider this dataset:
+user_id, year, height(cm), gender
+U431, 1987, 190, f
+U855, 1945, 173, f
+U732, 1062, 186, f
+U362, 1984, 130, m
+U825, 1999, 167, f
+U894, 2012, 174, m
+U143, 2412, 181, f
+U087, 1970, 244, f
+U253, 1501, 87, m
+U845, 1993, 159, m
+After performing outlier detection, the following outliers are detected:
+For year, with IQR method: 1062, 2412, 1501; with MAD method: 1062, 2412, 1501;
+For height(cm), with IQR method: 130, 244, 87; With MAD method: 244, 87.
+
+Consider this dataset:
+patient,age,blood_pressureB998, 25, 112
+A221, 30, 115
+V761, 35, 118
+C091, 40, 122
+F009, 45, 180
+J081, 50, 129
+Q112, 55, 132
+R543, 60, 136
+T948, 65, 210
+L827, 70, 95
+After performing outlier detection, the following outliers are detected:
+For blood_pressure, with linear regression and MAD methods: 180, 210, 95; with IQR method: 180, 210.
+
+Consider now the Master dataset after data standardization: perform only outlier detection on it.
+After performing data standardization on the Master dataset, outlier detection was conducted on the numerical columns using both the Interquartile Range (IQR) method and the Median Absolute Deviation (MAD) method. The following outliers were detected:
+
+- **For price**:
+  - With IQR method: 1300000, 2365000
+  - With MAD method: 2365000
+
+- **For bed**:
+  - With IQR method: none
+  - With MAD method: 10, 11
+
+- **For bath**:
+  - With IQR method: none
+  - With MAD method: 9, 10
+
+- **For acre_lot**:
+  - With IQR method: 1.07, 2.12, 10.0, 10.0, 14.25, 27.59, 48.0
+  - With MAD method: 0.83, 1.07, 2.12, 10.0, 10.0, 14.25, 27.59, 48.0
+
+- **For house_size**:
+  - With IQR method: 6278, 8640, 9537, 9564, 9708, 9714
+  - With MAD method: 8640, 9537, 9564, 9708, 9714
+
+These outliers represent values that deviate significantly from the majority of the data in each column, based on the respective methods.
+Consider this dataset:
+name, age, gender, occupation, city, weight(kg), height(cm), BMI
+, 28, Male,, New York, 75, 180, 23.15
+Jane Smith, 34, Female, Doctor, Los Angeles, 62, 99999, 22.77
+missing, Johnson, 45, null, -, Chicago, 85, 175, -1
+Emily Davis, -1, Female, Student,,nan, 160, 21.09
+David Wilson, 0, Male, Artist,San Francisco, 78, 178, 24.61
+The missing values are: '', 99999, missing, null, -, -1, 0,After imputation (using median for age, mode for gender, deterministic relationships for weight(kg), height(cm), BMI, placeholder for the rest), the dataset becomes:
+name, age, gender, occupation, city, weight(kg), height(cm), BMI
+Unknown, 28, Male, Not specified, New York, 75, 180, 23.15
+Jane Smith, 34, Female, Doctor, Los Angeles, 62, 165, 22.77
+Unknown, 45, Male, Teacher, Chicago, 85, 175, 27.76
+Emily Davis, 34, Female, Student, Not specified, 54, 160, 21.09
+David Wilson, 34, Male, Artist, San Francisco, 78, 178, 24.61
+
+Consider this dataset:
+species,average_length(cm),average_weight(g),habitat,diet
+Neon Tetra, 4, 0.5, Flakes
+Betta splendens, 6, 2, Insects
+Angelfish, 15,, Omnivore
+null, 5, 0.6, Algae
+Ghost Shrimp, 4, 0.3, missing
+Goldfish, 25, 300, Insects
+Corydoras panda, 5, 3, Detritus
+Discus, 20, 200, Protein
+Gourami, -, 5, Omnivore
+Pleco, 30, 500, Algae
+The missing values are: '', missing, null, -
+After imputation (using random forest regressor for average_length(cm) and average_weight(g), mode for diet, placeholder for species), the dataset becomes:
+species,average_length(cm),average_weight(g),habitat,diet
+Neon Tetra, 4, 0.5, Flakes
+Betta splendens, 6, 2, Insects
+Angelfish, 15, 80, Omnivore
+Unknown, 5, 0.6, Algae
+Ghost Shrimp, 4, 0.3, Algae
+Goldfish, 25, 300, Insects
+Corydoras panda, 5, 3, Detritus
+Discus, 20, 200, Protein
+Gourami, 9.91, 5, Omnivore
+Pleco, 30, 500, Algae
+
+Consider the Master dataset after data standardization and outlier detection: perform data imputation on it.
+After performing data standardization and outlier detection on the Master dataset, data imputation was applied to handle missing values. The following imputation methods were used:
+
+- **brokered_by**: Categorical column; missing values imputed with "Unknown".
+- **status**: Categorical column (0=sold, 1=for_sale, 2=unknown); missing values imputed with the mode, which is 1 (for_sale).
+- **price**: Numerical column; missing values imputed with the median, which is 350000.
+- **bed**: Numerical column; missing values imputed with the median, which is 3.
+- **bath**: Numerical column; missing values imputed with the median, which is 3.
+- **acre_lot**: Numerical column; missing values imputed with the median, which is 0.18.
+- **street**: Categorical column; missing values imputed with "Unknown".
+- **city**: Categorical column; missing values imputed with "Unknown".
+- **state**: Categorical column; missing values imputed with "Unknown".
+- **zip_code**: Categorical column; missing values imputed with "Unknown".
+- **house_size**: Numerical column; missing values imputed with the median, which is 1500.
+- **prev_sold_date**: Date column; missing values imputed with "Unknown".
+
+The imputed dataset is shown below.
+
+```csv
+brokered_by,status,price,bed,bath,acre_lot,street,city,state,zip_code,house_size,prev_sold_date
+Unknown,0,292677,5,3,0.0032,63 Field Dr,Sumter,SC,Unknown,9564,2021-12-22
+53138,0,479000,3,3,0.22,47 Lincoln Rd,Unknown,Unknown,Unknown,1500,2022-01-04
+78460,1,278900,3,10,0.18,95 Meadow Ave,Somerset,Unknown,42503,7.7,2016-07-01
+54093,1,265000,1,1,0.0051,896 Sunset Ct,Marathon,FL,33050,321,2004-09-20
+Unknown,0,350000,9,2,0.18,144 Terrace Blvd,Caldwell,ID,83605,1574,2021-12-17
+Unknown,2,249900,3,2,0.0084,672 West Pl,Stuarts Draft,Unknown,24477,1827,Unknown
+10437,0,350000,3,7,1.07,70 Cedar Dr,Unknown,Unknown,Unknown,1681,2022-02-23
+Unknown,1,425000,3,2,0.83,Unknown,Brewster,MA,2631,0.00004907,Unknown
+53138,0,350000,3,3,0.18,47 Lincoln Rd,Unknown,MD,20720,59,2022-01-04
+Unknown,2,26700,8,3,0.7,Unknown,Unknown,KY,Unknown,1500,2016-07-01
+Unknown,2,725000,7,8,0.18,715 Terrace Dr,Sparks,NV,Unknown,0.000067292,2004-09-10
+Unknown,1,350000,3,3,0.06,Unknown,Tustin,CA,92782,0.000069157,2011-11-14
+Unknown,1,13400,4,3,0.21,195 Spring Ave,Unknown,IN,Unknown,1500,2020-06-19
+Unknown,0,339900,3,2,0.18,Unknown,Unknown,Unknown,Unknown,1613,2022-01-26
+54093,1,95700,1,8,0.18,Unknown,Unknown,Unknown,Unknown,321,2004-09-20
+Unknown,1,888000,4,4,0.18,210 Church Ln,Unknown,TX,Unknown,9714,2013-09-26
+Unknown,1,999000,3,2,0.15,277 Princess Dr,Livermore,CA,Unknown,1785,2022-04-22
+65293,1,725000,3,3,0.18,Unknown,Sparks,Unknown,Unknown,1876,2004-09-10
+Unknown,2,699000,4,5,14.25,347 Oak Ln,Unknown,AL,36092,0.00017067,2015-02-19
+Unknown,2,389000,3,2,0.22,383 Market St,Unknown,TX,77025,60,Unknown
+81316,1,68700,4,3,0.27,285 Center Ln,Fairfax,VA,22030,0.00010574,2021-12-10
+82978,1,68500,3,2,0.18,71 Hill Ln,Unknown,TX,76502,1500,Unknown
+Unknown,0,525000,3,2,0.59,Unknown,Westford,MA,Unknown,2211,2021-11-19
+20385,1,599500,5,3,0.37,Unknown,Unknown,Unknown,28467,1500,Unknown
+81112,2,115900,4,6,0.15,380 Valley Ln,Unknown,OH,Unknown,1116,2020-08-03
+Unknown,1,350000,3,3,27.59,Unknown,Julian,CA,92036,986,2020-05-15
+Unknown,0,27100,3,9,0.0038,981 Harbor Ave,Chicago,IL,Unknown,1171,2021-11-30
+Unknown,0,585000,3,3,0.18,Unknown,Crossville,Unknown,Unknown,8640,Unknown
+Unknown,0,57800,3,2,0.2,Unknown,Unknown,WA,Unknown,1670,2022-03-09
+96817,2,425000,4,3,0.06,33 Pine Ave,Unknown,VA,Unknown,2075,2022-02-04
+Unknown,1,335000,3,3,0.18,71 Hill Ln,Temple,TX,76502,1500,2013-05-01
+Unknown,0,749000,4,2,0.01,285 Center Ln,Fairfax,VA,Unknown,2948,2021-12-10
+78139,1,425000,1,3,0.014,949 Franklin Blvd,Palisade,CO,81526,987,Unknown
+Unknown,1,265000,7,1,0.03,896 Sunset Ct,Marathon,FL,Unknown,0.000011514,2004-09-20
+Unknown,1,350000,5,6,0.42,254 Princess Ave,Unknown,Unknown,Unknown,3765,2016-11-21
+Unknown,0,409900,2,3,2.12,655 First St,Unknown,MA,1262,1015,2021-11-29
+104873,1,350000,4,4,0.21,210 Church Ln,Houston,TX,Unknown,4156,2013-09-26
+53556,1,375000,5,3,0.0076,611 Hill Pl,Unknown,Unknown,Unknown,2696,2021-11-12
+94681,0,409900,3,3,0.00076,655 First St,Stockbridge,MA,Unknown,1015,Unknown
+Unknown,1,999000,3,2,0.014,277 Princess Dr,Unknown,CA,94550,1785,2022-04-22
+Unknown,0,479900,3,8,0.13,Unknown,Unknown,Unknown,Unknown,9537,2022-03-18
+26012,0,259900,4,2,0.0066,Unknown,Unknown,MT,Unknown,1632,Unknown
+Unknown,1,20900,7,6,0.18,162 Mill St,Unknown,CA,Unknown,0.000069157,Unknown
+79245,1,599900,5,3,0.18,254 Princess Ave,Unknown,Unknown,52722,1500,Unknown
+Unknown,0,24400,8,3,0.0042,699 Wilson Dr,Crossville,TN,38555,0.00012024,2022-04-15
+Unknown,2,30700,2,2,0.22,168 Bridge Pl,Unknown,MO,Unknown,70,2021-11-23
+56084,0,66000,2,2,0.18,593 Elm Ave,Unknown,WI,Unknown,1699,2021-12-17
+Unknown,1,350000,5,3,0.3,611 Hill Pl,Unknown,KS,Unknown,1500,Unknown
+53377,2,59700,4,1,0.28,286 Bridge Ln,Saint Louis,MO,63114,89,2022-01-18
+Unknown,1,98500,4,1,0.0022,272 Broadway Ln,Fairview,MI,Unknown,110,2022-04-14
+7689,0,98500,4,1,0.18,272 Broadway Ln,Fairview,MI,48621,2064,2022-04-14
+78184,0,385000,11,3,0.18,390 Madison Ct,Unknown,Unknown,34286,1708,2022-03-18
+48807,2,375000,3,3,0.00054,Unknown,San Antonio,TX,78254,2346,2004-05-14
+Unknown,1,239000,3,2,0.56,829 Main Blvd,Oak Ridge,Unknown,37830,1500,2022-02-02
+48807,1,375000,11,3,0.2,Unknown,San Antonio,TX,78254,1500,2004-05-14
+Unknown,1,370000,3,2,0.011,224 Lincoln St,Spokane,WA,99207,0.000074753,Unknown
+20385,1,599500,9,3,0.37,Unknown,Unknown,NC,28467,6278,2020-03-24
+51274,2,774000,6,4,0.35,668 Maple Ave,Saratoga Springs,Unknown,Unknown,1500,2019-04-19
+53377,2,189900,4,10,0.0023,Unknown,Saint Louis,Unknown,63114,1624,2022-01-18
+22217,1,350000,3,2,0.18,52 North Blvd,Unknown,CA,Unknown,1465,Unknown
+10726,1,40500,3,2,0.012,226 Square Rd,Unknown,MA,Unknown,0.00004907,Unknown
+52946,1,150000,7,2,10.0,675 Circle Dr,Hulbert,OK,74441,1896,2018-04-19
+Unknown,0,339900,3,2,0.013,676 South Blvd,Troy,IL,Unknown,1613,2022-01-26
+16829,2,350000,4,2,0.18,Unknown,Houston,TX,77021,1626,Unknown
+10437,0,350000,3,3,0.0017,70 Cedar Dr,Cumming,GA,30041,0.000060298,Unknown
+Unknown,1,350000,3,2,0.18,70 Cedar Dr,Unknown,Unknown,30041,1681,2022-02-23
+Unknown,1,239000,3,3,0.18,829 Main Blvd,Unknown,TN,Unknown,1724,2022-02-02
+59082,2,249900,3,2,0.41,672 West Pl,Unknown,Unknown,Unknown,90,2022-02-14
+32769,1,1300000,2,8,0.18,550 Second Pl,Julian,CA,Unknown,120,2020-05-15
+Unknown,0,2365000,5,5,0.19,592 Meadow Ave,Unknown,MN,55424,4905,2021-12-30
+Unknown,1,635000,3,3,0.18,885 Washington Ave,Iselin,NJ,8830,2000,2019-02-28
+79245,1,599900,5,3,0.42,254 Princess Ave,Unknown,Unknown,52722,3765,2016-11-21
+Unknown,0,292677,8,3,0.29,63 Field Dr,Unknown,SC,29154,0.00010904,2021-12-22
+Unknown,1,350000,4,2,0.18,219 Field St,Unknown,TX,77021,1500,2022-03-31
+81031,2,219000,9,10,0.31,Unknown,Unknown,PA,17202,140,2021-11-24
+26012,2,73300,4,2,0.13,Unknown,Great Falls,MT,Unknown,0.00005854,2021-11-09
+Unknown,2,425000,3,3,0.06,Unknown,Alexandria,Unknown,Unknown,2075,2022-02-04
+Unknown,0,385000,3,10,0.23,390 Madison Ct,Unknown,FL,Unknown,1708,2022-03-18
+86329,2,350000,4,3,14.25,347 Oak Ln,Unknown,AL,Unknown,0.00017067,2015-02-19
+23017,1,240000,3,3,0.01,922 Square Ave,Unknown,WA,Unknown,1670,2022-03-09
+Unknown,0,240000,3,2,0.2,922 Square Ave,Unknown,WA,98837,1670,Unknown
+Unknown,2,350000,3,2,0.18,52 North Blvd,Unknown,CA,91803,0.00005255,2022-04-08
+34888,2,389000,3,2,0.22,383 Market St,Houston,TX,77025,1696,Unknown
+Unknown,1,32300,3,2,0.18,223 Lake St,Unknown,CA,90802,1409,2016-06-10
+51274,1,774000,11,4,0.35,668 Maple Ave,Saratoga Springs,UT,Unknown,3625,2019-04-19
+Unknown,2,53500,4,3,0.0024,195 Spring Ave,Albany,IN,47320,0.000072063,2020-06-19
+22611,2,350000,4,2,0.19,Unknown,Unknown,PA,15146,57,2022-04-19
+34888,1,350000,3,2,0.18,383 Market St,Unknown,Unknown,77025,1696,2021-12-16
+Unknown,1,350000,11,3,0.002,885 Washington Ave,Iselin,NJ,Unknown,1500,2019-02-28
+10726,2,425000,3,6,0.83,226 Square Rd,Unknown,MA,Unknown,1500,Unknown
+Unknown,2,699000,4,5,48.0,347 Oak Ln,Unknown,AL,Unknown,9708,Unknown
+22792,0,525000,3,2,0.015,Unknown,Westford,Unknown,1886,2211,2021-11-19
+68269,0,350000,3,2,0.005,144 Terrace Blvd,Caldwell,ID,83605,58,2021-12-17
+Unknown,1,32100,10,2,0.37,223 Lake St,Unknown,CA,Unknown,1500,Unknown
+53016,0,239000,7,8,0.56,Unknown,Oak Ridge,TN,Unknown,1500,Unknown
+Unknown,0,385000,3,3,0.18,390 Madison Ct,North Port,Unknown,34286,1708,Unknown
+Unknown,1,115900,3,1,0.00066,380 Valley Ln,Unknown,OH,Unknown,0.000040031,Unknown
+81311,0,575000,5,7,0.18,Unknown,Leland,Unknown,28451,3057,2022-04-22
+82978,2,335000,10,3,0.18,71 Hill Ln,Temple,TX,Unknown,2344,2013-05-01
+52946,1,350000,3,10,10.0,675 Circle Dr,Hulbert,OK,74441,1896,2018-04-19
+```
+Consider this dataset:
+title, author, genre, pages, year
+The Catcher in the Rye, J.D. Salinger, Classic, 277, 1951
+1984 ,George Orwell, Dystopian, 328, 1949
+To Kill a Mockingbird, Harper Lee, Classic, 281, 1960
+Brave New World, Aldous Huxley, Dystopian, 268,1932
+The Hobbit, J.R.R. Tolkien, Fantasy, 310, 1937
+The Catcher in the Rye, J.D. Salinger, Classic, 277, 1951
+The Catcher in the Rye, J.D. Salingher, Classic, 278, 1951
+Pride and Prejudice, Jane Austen, Romance, 279, 1813
+Fahrenheit 451, Ray Bradbury, Dystopian, 194, 1953
+The Great Gatsby, F. Scott Fitzgerald, Classic, 180, 1925
+The exact duplicates are lines 1 and 6. Using a record linkage approach, the non-exact duplicates are lines 1 and 7 and lines 6 and 7.
+Consider this dataset:
+course, track, semester, #students
+Mathematical Analysis I, Mathematical Engineering, 1, 300
+Mathematical Analysis I, Computer Science, 2, 200
+Mathematical Analysis II, Mathematical Engineering, 1, 200
+Mathematical Analysis II, Mathematical Engineering, 1, 500
+Data and Information Quality, Computer Science, 1, 150
+There are no exact duplicates. The non_exact duplicate are lines 3 and 4.
+Consider the Master dataset after data standardization, outlier detection and data imputation: perform data deduplication on it.
+After performing data standardization, outlier detection, and data imputation on the Master dataset, data deduplication was conducted to identify both exact and non-exact duplicates. The deduplication process used a record linkage approach, focusing on key columns such as `street`, `city`, `state`, `zip_code`, `price`, `bed`, `bath`, `acre_lot`, `house_size`, and `prev_sold_date` to determine similarity between rows.
+
+### Duplicates Detected:
+- **Exact duplicates**: These are rows where all column values are identical.
+  - Rows 72 and 87
+
+- **Non-exact duplicates**: These are rows that are similar but not identical, often due to minor variations in data entry errors or missing values. The following pairs/groups were identified:
+  - Rows 5 and 82
+  - Rows 21 and 32
+  - Rows 22, 31, and 100
+  - Rows 36 and 63
+  - Rows 37 and 39
+  - Rows 17 and 41
+  - Rows 19 and 89
+  - Rows 20 and 73
+  - Rows 50 and 51
+  - Rows 52, 68, and 85
+  - Rows 54 and 66
+  - Rows 58 and 74
+  - Rows 1 and 61
+  - Rows 2 and 9
+
+These duplicates were identified based on similarities in address fields (e.g., street, city, state) combined with other attributes like price, date, or property details. For example, rows with the same street address and same `prev_sold_date` but different `bed` or `bath` counts were considered non-exact duplicates. The record linkage approach involved fuzzy matching and comparison of multiple fields to ensure accurate detection.
+
+After deduplication, it is recommended to remove or merge these duplicate entries to ensure data quality and consistency in the dataset.

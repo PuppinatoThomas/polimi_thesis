@@ -1,0 +1,75 @@
+Here’s a comprehensive checklist of common data-cleaning operations. Pick the ones relevant to your data and goals:
+
+- Define rules and targets
+  - Clarify business definitions, acceptance criteria, and data quality rules (types, ranges, uniqueness, nullability).
+
+- Profile and audit
+  - Compute summaries, distributions, missingness, cardinality, correlations, and detect schema drift.
+
+- Schema and structure
+  - Standardize column names and order, drop/rename/merge/split fields, reshape (wide/long), and parse nested/semi-structured data.
+
+- Data types and parsing
+  - Cast to correct types; parse numbers (locale), booleans, dates/times/timezones; handle special float values (NaN, inf).
+
+- Standardize formats and encodings
+  - Normalize string case and whitespace, Unicode/ASCII normalization, fix encoding issues, unify date/number formats.
+
+- Units and currencies
+  - Convert and standardize measurement units and currencies; record conversion assumptions and reference dates.
+
+- Handle missing data
+  - Normalize missing markers (e.g., "", "NA", -999), decide drop vs. impute, create missingness indicators.
+
+- Duplicates and identity resolution
+  - Remove exact duplicates, deduplicate with keys and fuzzy matching, enforce uniqueness constraints.
+
+- Fix structural and categorical errors
+  - Correct typos and synonyms in categories, align to controlled vocabularies, consolidate rare levels.
+
+- Validate values and business rules
+  - Enforce ranges, domains, regex patterns, cross-field logic (e.g., start_date <= end_date), referential integrity.
+
+- Outliers and anomalies
+  - Detect (robust stats, isolation forests, rules) and decide to cap, transform, correct, or exclude.
+
+- Numeric transformations
+  - Address skew (log/Box-Cox), scale/standardize (min-max, z-score, robust), handle zeros/negatives appropriately.
+
+- Date/time handling
+  - Normalize timezones, correct DST issues, remove/merge duplicate timestamps, fill/flag gaps, resample if needed.
+
+- Text fields (if applicable)
+  - Clean punctuation/whitespace, normalize accents, correct common misspellings, tokenize; optionally stem/lemmatize, remove stopwords.
+
+- Geospatial (if applicable)
+  - Validate geometries, fix CRS/coordinate systems, snap/clean topology, dedupe by proximity, fill missing geocodes.
+
+- Images/audio (if applicable)
+  - Detect corrupt files, standardize resolution/sample rate/color space, normalize intensity, trim silence.
+
+- Data integration and linkage
+  - Clean join keys, resolve conflicting records, align schemas, harmonize code systems, dedupe across sources.
+
+- Error correction with reference data
+  - Validate and fix using external registries (e.g., postal codes, country codes), lookup tables, and master data.
+
+- Rare events and class balance (ML contexts)
+  - Identify severe imbalance; if adjusting, document sampling/weighting (note: this is preprocessing adjacent to cleaning).
+
+- Privacy and compliance
+  - Detect and mask/remove PII, pseudonymize, enforce minimization and retention rules.
+
+- Versioning and lineage
+  - Track raw vs. cleaned datasets, record transformations, keep reproducible scripts/config.
+
+- Quality assurance and testing
+  - Implement validation checks, threshold alerts, and data contracts; re-profile after cleaning.
+
+- Automation and monitoring
+  - Build pipelines, schedule runs, log metrics, monitor drift and freshness, handle failures and retries.
+
+- Documentation
+  - Update data dictionary, define field meanings, units, valid ranges, and known limitations.
+
+No single project needs all of these; select and order them based on your domain, data types, and downstream use.

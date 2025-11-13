@@ -1,0 +1,143 @@
+I'll perform data wrangling on this real estate dataset. Here's a comprehensive analysis and cleaning process:
+
+## Data Quality Assessment & Cleaning
+
+```python
+import pandas as pd
+import numpy as np
+
+# First, let's examine the data structure and identify issues
+print("Initial Data Overview:")
+print(f"Dataset shape: {df.shape}")
+print("\nData types:")
+print(df.dtypes)
+print("\nMissing values:")
+print(df.isnull().sum())
+```
+
+## Data Cleaning Steps
+
+```python
+# 1. Handle data type conversions
+df['price'] = df['price'].astype(int)
+df['bed'] = df['bed'].astype(int)
+df['bath'] = df['bath'].astype(int)
+df['acre_lot'] = df['acre_lot'].astype(float)
+df['house_size'] = df['house_size'].astype(int)
+df['zip_code'] = df['zip_code'].astype(str)
+
+# 2. Parse the address into separate components
+df[['street', 'city', 'state']] = df['address'].str.extract(r'(.+),\s*(.+),\s*(.+)')
+
+# 3. Create a proper date column from previous sale components
+df['prev_sold_date'] = pd.to_datetime(
+    df[['prev_sold_year', 'prev_sold_month', 'prev_sold_day']].rename(
+        columns={'prev_sold_year': 'year', 'prev_sold_month': 'month', 'prev_sold_day': 'day'}
+    ), errors='coerce'
+)
+
+# 4. Remove unnecessary columns
+df_clean = df.drop(['prev_sold_month', 'prev_sold_day', 'prev_sold_year', 'currency'], axis=1)
+
+# 5. Handle any potential duplicates
+df_clean = df_clean.drop_duplicates()
+
+print(f"Cleaned dataset shape: {df_clean.shape}")
+```
+
+## Enhanced Feature Engineering
+
+```python
+# Calculate price per square foot
+df_clean['price_per_sqft'] = df_clean['price'] / df_clean['house_size']
+
+# Create property age indicator (if previous sale exists)
+current_year = 2024
+df_clean['years_since_last_sale'] = current_year - df_clean['prev_sold_year']
+
+# Create size categories
+def size_category(sqft):
+    if sqft < 1500: return 'Small'
+    elif sqft < 2500: return 'Medium'
+    else: return 'Large'
+
+df_clean['size_category'] = df_clean['house_size'].apply(size_category)
+
+# Create lot size categories
+def lot_category(acres):
+    if acres < 0.25: return 'Small Lot'
+    elif acres < 1: return 'Medium Lot'
+    else: return 'Large Lot'
+
+df_clean['lot_category'] = df_clean['acre_lot'].apply(lot_category)
+```
+
+## Data Validation & Quality Checks
+
+```python
+# Check for data quality issues
+print("\nData Quality Checks:")
+print(f"Records with invalid prices: {(df_clean['price'] <= 0).sum()}")
+print(f"Records with invalid house sizes: {(df_clean['house_size'] <= 0).sum()}")
+print(f"Records with invalid bedrooms: {(df_clean['bed'] <= 0).sum()}")
+
+# Remove obvious outliers (extreme cases)
+df_clean = df_clean[
+    (df_clean['price'] > 10000) & 
+    (df_clean['price'] < 10000000) &
+    (df_clean['house_size'] > 100) &
+    (df_clean['bed'] > 0)
+]
+
+print(f"Final cleaned dataset shape: {df_clean.shape}")
+```
+
+## Summary Statistics
+
+```python
+print("\nCleaned Dataset Summary:")
+print(f"Total properties: {len(df_clean)}")
+print(f"Properties for sale: {len(df_clean[df_clean['status'] == 'for_sale'])}")
+print(f"Properties sold: {len(df_clean[df_clean['status'] == 'sold'])}")
+print(f"Unique states: {df_clean['state'].nunique()}")
+print(f"Unique brokers: {df_clean['brokered_by'].nunique()}")
+
+print("\nPrice Statistics:")
+print(f"Average price: ${df_clean['price'].mean():,.2f}")
+print(f"Median price: ${df_clean['price'].median():,.2f}")
+print(f"Price range: ${df_clean['price'].min():,} - ${df_clean['price'].max():,}")
+
+print("\nProperty Size Statistics:")
+print(f"Average house size: {df_clean['house_size'].mean():.0f} sqft")
+print(f"Average lot size: {df_clean['acre_lot'].mean():.2f} acres")
+```
+
+## Final Cleaned Dataset Structure
+
+The wrangled dataset now includes:
+
+**Original columns (cleaned):**
+- `brokered_by`, `broker_first_name`, `broker_surname`
+- `status` (for_sale/sold)
+- `price` (as integer)
+- `bed`, `bath` (as integers)
+- `acre_lot`, `house_size` (as numeric)
+- `zip_code` (as string)
+
+**New derived columns:**
+- `street`, `city`, `state` (parsed from address)
+- `prev_sold_date` (proper datetime)
+- `price_per_sqft`
+- `years_since_last_sale`
+- `size_category` (Small/Medium/Large)
+- `lot_category` (Small/Medium/Large Lot)
+
+**Key improvements:**
+1. Proper data types for all columns
+2. Parsed address components for better analysis
+3. Standardized date format
+4. Added meaningful derived features
+5. Removed invalid records and duplicates
+6. Enhanced categorical classifications
+
+The dataset is now ready for analysis, visualization, or machine learning applications!

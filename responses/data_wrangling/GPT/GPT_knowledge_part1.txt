@@ -1,0 +1,90 @@
+Here’s a comprehensive checklist of data‑wrangling operations:
+
+- Data acquisition and ingestion
+  - Identify/connect to sources (files, DBs, APIs, streams)
+  - Extract/parse formats (CSV, JSON, XML, Parquet); flatten nested data
+  - Handle encodings, locales, schema inference, incremental loads/CDC
+
+- Data profiling and understanding
+  - Summary stats, distributions, missingness patterns
+  - Cardinality/uniqueness, key detection, correlations
+  - Schema drift and data quality assessment
+
+- Data cleaning
+  - Handle missing data (drop, impute, flag)
+  - Fix data types and parse values (numbers, booleans, dates/times)
+  - Standardize formats/units (dates, currencies, measurement units)
+  - Text normalization (trim, case, accents, punctuation, regex fixes)
+  - De-duplication and entity resolution (exact/fuzzy)
+  - Constraint checks (ranges, domain lists, regex, uniqueness, referential integrity)
+  - Outlier detection and treatment (cap, winsorize, transform, remove)
+  - Error tagging/anomaly labeling
+
+- Transformation and normalization
+  - Scaling/normalization (z-score, min–max, robust)
+  - Categorical encoding (one-hot, ordinal, target, frequency, hashing)
+  - Binning/discretization
+  - Mathematical transforms (log, Box–Cox, Yeo–Johnson, sqrt)
+  - Aggregations and window functions
+  - Reshape: pivot/unpivot (melt), wide↔long
+  - String operations (split/merge, extract with regex)
+  - Date/time ops (TZ/DST handling, extract components, calendars)
+
+- Time series–specific
+  - Reindex/resample to regular frequency
+  - Interpolate/gap filling
+  - Lag/lead features, rolling/expanding stats, differencing
+  - Holiday/seasonality features
+
+- Text/NLP–specific
+  - Tokenization, normalization, stopword removal
+  - Stemming/lemmatization, n‑grams
+  - Vectorization/embeddings; vocabulary pruning
+
+- Geospatial–specific
+  - Geocoding/reverse geocoding
+  - CRS transforms, spatial joins/buffers
+  - Distance/area calculations, tiling/gridding
+
+- Integration and reshaping across datasets
+  - Joins/merges, concatenation/unions, set operations
+  - Resolve schema conflicts, conform dimensions, surrogate keys
+  - Post-merge deduplication and survivorship rules
+  - Enrichment via lookups/reference data
+
+- Feature engineering
+  - Domain-derived features, interactions, polynomial terms
+  - Target/leakage checks, feature hashing
+  - Signal extraction (e.g., PCA features, topic features)
+
+- Dimensionality reduction and feature selection
+  - Filter methods (variance, correlation, MI)
+  - Wrapper methods (RFE)
+  - Embedded methods (L1/L2)
+  - Projections (PCA; manifold methods for exploration)
+
+- Sampling and splitting
+  - Train/validation/test splits (random/stratified/time‑aware)
+  - Cross‑validation folds
+  - Class imbalance handling (re/under‑sampling, SMOTE), weighting
+
+- Quality assurance and validation
+  - Data tests/assertions/expectations
+  - Reconciliation checks, audits, QA reports
+  - Monitoring freshness, completeness, drift/anomalies
+
+- Security, privacy, and compliance
+  - PII detection; masking, hashing, tokenization, anonymization
+  - Access controls, consent/purpose tagging
+
+- Documentation and governance
+  - Data dictionary, metadata, lineage/provenance
+  - Versioning of data, schemas, and transformations
+  - Reproducibility (seeds, environment/config capture)
+
+- Delivery and orchestration
+  - Persist curated data (partitioning, indexing, efficient formats)
+  - Pipelines/workflows, scheduling, idempotency, checkpointing
+  - Logging, alerts, rollback, and cost/performance tuning
+
+Not every project needs every step, but this covers the operations most practitioners use for robust data wrangling.

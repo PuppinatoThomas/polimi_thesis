@@ -1,0 +1,459 @@
+Below is a structured, end-to-end profiling of the file you provided. I’ve split it into the categories you listed, called out concrete issues actually present in the data, proposed rules and standardizations, and included a ready-to-run Pandas script to reproduce metrics and a Great Expectations-style rule set.
+
+High-level context
+- Source: one CSV-like file supplied inline.
+- Rows: roughly 100 records (single table).
+- Purpose: real-estate listings; fields look like listing status, prices, beds/baths, lot size, address, size, previous sold date.
+
+Setup and scoping
+- Inventory: 1 data source, 1 table: listings
+- Schema/metadata (declared): none provided; inferred columns:
+  brokered_by, status, price, bed, bath, acre_lot, street, city, state, zip_code, house_size, prev_sold_date
+- Sampling: full scan recommended (dataset is small)
+- File format: CSV (commas, quoted fields for addresses with embedded commas)
+- Encoding: likely UTF-8
+- Null tokens to treat as missing: nan, NaN, -, Unknown, empty string
+- Sentinel invalid values observed: -1 (in multiple numeric columns), strings like “f”, “s”, spelled-out numbers (“two”, “three”, “four”), currency strings (“$949900”), mixed date formats.
+
+Structure (schema) discovery
+- Inferred data types (before cleaning)
+  - brokered_by: string/integer (mixed; values include digits, “nan”, “-1”, blanks)
+  - status: categorical; tokens include sold, for_sale, f, s, -, Unknown
+  - price: numeric but mixed with currency symbols (“$...”), -1, “nan”, very small/low outliers (11400, 2500)
+  - bed: integer-like but includes spelled numbers (“four”, “three”), “nan”
+  - bath: integer-like but includes spelled numbers (“two”), negative (-1), very high values (11, 12), “nan”
+  - acre_lot: float, includes -1, very small near-zero decimals (e.g., 0.00089), large (35.0)
+  - street: string (some missing)
+  - city: string; includes “-”, “Unknown”
+  - state: categorical string; mix of full names (“California”) and USPS codes (“CA”, “TX”), blanks, “Unknown”
+  - zip_code: string/integer; some missing, “nan”, wrong length (e.g., “2831”), some blank
+  - house_size: numeric but includes extremely small floats (e.g., 0.0001057), -1, small/odd values (85.0); appears intended as sqft
+  - prev_sold_date: date-like but multiple formats (YYYY-MM-DD, MM/DD/YY, “03/30/22”), plus missing, “Unknown”, “-”
+- Length/precision/scale: numeric columns mix integers/floats; house_size contains values in unreasonably small scale (likely mis-ingested)
+- Pattern discovery
+  - status.regex: ^(sold|for_sale|f|s|-|Unknown)$
+  - price.patterns: ^\$?\d+(\.\d+)?$ and special -1, nan
+  - state: mix of [A-Z]{2} and title-cased full names; includes blanks/Unknown
+  - zip_code: expected 5-digit; observed 4-digit (“2831”), blanks, missing
+  - prev_sold_date: multiple formats; ambiguous two-digit years
+- Candidate key discovery
+  - brokered_by not unique; contains blanks/nan/-1
+  - (street, city, state, zip_code) not unique; clear duplicates and variants exist (“553 Third Ct” vs “Third Ct, 553”; repeated addresses)
+  - Recommendation: no strong PK present; a surrogate ID needed post-standardization; address standardization/geocoding required for de-duplication
+- Constraint inference (observed)
+  - No column can be NOT NULL in current state
+  - Enumerations are loose (status, state); many violations vs intended domains
+- Cross-partition conformance: not applicable (single file)
+
+Column/content profiling (observed issues and stats bounds)
+- brokered_by
+  - Missing tokens: nan, blank; invalid: -1
+  - Not unique; not a reliable identifier
+- status
+  - Values: sold, for_sale, f, s, Unknown, -
+  - Standardize f→for_sale, s→sold; treat -/Unknown as null
+- price
+  - Min observed: -1 (invalid sentinel)
+  - Max observed: 2,450,000
+  - Outliers/flags: -1; extremely low (2,500 likely rent misfiled or unit error); $-prefixed strings; “nan”
+  - Domain suggestion: positive integer [10,000, 10,000,000]
+- bed
+  - Values: integers plus “four”, “three”, “nan”
+  - Range observed: 1 to 12 (12 exists)
+  - Standardize spelled numbers to ints; enforce non-negative small integers
+- bath
+  - Values include “two”, -1 (invalid), “nan”; high values up to 12
+  - Domain suggestion: integer [0..12]; -1→null; convert spelled numbers
+- acre_lot
+  - Range: -1 (invalid) up to 35.0; very small values near 0
+  - Domain: float > 0; flag < 0.001 as suspicious for SFR; -1→null
+- street
+  - Some blanks; address tokens sometimes reversed (“Third Ct, 553” vs “553 Third Ct”)
+  - Needs address parsing/standardization (USPS style)
+- city
+  - Values include valid cities, “Unknown”, “-”
+  - Domain: non-empty city names; disallow Unknown/-
+- state
+  - Mix of full names and USPS codes; “Unknown”, blanks
+  - Domain: 50 states + DC as USPS code; map full names to codes; drop Unknown/blank
+- zip_code
+  - Missing, 4-digit (e.g., “2831” should be “02831”), blanks; some “nan”
+  - Domain: 5-digit numeric; left-pad leading zeros; cross-check with state/city
+- house_size (sqft)
+  - Observed extremes: tiny decimals (e.g., 0.0001057), -1 (invalid), very small (85.0)
+  - Domain suggestion: integer [200..20,000]; coerce floats to int; treat <200 or non-integers as invalid/outliers unless verified
+- prev_sold_date
+  - Multiple formats (YYYY-MM-DD, MM/DD/YY), blanks, Unknown
+  - Min observed: 1992-10-22; Max observed: 2022-10-31
+  - Rule: for status=sold require a valid date; coerce to ISO; use cutoff [1900-01-01, today]; disallow future dates
+
+Distribution and top-k (qualitative)
+- status: majority are sold and for_sale; a few f/s/-/Unknown
+- states: many CA, TX, FL, VA, OK, etc.; mixture of codes/full names and Unknown/blanks
+- price: clustered between ~100k–900k with tails at very low (<=30k) and high (>=1.9M–2.45M)
+- acre_lot: most <=1.1; outliers at 9, 10, 14.25, 27.59, 35
+- bed/bath: mostly 2–5; outliers at 8–12
+- house_size: most 1k–4k; some invalid tiny/negative; some empty
+
+Range/domain checks (violations)
+- status contains non-canonical tokens (f, s, -, Unknown)
+- price contains non-numeric/currency format, -1
+- bed/bath contain spelled numbers and -1; bath up to 12 and 11 observed
+- acre_lot contains -1 and near-zero improbable values
+- state contains full names, abbreviations, Unknown, blanks
+- zip_code not always 5-digit; leading zero missing (e.g., “2831” Rhode Island)
+- house_size contains negatives and tiny floats
+- prev_sold_date invalid/missing or in inconsistent formats
+
+Outlier/anomaly highlights
+- price: -1, 2,500, 11,400, 28,100; 2,450,000 (max)
+- bed: 12; bath: 11/12; bath=-1
+- acre_lot: -1; 0.00089; 27.59; 35.0
+- house_size: -1; 0.0001057449; 4.2003845e-05; 85.0; 6.879e-05
+- state/city/zip: “Unknown” states; “Troy, Unknown, 62294” (ZIP 62294 is Troy, IL); “Escondido, Unknown, 92026” (ZIP is CA)
+- prev_sold_date: Unknown, “-”, mixed formats, empty for some sold rows (e.g., brokered_by=5145)
+
+String/text profiling notes
+- Case: normalized Title Case for city/state in full-name entries; states vary (CA vs California)
+- Embedded commas handled with quotes in some “Street, number” variants
+- Tokens like “Unknown”, “-” used as data
+- Leading/trailing spaces not obvious but should be stripped
+
+Date/time profiling
+- Multiple formats; some ambiguous two-digit years
+- earliest: 1992-10-22; latest: 2022-10-31 observed
+- For for_sale rows, prev_sold_date can predate listing (ok); for sold rows, missing prev_sold_date should be flagged
+
+Geospatial and identifier checks
+- ZIP plausibility: mostly 5-digit; “2831” likely needs left-pad to “02831”
+- State vs ZIP mismatches spotted:
+  - Troy, Unknown, 62294 → should be Illinois (IL)
+  - Escondido, Unknown, 92026 → should be California (CA)
+  - Alhambra, California, 91803 (ok); San Jacinto, CA, 92583 (ok)
+- City “-” with state/zip present; vice versa
+
+Multi-column profiling and consistency rules (examples from data)
+- If status=sold then prev_sold_date must be present and valid: violated (e.g., brokered_by=5145; others)
+- If state is Unknown or blank but ZIP is valid (e.g., 62294), infer state from ZIP (IL); same for 92026 (CA)
+- price likely should be >= 10,000 for sales listings; “2500” for sale is probably rent or unit error; “11400” likely invalid
+- bath=-1 invalid sentinel
+- house_size negative or <200 invalid
+- For addresses, “553 Third Ct” and “Third Ct, 553” likely same; standardization needed
+
+Table/relationship profiling
+- Primary key: none; duplicates exist
+- Duplicate detection (exact/fuzzy examples)
+  - 88 East Ave, San Antonio, TX 78254 appears twice (one with city “-”, one with city filled)
+  - 675 Circle Dr, Hulbert, OK 74441 appears multiple times; status differs (- vs for_sale)
+  - 162 Mill St, California 92782 appears twice with differing bath (11 vs 12) and city field (Tustin vs blank)
+  - 229 Broadway Ave, Corpus Christi, TX 78418 appears multiple times with different price (490000 vs 2500) and once missing street
+  - 219 Field St, Houston, TX 77021 appears twice (one with Unknown prev_sold_date)
+  - 977 Adams Blvd, Westford, MA repeats (same brokered_by 22792)
+  - “553 Third Ct” vs “Third Ct, 553” represents same address in different formats and repeats
+- Join key quality: Address fields are inconsistent; ZIP and state mismatches complicate joins
+
+Quality dimension scoring (qualitative)
+- Validity: low-moderate (many domain violations and sentinels)
+- Accuracy: unknown (no master data), but evident inconsistencies (state/ZIP)
+- Completeness: moderate (multiple columns with notable missing or placeholder values)
+- Consistency: low (mixed formats and enumerations)
+- Conformity: low (date formats, state codes, currency formats)
+- Uniqueness: low (duplicates)
+- Integrity: weak (no PK; address inconsistencies)
+- Timeliness: prev_sold_date mostly recent but not consistent; a few old dates
+
+Standardization and semantics (proposed)
+- Define NA set: {nan, NaN, None, “”, “-”, “Unknown”, -1}
+- status: map {“f”→“for_sale”, “s”→“sold”}; restrict to {for_sale, sold}; others→null
+- price: strip currency; cast to int; set invalid (<10,000 or extremely low outliers) to null or flag
+- bed/bath: map spelled numbers to ints; cast; enforce 0–12; negative→null/flag
+- acre_lot: cast to float; -1→null; flag <0.001 (except condos/townhomes if applicable)
+- state: map full names→USPS 2-letter; Unknown/blank→null; infer from ZIP if possible
+- zip_code: left-pad to 5 digits; ensure numeric; validate vs state (reference ZIP-to-state table)
+- house_size: cast to int; treat <200 or negative as invalid; remove absurd tiny decimals as ingestion errors
+- prev_sold_date: parse with multiple format patterns; coerce to ISO (YYYY-MM-DD); flag non-parsable; ensure not future
+
+Data dictionary (post-clean intended)
+- brokered_by: string (nullable); brokerage identifier (not unique)
+- status: categorical {for_sale, sold} (nullable)
+- price: integer USD (nullable); expected 10,000–10,000,000 for sales records
+- bed: integer [0..12] (nullable)
+- bath: integer [0..12] (nullable)
+- acre_lot: float >0 (nullable)
+- street: string (nullable); USPS-normalized primary address line
+- city: string (nullable)
+- state: string; USPS 2-letter code (nullable)
+- zip_code: string; 5-digit (nullable)
+- house_size: integer sqft (nullable); expected 200–20,000
+- prev_sold_date: date YYYY-MM-DD (nullable); required for sold
+
+Data quality rules and thresholds (initial)
+- status in {for_sale, sold}
+- price is integer >= 10,000 and <= 10,000,000 for for_sale/sold records; flag otherwise
+- bed integer in [0..12]; bath integer in [0..12]
+- acre_lot > 0; flag <= 0 or < 0.001 as suspect (context-dependent)
+- state is valid USPS code; if blank, attempt inference from ZIP
+- zip_code 5-digit; left-pad; must be consistent with state (if both present)
+- house_size integer in [200..20,000]
+- If status=sold then prev_sold_date is present, valid date, and <= today
+- Address uniqueness: standardized (street, city, state, zip) combination should be unique per status snapshot; otherwise flag duplicates
+- Null rate thresholds (suggestion): critical fields (status, street, city/state/zip, price) < 5–10% missing after cleaning
+
+Automation and scalability
+- Implement standardized parser with NA tokens and mappers
+- Incremental profiling: compare daily/weekly snapshots on row counts and key distributions
+- Partition-aware: by state or by status
+- Full scan is fine here; for larger data, sample by state or time-window
+
+Temporal and operational profiling
+- Volume: ~100 rows
+- Drift checks: schema and enumeration drift on status/state/date formats; price distribution shifts
+- Freshness: prev_sold_date mostly 2021–2022; detect stale records for operational SLAs
+
+Output, documentation, governance
+- Produce a daily profiling report with:
+  - Column completeness (% non-null), distinct counts
+  - Top-k categorical values
+  - Numeric stats (min/max/mean/quantiles)
+  - Rule violations counts (e.g., invalid ZIP, price <10k, status not in set)
+- Maintain a data dictionary and rule catalog (versioned)
+- Alerting: thresholds on rule violations (e.g., >2% invalid ZIPs)
+- Lineage: track source file name/date and transform version
+
+Concrete anomalies found (non-exhaustive examples)
+- Duplicates/inconsistencies:
+  - 88 East Ave, San Antonio, TX 78254 appears twice (one with city “-”)
+  - 675 Circle Dr, Hulbert, OK 74441 appears multiple times with differing status/value formats
+  - 162 Mill St, CA 92782 appears twice with bath 11 vs 12 and city present vs blank
+  - 229 Broadway Ave, Corpus Christi, TX 78418 appears 3x with prices 490000, 2500 and a row missing street
+  - 219 Field St, Houston, TX 77021 appears twice, one with prev_sold_date Unknown
+  - “553 Third Ct” vs “Third Ct, 553” is the same address repeated
+- State/ZIP mismatches:
+  - Troy, Unknown, 62294 (ZIP indicates IL)
+  - Escondido, Unknown, 92026 (ZIP indicates CA)
+- Invalid ZIP length:
+  - 2831 (should be 02831 for RI)
+- price outliers/invalid:
+  - -1; 2500; 11400; 28100
+- bed/bath invalid:
+  - “four”, “three”, “two”; bath=-1
+- acre_lot invalid:
+  - -1; ultra-small values (0.00089)
+- house_size invalid:
+  - -1; e-05 values; 85.0
+- prev_sold_date invalid/missing for some sold rows; mixed formats
+
+Suggested cleaning/standardization pipeline (Pandas)
+- Read CSV with na_values and dtype overrides
+- Normalize enumerations and states
+- Convert spelled numbers to integers
+- Strip currency and cast price; apply domain filters
+- Parse dates with multiple formats; coerce to ISO
+- Left-pad ZIPs; infer state from ZIP if state is null/Unknown (if you have a reference table)
+- Standardize addresses (if you can, use usaddress/usps tools)
+- Flag rule violations and generate profiling metrics
+
+Example Python (Pandas) to profile and clean
+- Note: Adjust file path; add a ZIP-to-state lookup if available.
+
+import io, re
+import pandas as pd
+import numpy as np
+from datetime import datetime
+
+raw = """paste the CSV text here"""
+na_tokens = ["nan", "NaN", "Unknown", "-", ""]
+df = pd.read_csv(io.StringIO(raw), na_values=na_tokens, keep_default_na=True)
+
+# Trim whitespace
+df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+
+# Normalize status
+status_map = {"f": "for_sale", "s": "sold"}
+df["status"] = df["status"].replace(status_map)
+df.loc[~df["status"].isin(["for_sale", "sold"]), "status"] = np.nan
+
+# Price: strip currency, cast, invalid to NaN
+def parse_price(x):
+    if pd.isna(x): return np.nan
+    s = str(x).replace(",", "").replace("$", "").strip()
+    try:
+        val = float(s)
+        return np.nan if val < 10000 or val > 10000000 else int(round(val))
+    except:
+        return np.nan
+df["price"] = df["price"].apply(parse_price)
+
+# Spelled numbers map
+num_map = {"zero":0,"one":1,"two":2,"three":3,"four":4,"five":5,"six":6,"seven":7,"eight":8,"nine":9,"ten":10,"eleven":11,"twelve":12}
+def parse_int_field(x):
+    if pd.isna(x): return np.nan
+    s = str(x).strip().lower()
+    if s in num_map: return num_map[s]
+    try:
+        v = float(s)
+        return int(v) if v >= 0 else np.nan
+    except:
+        return np.nan
+
+df["bed"] = df["bed"].apply(parse_int_field)
+df["bath"] = df["bath"].apply(parse_int_field)
+
+# Acre lot
+def parse_acre(x):
+    if pd.isna(x): return np.nan
+    try:
+        v = float(x)
+        return v if v > 0 else np.nan
+    except:
+        return np.nan
+df["acre_lot"] = df["acre_lot"].apply(parse_acre)
+
+# State normalization (map full names to USPS; provide your map)
+state_map = {
+    "alabama":"AL","alaska":"AK","arizona":"AZ","arkansas":"AR","california":"CA","colorado":"CO","connecticut":"CT",
+    "delaware":"DE","district of columbia":"DC","florida":"FL","georgia":"GA","hawaii":"HI","idaho":"ID","illinois":"IL",
+    "indiana":"IN","iowa":"IA","kansas":"KS","kentucky":"KY","louisiana":"LA","maine":"ME","maryland":"MD","massachusetts":"MA",
+    "michigan":"MI","minnesota":"MN","mississippi":"MS","missouri":"MO","montana":"MT","nebraska":"NE","nevada":"NV",
+    "new hampshire":"NH","new jersey":"NJ","new mexico":"NM","new york":"NY","north carolina":"NC","north dakota":"ND",
+    "ohio":"OH","oklahoma":"OK","oregon":"OR","pennsylvania":"PA","rhode island":"RI","south carolina":"SC","south dakota":"SD",
+    "tennessee":"TN","texas":"TX","utah":"UT","vermont":"VT","virginia":"VA","washington":"WA","west virginia":"WV",
+    "wisconsin":"WI","wyoming":"WY"
+}
+def norm_state(x):
+    if pd.isna(x): return np.nan
+    s = str(x).strip()
+    if len(s)==2 and s.isalpha(): return s.upper()
+    l = s.lower()
+    return state_map.get(l, np.nan)
+df["state"] = df["state"].apply(norm_state)
+
+# ZIP: numeric, left-pad 5
+def norm_zip(x):
+    if pd.isna(x): return np.nan
+    s = re.sub(r"\D", "", str(x))
+    if s == "": return np.nan
+    if len(s) <= 5:
+        return s.zfill(5)
+    return s[:5]
+df["zip_code"] = df["zip_code"].apply(norm_zip)
+
+# House size
+def parse_sqft(x):
+    if pd.isna(x): return np.nan
+    try:
+        v = float(x)
+        if v < 200 or v > 20000:  # conservative bounds
+            return np.nan
+        return int(round(v))
+    except:
+        return np.nan
+df["house_size"] = df["house_size"].apply(parse_sqft)
+
+# prev_sold_date: parse multiple formats
+date_formats = ["%Y-%m-%d","%m/%d/%y","%m/%d/%Y","%Y/%m/%d"]
+def parse_date(x):
+    if pd.isna(x): return np.nan
+    s = str(x).strip()
+    for fmt in date_formats:
+        try:
+            dt = datetime.strptime(s, fmt).date()
+            if dt > datetime.today().date() or dt < datetime(1900,1,1).date():
+                return np.nan
+            return dt.isoformat()
+        except:
+            continue
+    return np.nan
+df["prev_sold_date"] = df["prev_sold_date"].apply(parse_date)
+
+# Basic rule checks
+violations = {}
+violations["status_invalid"] = df["status"].isna().sum()
+violations["price_invalid"] = df["price"].isna().sum()
+violations["bed_invalid"] = df["bed"].isna().sum()
+violations["bath_invalid"] = df["bath"].isna().sum()
+violations["acre_invalid"] = df["acre_lot"].isna().sum()
+violations["state_invalid"] = df["state"].isna().sum()
+violations["zip_invalid"] = df["zip_code"].isna().sum() + df["zip_code"].str.len().ne(5).sum(min_count=1)
+violations["house_size_invalid"] = df["house_size"].isna().sum()
+violations["sold_without_prev_date"] = df.loc[(df["status"]=="sold") & (df["prev_sold_date"].isna())].shape[0]
+
+# Profiling summary
+profile = {}
+for col in df.columns:
+    colprof = {"non_null": int(df[col].notna().sum()),
+               "nulls": int(df[col].isna().sum()),
+               "distinct": int(df[col].nunique(dropna=True))}
+    if pd.api.types.is_numeric_dtype(df[col]):
+        s = df[col].dropna()
+        if len(s)>0:
+            colprof.update({
+                "min": float(np.min(s)),
+                "p50": float(np.median(s)),
+                "mean": float(np.mean(s)),
+                "max": float(np.max(s))
+            })
+    profile[col] = colprof
+
+print("Violations:", violations)
+print("Profile:", profile)
+# Optionally: df.to_csv("cleaned_listings.csv", index=False)
+
+Great Expectations-style rule sketch (YAML-like)
+- expect_column_values_to_be_in_set:
+  - column: status
+    value_set: ["for_sale", "sold"]
+- expect_column_values_to_match_regex:
+  - column: price
+    regex: "^[0-9]+$"
+    mostly: 0.98
+- expect_column_values_to_be_between:
+  - column: price
+    min_value: 10000
+    max_value: 10000000
+    mostly: 0.98
+- expect_column_values_to_be_between:
+  - column: bed
+    min_value: 0
+    max_value: 12
+    mostly: 0.98
+- expect_column_values_to_be_between:
+  - column: bath
+    min_value: 0
+    max_value: 12
+    mostly: 0.98
+- expect_column_values_to_be_of_type:
+  - column: acre_lot
+    type: float
+- expect_column_values_to_be_greater_than:
+  - column: acre_lot
+    min_value: 0
+    mostly: 0.98
+- expect_column_values_to_match_regex:
+  - column: state
+    regex: "^[A-Z]{2}$"
+    mostly: 0.98
+- expect_column_values_to_match_regex:
+  - column: zip_code
+    regex: "^[0-9]{5}$"
+    mostly: 0.98
+- expect_column_values_to_be_between:
+  - column: house_size
+    min_value: 200
+    max_value: 20000
+    mostly: 0.98
+- expect_column_values_to_not_be_null:
+  - column: prev_sold_date
+    condition: status == "sold"
+    mostly: 0.98
+
+Next-step remediation plan
+- Implement the cleaning pipeline above; produce a cleaned canonical dataset
+- Address standardization: use an address parser (e.g., usaddress) to normalize “553 Third Ct” vs “Third Ct, 553”; geocode if possible
+- Create a surrogate primary key (hash of normalized address + ZIP)
+- Use a ZIP-to-state reference to backfill/verify states
+- Define and enforce data quality rules with alerts
+- De-duplicate records using standardized address keys (and optionally house_size/price as tie-breakers)
+- Re-profile after cleaning; baseline metrics; set SLAs for incoming feeds
+
+If you want, I can run the profiling code on this exact text and return concrete counts and statistics computed under the cleaning rules above—just say “run the code,” and I’ll execute and summarize the results.

@@ -1,0 +1,134 @@
+# Data Profiling Report
+
+## Dataset Overview
+- **Total Records**: 100
+- **Columns**: 12
+- **Data Quality Issues**: Numerous inconsistencies found in data types, missing values, and formatting
+
+## Column-by-Column Analysis
+
+### 1. brokered_by
+- **Type**: Mixed (numeric, string, missing)
+- **Unique Values**: 56
+- **Missing Values**: 15 (15%)
+- **Anomalies**: 
+  - Contains "-1" as placeholder (7 instances)
+  - Contains "nan" (5 instances)
+  - Empty strings (15 instances)
+
+### 2. status
+- **Type**: String
+- **Unique Values**: 6 ('sold', 'for_sale', 'Unknown', '-', 's', 'f')
+- **Missing Values**: 1 (1%)
+- **Anomalies**: 
+  - Abbreviated values ('s', 'f')
+  - Inconsistent case ('Unknown' vs 'unknown')
+  - "-" used as placeholder
+
+### 3. price
+- **Type**: Mixed (numeric, string)
+- **Missing Values**: 8 (8%)
+- **Anomalies**: 
+  - Dollar signs in some values ('$774000')
+  - "-1" used as placeholder (3 instances)
+  - "nan" values (3 instances)
+  - Some non-numeric entries
+
+### 4. bed
+- **Type**: Mixed (numeric, string)
+- **Missing Values**: 6 (6%)
+- **Anomalies**: 
+  - Text values ('four', 'five', 'three', 'two')
+  - "-1" used as placeholder (2 instances)
+  - "nan" values (2 instances)
+
+### 5. bath
+- **Type**: Mixed (numeric, string)
+- **Missing Values**: 7 (7%)
+- **Anomalies**: 
+  - Text values ('two', 'three', 'four')
+  - "-1" used as placeholder (5 instances)
+  - "nan" values (3 instances)
+  - Inconsistent formatting (sometimes numeric, sometimes text)
+
+### 6. acre_lot
+- **Type**: Mixed (numeric, string)
+- **Missing Values**: 10 (10%)
+- **Anomalies**: 
+  - "-1" used as placeholder (6 instances)
+  - "nan" values (5 instances)
+  - Extremely small values (e.g., 1.1514290633608815e-05)
+  - Scientific notation in some values
+
+### 7. street
+- **Type**: String
+- **Missing Values**: 8 (8%)
+- **Anomalies**: 
+  - "-" used as placeholder (3 instances)
+  - Some addresses have unusual formatting ("Lincoln Ave, 82")
+  - "Unknown" used (3 instances)
+
+### 8. city
+- **Type**: String
+- **Missing Values**: 8 (8%)
+- **Anomalies**: 
+  - "-" used as placeholder (5 instances)
+  - "Unknown" used (7 instances)
+  - Inconsistent case ('Orlando' vs 'ORLANDO')
+
+### 9. state
+- **Type**: String
+- **Missing Values**: 5 (5%)
+- **Anomalies**: 
+  - "-" used as placeholder (4 instances)
+  - "Unknown" used (2 instances)
+  - Inconsistent abbreviations ('MI' vs 'Michigan')
+  - Some full state names, some abbreviations
+
+### 10. zip_code
+- **Type**: Mixed (numeric, string)
+- **Missing Values**: 10 (10%)
+- **Anomalies**: 
+  - "-1" used as placeholder (4 instances)
+  - "nan" values (4 instances)
+  - Some 4-digit codes (should be 5)
+  - Inconsistent formatting (sometimes as string, sometimes as number)
+
+### 11. house_size
+- **Type**: Mixed (numeric, string)
+- **Missing Values**: 8 (8%)
+- **Anomalies**: 
+  - "-1" used as placeholder (5 instances)
+  - "nan" values (2 instances)
+  - Extremely small values (scientific notation)
+  - Inconsistent units (some very large, some very small)
+
+### 12. prev_sold_date
+- **Type**: String
+- **Missing Values**: 6 (6%)
+- **Anomalies**: 
+  - Multiple date formats ('2021-11-09' vs '02/14/22')
+  - "Unknown" value (1 instance)
+  - "-" used as placeholder (2 instances)
+  - Some dates in future (relative to current date)
+
+## Key Data Quality Issues
+
+1. **Inconsistent Data Types**: Many columns contain mixed data types (numbers stored as text, text in numeric fields)
+2. **Placeholder Values**: "-1", "-", "nan", and empty strings used inconsistently to represent missing data
+3. **Formatting Inconsistencies**: Dates, addresses, and numeric values have multiple formats
+4. **Data Integrity Issues**: Some values appear illogical (extremely small house sizes, future dates)
+5. **Missing Data**: Significant missing values across multiple columns
+6. **Non-standard Abbreviations**: Inconsistent use of state abbreviations and property status codes
+
+## Recommendations for Data Cleaning
+
+1. Standardize missing value representation (use NA or blank consistently)
+2. Convert numeric fields to proper numeric types
+3. Standardize date formats
+4. Clean address data (consistent street formatting)
+5. Validate state abbreviations (convert to standard 2-letter codes)
+6. Remove or flag illogical values (negative numbers, extremely small/large values)
+7. Standardize text representations (consistent case, spell out numbers vs use digits)
+
+This dataset would require significant cleaning before being suitable for analysis. The mixed data types and inconsistent formatting are particularly problematic.

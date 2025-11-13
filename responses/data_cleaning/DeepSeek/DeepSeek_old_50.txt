@@ -1,0 +1,125 @@
+# Data Cleaning Report
+
+After analyzing the dataset, I've identified several data quality issues that need to be addressed. Here's my cleaning approach:
+
+## 1. Standardize Missing/Invalid Values
+- Replace "-1", "nan", "-", and empty strings with consistent NA/NaN values
+- Standardize "Unknown" values (some fields use "-" or empty strings for unknown)
+
+## 2. Data Type Corrections
+- Convert numeric fields (price, bed, bath, acre_lot, house_size) to proper numeric types
+- Convert date fields to datetime format
+- Standardize categorical fields (status, state)
+
+## 3. Specific Field Cleaning
+
+### brokered_by:
+- Replace "-1" and empty strings with NA
+- Convert to string type
+
+### status:
+- Standardize values: "f", "s" → "for_sale", "sold"
+- Replace empty strings and "Unknown" with NA
+- Possible values: "for_sale", "sold", NA
+
+### price:
+- Remove "$" symbols
+- Convert to float
+- Replace "nan" and empty strings with NA
+- Negative price (-1) → NA
+
+### bed, bath:
+- Convert word numbers ("one", "two", etc.) to numeric
+- Replace "nan" and empty strings with NA
+- Negative values → NA
+
+### acre_lot:
+- Convert to float
+- Replace "nan" and empty strings with NA
+- Negative values → NA
+- Some extremely small values may need verification
+
+### street, city:
+- Clean inconsistent formatting (some have numbers after street names)
+- Replace "-" and empty strings with NA
+
+### state:
+- Replace "-" and empty strings with NA
+- Standardize state names (some are full names, some are abbreviations)
+- Fix "Unknown" values
+
+### zip_code:
+- Convert to string type
+- Replace "-1" and empty strings with NA
+- Some numeric zips need to be converted to strings
+
+### house_size:
+- Convert to float
+- Replace "-1" and empty strings with NA
+- Some extremely small values may be errors
+
+### prev_sold_date:
+- Standardize date formats (mix of YYYY-MM-DD and MM/DD/YY)
+- Replace "-" and empty strings with NA
+
+## 4. Duplicate Detection
+- Several rows appear to be duplicates (e.g., multiple entries for "Lincoln Rd, 47")
+- Need to verify if these are true duplicates or different properties
+
+## 5. Outlier Detection
+- Some prices seem extremely low or high for the given property details
+- Some house sizes are extremely small (e.g., 4.9e-05) which are likely errors
+- Some acre_lot values seem unrealistic
+
+## Recommended Cleaning Steps:
+
+```python
+import pandas as pd
+import numpy as np
+
+# Load the data
+df = pd.read_csv('property_data.csv')
+
+# Standardize missing values
+df.replace(['-1', '-', 'nan', '', 'Unknown'], np.nan, inplace=True)
+
+# Clean price field
+df['price'] = df['price'].str.replace('$', '').str.replace(',', '').astype(float)
+
+# Convert word numbers to numeric in bed/bath
+word_to_num = {'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 
+               'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10}
+for col in ['bed', 'bath']:
+    df[col] = df[col].replace(word_to_num).astype(float)
+
+# Clean status field
+status_map = {'f': 'for_sale', 's': 'sold'}
+df['status'] = df['status'].replace(status_map)
+
+# Clean numeric fields
+numeric_cols = ['acre_lot', 'house_size']
+for col in numeric_cols:
+    df[col] = pd.to_numeric(df[col], errors='coerce')
+    
+# Clean dates
+df['prev_sold_date'] = pd.to_datetime(df['prev_sold_date'], errors='coerce')
+
+# Clean state field (convert abbreviations to full names if needed)
+# Would need a full state mapping dictionary
+
+# Handle extreme values (example for house_size)
+df.loc[df['house_size'] < 1, 'house_size'] = np.nan  # assuming sizes < 1 are errors
+
+# Drop exact duplicates
+df = df.drop_duplicates()
+
+# Additional cleaning would be needed based on domain knowledge
+```
+
+## Post-Cleaning Validation Needed:
+1. Verify property uniqueness (some addresses appear multiple times - are these truly different properties?)
+2. Cross-check extreme values with external data sources
+3. Validate state/zip code consistency
+4. Verify date ranges make sense (no future dates, reasonable historical dates)
+
+This cleaning would significantly improve data quality for analysis. The dataset contains several inconsistencies that suggest it may have been merged from multiple sources with different formatting standards.

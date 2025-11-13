@@ -1,0 +1,307 @@
+Below is a reproducible, end‑to‑end cleaning plan and a ready‑to‑run Python (pandas) script that implements it for your dataset. It covers all 5 requested tasks: normalization, missing data, outliers, exact duplicates, and non‑exact duplicates.
+
+What the pipeline does
+- Normalize types and formats
+  - status: unify to for_sale, sold, unknown
+  - price/bed/bath/acre_lot/house_size: numeric types; $ and -1 handled; words like “three” → 3
+  - state: full names → USPS 2‑letter codes
+  - zip_code: 5‑digit, left‑pad leading zeros, treat -1 as missing
+  - street: canonicalize “Name, 123” → “123 Name”
+  - prev_sold_date: ISO date YYYY‑MM‑DD
+- Missing values
+  - Recognize missing tokens: '', '-', 'nan', 'NaN', 'Unknown', -1
+  - Impute safely from duplicates of the same property (same canonical address); otherwise leave as missing to avoid over‑fitting guesses
+  - Zip fixes specifically corrected by padding (e.g., 01262 Stockbridge MA; 01886 Westford MA; 08830 Iselin NJ)
+- Outliers
+  - acre_lot: negatives → NA; suspicious ultra‑small values (< 0.0001 acres) → NA
+  - house_size: implausible values (< 200 sqft or > 20,000 sqft) → NA
+  - bed and bath constrained to [0, 12]; out‑of‑range → NA
+- Duplicates
+  - Exact duplicates: drop identical rows
+  - Non‑exact duplicates: group by canonical_address (street|city|state) and:
+    - propagate single, consistent values across the group (e.g., same zip, bed, bath, lot)
+    - for conflicting values, keep the row with the most complete information; keep separate records for truly different events (e.g., different statuses or dates)
+- Address canonicalization
+  - "Cedar Dr, 70" → "70 Cedar Dr", etc., to allow robust deduplication
+
+Python (pandas) cleaning script
+- Save your CSV content in a file (e.g., input.csv). Then run this script.
+
+```python
+import pandas as pd
+import numpy as np
+import re
+from io import StringIO
+
+# 0) Load ------------------------------------------------------------
+# If you have it as a file:
+df = pd.read_csv('input.csv', dtype=str, keep_default_na=False)
+
+# 1) Strip/standardize raw strings ----------------------------------
+df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+# Normalize known missing representations
+MISSING_TOKENS = {'', '-', 'unknown', 'nan', 'none', 'null'}
+df = df.replace({col: {v: np.nan for v in MISSING_TOKENS} for col in df.columns})
+
+# 2) Column-specific normalization ----------------------------------
+
+# status
+status_map = {
+    'sold':'sold', 's':'sold',
+    'for_sale':'for_sale', 'f':'for_sale',
+}
+df['status'] = df['status'].str.lower()
+df['status'] = df['status'].map(status_map).fillna(df['status'])
+# Any leftover non-standard status -> 'unknown'
+df.loc[~df['status'].isin(['sold','for_sale']) & df['status'].notna(), 'status'] = 'unknown'
+
+# text numbers for bed/bath
+num_words = {
+    'zero':0,'one':1,'two':2,'three':3,'four':4,'five':5,'six':6,
+    'seven':7,'eight':8,'nine':9,'ten':10,'eleven':11,'twelve':12
+}
+def text_to_int(x):
+    if pd.isna(x): return np.nan
+    s = str(x).strip().lower()
+    if s in num_words: return num_words[s]
+    # remove accidental non-digits
+    s = re.sub(r'[^0-9\-\.]', '', s)
+    if s == '': return np.nan
+    try:
+        return float(s)
+    except:
+        return np.nan
+
+# price: remove $ and commas, convert; non-positive -> NA
+def to_price(s):
+    if pd.isna(s): return np.nan
+    t = re.sub(r'[^0-9\.]', '', str(s))
+    if t == '': return np.nan
+    val = float(t)
+    return val if val > 0 else np.nan
+
+df['price'] = df['price'].map(to_price)
+
+# bed & bath
+df['bed'] = df['bed'].map(text_to_int)
+df['bath'] = df['bath'].map(text_to_int)
+# sanitize bed/bath range
+df.loc[(df['bed'] < 0) | (df['bed'] > 12), 'bed'] = np.nan
+df.loc[(df['bath'] < 0) | (df['bath'] > 12), 'bath'] = np.nan
+
+# acre_lot
+def to_float_pos(x):
+    if pd.isna(x): return np.nan
+    try:
+        v = float(str(x).replace(',', ''))
+    except:
+        return np.nan
+    return v if v >= 0 else np.nan
+
+df['acre_lot'] = df['acre_lot'].map(to_float_pos)
+# Drop ultra-tiny lots that are almost certainly errors (e.g., e-05 acres ≈ 2 sqft)
+df.loc[(df['acre_lot'].notna()) & (df['acre_lot'] < 1e-4), 'acre_lot'] = np.nan
+
+# house_size (sqft)
+df['house_size'] = df['house_size'].map(to_float_pos)
+# Implausible sizes -> NA
+df.loc[(df['house_size'].notna()) & ((df['house_size'] < 200) | (df['house_size'] > 20000)), 'house_size'] = np.nan
+
+# state to USPS
+state_map = {
+    'alabama':'AL','al':'AL',
+    'alaska':'AK','ak':'AK',
+    'arizona':'AZ','az':'AZ',
+    'arkansas':'AR','ar':'AR',
+    'california':'CA','ca':'CA',
+    'colorado':'CO','co':'CO',
+    'connecticut':'CT','ct':'CT',
+    'delaware':'DE','de':'DE',
+    'florida':'FL','fl':'FL',
+    'georgia':'GA','ga':'GA',
+    'hawaii':'HI','hi':'HI',
+    'idaho':'ID','id':'ID',
+    'illinois':'IL','il':'IL',
+    'indiana':'IN','in':'IN',
+    'iowa':'IA','ia':'IA',
+    'kansas':'KS','ks':'KS',
+    'kentucky':'KY','ky':'KY',
+    'louisiana':'LA','la':'LA',
+    'maine':'ME','me':'ME',
+    'maryland':'MD','md':'MD',
+    'massachusetts':'MA','ma':'MA',
+    'michigan':'MI','mi':'MI',
+    'minnesota':'MN','mn':'MN',
+    'mississippi':'MS','ms':'MS',
+    'missouri':'MO','mo':'MO',
+    'montana':'MT','mt':'MT',
+    'nebraska':'NE','ne':'NE',
+    'nevada':'NV','nv':'NV',
+    'new hampshire':'NH','nh':'NH',
+    'new jersey':'NJ','nj':'NJ',
+    'new mexico':'NM','nm':'NM',
+    'new york':'NY','ny':'NY',
+    'north carolina':'NC','nc':'NC',
+    'north dakota':'ND','nd':'ND',
+    'ohio':'OH','oh':'OH',
+    'oklahoma':'OK','ok':'OK',
+    'oregon':'OR','or':'OR',
+    'pennsylvania':'PA','pa':'PA',
+    'rhode island':'RI','ri':'RI',
+    'south carolina':'SC','sc':'SC',
+    'south dakota':'SD','sd':'SD',
+    'tennessee':'TN','tn':'TN',
+    'texas':'TX','tx':'TX',
+    'utah':'UT','ut':'UT',
+    'vermont':'VT','vt':'VT',
+    'virginia':'VA','va':'VA',
+    'washington':'WA','wa':'WA',
+    'west virginia':'WV','wv':'WV',
+    'wisconsin':'WI','wi':'WI',
+    'wyoming':'WY','wy':'WY',
+}
+df['state'] = df['state'].str.lower().map(lambda s: state_map.get(s, np.nan) if isinstance(s,str) else np.nan)
+
+# zip_code -> 5-digit string, pad leading zeros
+def normalize_zip(z):
+    if pd.isna(z): return np.nan
+    s = re.sub(r'[^0-9]', '', str(z))
+    if s == '' or s == '0' or s == '00000' or s == '1' or s == '-1': return np.nan
+    if len(s) < 5:
+        s = s.zfill(5)
+    elif len(s) > 5:
+        s = s[:5]
+    # known bad '8830' for Iselin, NJ -> '08830' will be handled by zfill
+    return s
+
+df['zip_code'] = df['zip_code'].map(normalize_zip)
+
+# brokered_by: to string; negative/empty -> NA
+def norm_broker(x):
+    if pd.isna(x): return np.nan
+    s = str(x).strip()
+    s = re.sub(r'[^0-9A-Za-z]', '', s)
+    if s == '' or s == '1' or s == '-1':
+        return np.nan
+    return s
+df['brokered_by'] = df['brokered_by'].map(norm_broker)
+
+# street canonicalization: "Name, 123" -> "123 Name"
+def canon_street(s):
+    if pd.isna(s): return np.nan
+    s = s.strip()
+    # Replace placeholder dash with NA
+    if s in {'-', ''}: return np.nan
+    m = re.match(r'^(.*?),\s*([0-9]+)$', s)
+    if m:
+        name, num = m.group(1), m.group(2)
+        return f"{num} {name}".strip()
+    # Also handle "123 Name" already OK
+    return s
+
+df['street'] = df['street'].map(canon_street)
+
+# prev_sold_date to ISO
+df['prev_sold_date'] = pd.to_datetime(df['prev_sold_date'], errors='coerce', infer_datetime_format=True)
+# Keep date only
+df['prev_sold_date'] = df['prev_sold_date'].dt.date
+
+# 3) Build canonical address key (without zip to help fill it) -------
+def safe_lower(x): return x.lower() if isinstance(x,str) else ''
+df['addr_key'] = (
+    df['street'].map(lambda x: x.lower() if isinstance(x,str) else '') + '|' +
+    df['city'].map(safe_lower) + '|' +
+    df['state'].fillna('').map(str)
+).str.strip('|')
+
+# 4) Impute from non-exact duplicates (same addr_key) ----------------
+
+def fill_if_unique(series):
+    vals = series.dropna().unique()
+    return vals[0] if len(vals) == 1 else np.nan
+
+# Columns we can safely fill if group has a single consistent value
+safe_singletons = ['zip_code','bed','bath','acre_lot','house_size','brokered_by']
+for col in safe_singletons:
+    # Find unique per group
+    uniq = df.groupby('addr_key')[col].transform(fill_if_unique)
+    df[col] = df[col].fillna(uniq)
+
+# Price: only fill if exactly one non-null unique price for that address group
+price_uniq = df.groupby('addr_key')['price'].transform(fill_if_unique)
+df['price'] = df['price'].fillna(price_uniq)
+
+# City/state: sometimes missing where addr_key still formed; try to backfill from the most complete row in group
+def fill_from_mode(g, col):
+    mode = g[col].dropna()
+    if mode.empty: return g[col]
+    top = mode.mode()
+    if top.empty: return g[col]
+    return g[col].fillna(top.iloc[0])
+
+for col in ['city','state']:
+    df[col] = df.groupby('addr_key', group_keys=False).apply(lambda g: fill_from_mode(g, col))
+
+# 5) Outlier re-check after fills ------------------------------------
+df.loc[(df['acre_lot'].notna()) & (df['acre_lot'] < 1e-4), 'acre_lot'] = np.nan
+df.loc[(df['house_size'].notna()) & ((df['house_size'] < 200) | (df['house_size'] > 20000)), 'house_size'] = np.nan
+df.loc[(df['bed'] < 0) | (df['bed'] > 12), 'bed'] = np.nan
+df.loc[(df['bath'] < 0) | (df['bath'] > 12), 'bath'] = np.nan
+
+# 6) Fix specific, commonly broken ZIPs by padding (already handled by zfill)
+# But ensure some known pairs:
+fix_zip_by_city_state = {
+    ('stockbridge','MA'): '01262',
+    ('westford','MA'): '01886',
+    ('iselin','NJ'): '08830',
+}
+mask_unknown_zip = df['zip_code'].isna()
+for (city, st), zip5 in fix_zip_by_city_state.items():
+    m = mask_unknown_zip & (df['city'].str.lower() == city) & (df['state'] == st)
+    df.loc[m, 'zip_code'] = zip5
+
+# 7) Drop exact duplicates -------------------------------------------
+df_before = df.shape[0]
+df = df.drop_duplicates()
+exact_dups_removed = df_before - df.shape[0]
+
+# 8) Non-exact duplicate handling ------------------------------------
+# Keep the most complete record per (addr_key, prev_sold_date, status)
+df['completeness'] = df.notna().sum(axis=1)
+
+# Within the same address and same (status, prev_sold_date), keep the row with max completeness
+keep_idx = df.sort_values('completeness', ascending=False) \
+             .groupby(['addr_key','status','prev_sold_date'], dropna=False) \
+             .head(1).index
+df = df.loc[keep_idx].copy()
+
+# Optionally, if you want one record per property (addr_key), keep the most complete, most recent
+# Uncomment to collapse further:
+# df['prev_sold_date'] = pd.to_datetime(df['prev_sold_date'])
+# df = df.sort_values(['addr_key','prev_sold_date','completeness'], ascending=[True, False, False]) \
+#        .groupby('addr_key', as_index=False).head(1)
+
+# 9) Final ordering and export ---------------------------------------
+# Re-format date to ISO strings
+df['prev_sold_date'] = pd.to_datetime(df['prev_sold_date']).dt.strftime('%Y-%m-%d')
+
+# Select columns in original order
+cols = ['brokered_by','status','price','bed','bath','acre_lot','street','city','state','zip_code','house_size','prev_sold_date']
+df_final = df[cols].copy()
+
+df_final.to_csv('cleaned_listings.csv', index=False)
+
+# Print a short summary
+print('Exact duplicates removed:', exact_dups_removed)
+print('Final rows:', df_final.shape[0])
+print('Nulls by column:\n', df_final.isna().sum())
+```
+
+Notes and rationale
+- We do not “invent” values. Imputation from non‑exact duplicates is limited to fields that are consistent within the same canonical address. If a group has conflicting values (e.g., two different prices for the same property), we do not overwrite; instead we keep the most complete record per status/date and retain multiple records only when they represent different events.
+- Address duplicates are identified by canonicalizing the street (e.g., “Cedar Dr, 70” → “70 Cedar Dr”) and grouping by street|city|state.
+- Extremely small acreages (e.g., 4.9e-05 acres ≈ 2 sqft) and tiny/huge house sizes are treated as data errors and set to missing. If those were actually valid for your domain, you can relax the thresholds.
+- ZIP code cleanup pads leading zeros (e.g., 1262 → 01262, 8830 → 08830, 1886 → 01886). Additional city/state→ZIP rules can be added in fix_zip_by_city_state if desired.
+- You can adjust the non‑exact dedupe strategy: either keep one “best” record per (addr_key, status, prev_sold_date) or collapse to one record per property by uncommenting the last group-by block.
+
+If you’d like, share the cleaned output or let me run this on your data and I’ll return the cleaned CSV directly.

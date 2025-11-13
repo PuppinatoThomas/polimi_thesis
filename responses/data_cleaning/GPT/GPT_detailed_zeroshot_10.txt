@@ -1,0 +1,396 @@
+Below is a clear, reproducible cleaning pipeline you can run on the CSV you provided. It standardizes formats and types, normalizes addresses and states, detects and imputes missing values, handles outliers, and removes both exact and near-duplicates.
+
+What it does
+- Mapping and normalization
+  - Unifies missing markers: nan, NaN, -, Unknown, empty → null
+  - Standardizes status: for_sale/sold only (maps f→for_sale, s→sold; others → null)
+  - Standardizes price: removes $ and commas; numeric type; sets negatives/0 to null; flags clear rental price outlier (< 10000) and sets to null
+  - Standardizes bed/bath: converts words (“two/three/four”) to integers; bath outliers > 8 set to null; negatives set to null
+  - Standardizes acre_lot: numeric; negatives to null
+  - Standardizes house_size: numeric; values < 300 or negative treated as invalid and set to null; later imputed by (bed, bath) median
+  - Standardizes state to USPS 2-letter codes; removes “Unknown” and “-”
+  - Standardizes ZIP: keeps 5-digit numeric; pads leading zero when 4 digits; invalid/blank to null
+  - Standardizes prev_sold_date to ISO YYYY-MM-DD
+  - Normalizes street like “Third Ct, 553” → “553 Third Ct”; proper title case
+- Missing value imputation
+  - bed: impute missing with mode (global mode after cleaning)
+  - bath: impute missing with median (global median after cleaning)
+  - price: impute missing using median by (city, state, bed) then (state, bed), then overall median
+  - house_size: impute missing using median by (bed, bath), then by bed, then overall
+  - No imputation for city/state/zip/street (left null if not enough info)
+- Outliers
+  - price < 10000 set to null as likely rental price or invalid sale price
+  - bath > 8 set to null
+  - house_size < 300 or <= 0 set to null
+  - acre_lot <= 0 set to null
+- Duplicates
+  - Drops exact duplicate rows
+  - Builds a normalized address key (street, city, state, zip), merges non-exact duplicates (e.g., “Third Ct, 553” vs “553 Third Ct”, empty city/zip variations)
+  - Keeps the record with the most complete information and most recent prev_sold_date; falls back to non-null count if dates are missing
+
+Python (pandas) script
+Copy-paste the dataset into csv_text as shown and run this script.
+
+import io
+import re
+import numpy as np
+import pandas as pd
+
+csv_text = """brokered_by,status,price,bed,bath,acre_lot,street,city,state,zip_code,house_size,prev_sold_date
+nan,sold,749000,4,2,0.00089,285 Center Ln,Fairfax,Virginia,22030,0.0001057449494949495,2021-12-10
+96817,sold,425000,4,3,0.06,33 Pine Ave,Alexandria,Virginia,22309,2075,2022-02-04
+53673,for_sale,112900,3,2,0.5,169 Meadow St,Mount Pleasant,Michigan,48858,230.0,2012-08-13
+10437,sold,350000,3,2,0.0066,70 Cedar Dr,Cumming,Georgia,30041,1681,
+19903,sold,849500,8,3,0.18,249 South Pl,Houston,Texas,77030,2150,2021-12-31
+20385,for_sale,599500,5,3,0.37,217 Church Ln,Calabash,North Carolina,28467,3058,2020-03-24
+22792,sold,525000,3,12,0.59,,-,Massachusetts,-1,2211,2021-11-19
+104873,for_sale,888000,4,4,0.21,210 Church Ln,Houston,Texas,77082,4156,2013-09-26
+104876,sold,398000,3,2,0.11,981 Harbor Ave,-,Illinois,60659,4.200384527089073e-05,2021-11-30
+58970,sold,$949900,3,4,0.23,828 Spring St,Kensington,Maryland,20895,2500,12/30/21
+nan,sold,409900,,1,2.12,655 First St,Stockbridge,Unknown,1262,1015,2021-11-29
+78139,for_sale,425000,1,1,0.58,949 Franklin Blvd,Palisade,Colorado,81526,987,-
+53138,sold,479000,3,3,0.22,47 Lincoln Rd,-,Maryland,20720,2375,2022-01-04
+52946,for_sale,150000,4,2,10.0,675 Circle Dr,Hulbert,Oklahoma,74441,1896,2018-04-19
+687,sold,$355000,3,2,0.19,272 Terrace Ln,Orlando,Florida,32828,1864,2021-12-08
+103967,f,635000,3,3,0.23,885 Washington Ave,-,New Jersey,,2000,2019-02-28
+109987,for_sale,490000,3,4,0.16,229 Broadway Ave,Corpus Christi,Texas,78418,2416,2019-04-03
+2765,-,585000,3,3,4.44,699 Wilson Dr,Crossville,Tennessee,-1,3352,2022-04-15
+78460,for_sale,278900,3,2,0.7,95 Meadow Ave,Somerset,Kentucky,42503,1923,2016-07-01
+53232,for_sale,330000,2,1,0.3,225 Broadway Ct,Kingston,,12401,12.0,2014-07-01
+22916,-,376000,4,3,0.28,73 Franklin Rd,Jacksonville,North Carolina,28546,3162,2022-04-25
+57424,for_sale,nan,3,2,0.15,277 Princess Dr,Livermore,California,94550,1785,2022-04-22
+,for_sale,115900,4,1,0.15,380 Valley Ln,Fairborn,Ohio,45324,1116,2020-08-03
+92736,for_sale,175000,3,2,0.26,862 King Blvd,Owasso,Oklahoma,74055,1144,2017-12-29
+68269,sold,389854,3,,0.15,144 Terrace Blvd,Caldwell,Idaho,83605,1574,2021-12-17
+32769,Unknown,1300000,2,3,27.59,550 Second Pl,Julian,California,92036,986,2020-05-15
+84529,for_sale,1075000,3,11,nan,162 Mill St,Tustin,California,92782,1928,2011-11-14
+22217,sold,898000,3,2,0.21,52 North Blvd,Alhambra,California,91803,-1,2022-04-08
+65293,for_sale,11400,3,3,1.04,715 Terrace Dr,Sparks,Nevada,,1876,2004-09-10
+7689,sold,98500,4,1,9.0,272 Broadway Ln,Fairview,Michigan,-1,2064,2022-04-14
+78247,sold,339900,3,2,0.28,676 South Blvd,Troy,Unknown,62294,1613,2022-01-26
+105798,for_sale,155990,4,3,0.015,195 Spring Ave,Albany,Indiana,47320,2009,2020-06-19
+2177,sold,479900,3,2,-1,842 Cedar Dr,Windsor,Colorado,80550,2638,2022-03-18
+26012,sold,259900,8,2,0.13,391 Bridge Rd,Great Falls,Montana,59405,1632,2021-11-09
+96014,sold,370000,4,2,0.12,224 Lincoln St,Spokane,Washington,nan,2084,2022-04-05
+48807,for_sale,375000,3,3,0.2,88 East Ave,-,Texas,78254,2346,2004-05-14
+55214,sold,509900,3,3,0.2,603 Princess St,San Jacinto,CA,92583,2383,2022-05-03
+53556,f,375000,5,3,-1,611 Hill Pl,Wichita,Kansas,67207,2696,2021-11-12
+84534,sold,689900,3,4,,920 Field Dr,Vienna,Virginia,22180,2075,2022-04-22
+-1,for_sale,550000,3,2,0.22,Unknown,Charlottesville,Virginia,22903,1512,2011-09-29
+84529,for_sale,1075000,3,12,0.06,162 Mill St,,California,92782,1928,2011-11-14
+26543,sold,600000,4,3,1.08,763 Adams Pl,-,Florida,32934,3056,2022-01-21
+22671,sold,$90000,3,2,0.09,553 Third Ct,Saint Louis,Missouri,,1152,2022-03-24
+78075,sold,280000,2,1,0.06,686 East Ln,Reno,Nevada,89506,851,2021-11-19
+-1,sold,292677,5,3,0.013,63 Field Dr,Sumter,South Carolina,29154,3040,2021-12-22
+nan,sold,419000,5,4,0.3,864 Lake Ln,Irving,Texas,75060,280.0,2021-12-09
+29538,for_sale,1150000,3,2,0.37,223 Lake St,Long Beach,California,90802,1409,2016-06-10
+109950,sold,225000,3,2,0.23,Unknown,Fort Worth,Texas,76133,1552,2022-01-19
+75016,sold,65400,2,2,0.22,,Kirkwood,Missouri,63122,85.0,2021-11-23
+53016,sold,239000,3,2,0.56,829 Main Blvd,Oak Ridge,Tennessee,37830,1724,2022-02-02
+48807,for_sale,375000,3,3,0.2,88 East Ave,San Antonio,Texas,78254,2346,2004-05-14
+21986,sold,269900,four,3,0.17,"Garden Ct, 614",Pooler,Georgia,31322,2368,2021-12-30
+102016,for_sale,374900,3,2,0.14,368 Shore Rd,Zephyrhills,Florida,33542,1694,2019-04-25
+nan,sold,189900,4,1,0.28,286 Bridge Ln,Saint Louis,Missouri,63114,1624,2022-01-18
+8,f,517300,3,2,35.0,624 River Ln,Cheyenne,Wyoming,82007,3018,2022-10-31
+53173,sold,350000,3,2,0.9,693 Ridge Pl,Harpers Ferry,West Virginia,25425,3220,2021-12-10
+31355,-,2365000,5,5,0.19,592 Meadow Ave,Edina,Minnesota,55424,,2021-12-30
+16829,for_sale,1979000,6,6,0.29,400 Adams Ct,Port Washington,New York,11050,5828,2017-05-05
+101497,for_sale,129900,4,nan,0.0026,575 King Pl,Eastover,South Carolina,29044,2128,09/20/21
+53556,for_sale,375000,5,3,0.3,611 Hill Pl,,Kansas,67207,2696,2021-11-12
+10649,sold,219900,3,2,0.2,430 Church Rd,Allison Park,Pennsylvania,15101,1188,2022-04-13
+5145,sold,750000,12,4,0.19,59 Park Blvd,Meridian,Idaho,83642,2796,
+53592,for_sale,619900,4,6,,779 Third Blvd,Mchenry,Illinois,60050,4145,2020-04-02
+107955,for_sale,2199000,3,3,0.3,20 First Dr,Hingham,Massachusetts,2043,3650,1992-10-22
+78200,sold,149000,3,2,0.15,688 Garfield Ct,Akron,OH,44314,1560,2022-02-09
+15757,f,69900,3,1,0.17,520 View Rd,Unknown,Oklahoma,73701,1333,2016-06-09
+16829,sold,350000,4,2,0.18,219 Field St,Houston,Texas,77021,1626,2022-03-31
+86329,for_sale,699000,4,5,14.25,347 Oak Ln,Wetumpka,Alabama,nan,4758,2015-02-19
+22671,sold,90000,3,two,0.09,"Third Ct, 553",Saint Louis,Missouri,63115,1152,03/24/22
+16829,sold,350000,4,2,0.18,219 Field St,Houston,Texas,77021,1626,Unknown
+,for_sale,215000,3,2,0.12,995 Maple Ave,Calumet City,Illinois,60409,1304,2013-08-15
+57424,sold,935000,5,5,0.16,409 Wood Ct,Manteca,California,95337,3789,2022-02-18
+56084,sold,279900,2,2,0.16,"Elm Ave, 593",Madison,Wisconsin,53704,1699,-
+22611,sold,280000,4,2,0.19,952 King Rd,Monroeville,Unknown,15146,1874,2022-04-19
+108243,sold,499000,3,-1,0.18,197 Meadow Ct,Kennewick,Washington,99337,2289,03/30/22
+4630,for_sale,-1,4,3,0.13,906 Mill Blvd,Huntsville,Alabama,35801,2778,2020-03-09
+22792,sold,525000,3,2,0.59,977 Adams Blvd,Westford,Massachusetts,nan,2211,2021-11-19
+81031,sold,219000,3,two,0.31,73 Lake Ln,Chambersburg,Pennsylvania,17202,1189,2021-11-24
+22671,sold,90000,3,2,0.09,"Third Ct, 553",Saint Louis,Missouri,63115,1152,2022-03-24
+45913,s,250000,3,2,0.86,94 Washington Ave,Queensbury,New York,12804,1883,2021-11-23
+nan,for_sale,399500,3,3,0.27,411 Wilson Ave,-,Georgia,31405,1760,2002-06-03
+22562,for_sale,210000,3,2,0.15,272 Farm Blvd,Dearborn Heights,Michigan,48125,1960,2010-10-14
+109978,sold,760000,3,2,0.36,760 Madison Ln,Escondido,Unknown,92026,1888,2021-12-22
+-1,sold,28100,3,3,0.34,"Franklin Ave, 60",Bella Vista,Arkansas,72714,2035,2021-12-07
+81671,sold,325000,three,2,8.36,651 Vista Blvd,Plato,Missouri,65552,1784,2021-12-17
+109987,for_sale,2500,3,4,0.16,229 Broadway Ave,Corpus Christi,TX,78418,2416,2019-04-03
+28222,sold,2450000,4,4,0.19,687 Wilson Ave,Los Angeles,California,90064,2751,2022-02-22
+85655,sold,249900,3,1,0.22,159 Meadow Rd,Scituate,Rhode Island,2831,1310,2022-02-04
+78167,sold,350000,nan,2,0.15,324 Sunset St,Saint Louis Park,Minnesota,55426,1908,2022-04-01
+19415,for_sale,309000,3,2,3.0,820 View Ln,Ojibwa,Wisconsin,,2025,2020-02-04
+45936,for_sale,539900,3,2,0.21,293 Terrace Ct,Skaneateles,New York,13152,6.879878328741965e-05,2015-06-15
+33901,for_sale,225000,2,2,0.33,417 East Ct,Greenfield,Indiana,46140,1456,2017-07-26
+109987,for_sale,490000,3,4,0.16,,Corpus Christi,TX,78418,,2019-04-03
+78184,sold,nan,three,3,0.23,390 Madison Ct,North Port,Florida,34286,1708,2022-03-18
+79245,for_sale,599900,nan,7,0.42,254 Princess Ave,Bettendorf,Iowa,52722,3765,2016-11-21
+53177,for_sale,105000,3,2,0.24,434 Court Ct,Woodward,Oklahoma,73801,2036,2007-06-29
+81311,sold,575000,5,4,0.22,827 Elm Ct,Leland,NC,28451,3057,2022-04-22
+82978,for_sale,335000,3,2,0.18,71 Hill Ln,Temple,Texas,76502,2344,05/01/13
+22721,sold,799999,8,4,0.15,900 Baker Ln,Natick,Massachusetts,1760,3422,2022-04-05
+52946,-,150000,4,two,10.0,675 Circle Dr,Hulbert,Oklahoma,74441,1896,2018-04-19
+"""
+
+# Read CSV as strings
+df = pd.read_csv(io.StringIO(csv_text), dtype=str, keep_default_na=False)
+
+# Trim spaces
+df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+
+# Standard missing markers
+missing_markers = set(["", "nan", "NaN", "-", "Unknown"])
+df = df.replace(missing_markers, pd.NA)
+
+# Standardize status
+status_map = {"for_sale":"for_sale", "sold":"sold", "f":"for_sale", "s":"sold"}
+df["status"] = df["status"].map(lambda x: status_map.get(str(x), pd.NA) if pd.notna(x) else pd.NA)
+
+# Price: remove $, commas; to float; invalid/negatives to NaN; flag obvious rental (<10000)
+def clean_price(x):
+    if pd.isna(x): return pd.NA
+    s = str(x).replace("$","").replace(",","").strip()
+    if s == "": return pd.NA
+    try:
+        v = float(s)
+        if v <= 0: return pd.NA
+        if v < 10000: return pd.NA  # likely rental/invalid
+        return v
+    except:
+        return pd.NA
+df["price"] = df["price"].apply(clean_price)
+
+# Words to numbers for bed/bath
+word2num = {"zero":0, "one":1, "two":2, "three":3, "four":4, "five":5, "six":6,
+            "seven":7, "eight":8, "nine":9, "ten":10, "eleven":11, "twelve":12}
+def to_num(x):
+    if pd.isna(x): return pd.NA
+    s = str(x).strip().lower()
+    if s in word2num: return word2num[s]
+    try:
+        return int(float(s))
+    except:
+        return pd.NA
+df["bed"] = df["bed"].apply(to_num)
+df["bath"] = df["bath"].apply(to_num)
+
+# Clamp bath range; negatives to NaN; >8 set to NaN as outlier for single-residential
+df.loc[df["bath"].notna() & (df["bath"] < 0), "bath"] = pd.NA
+df.loc[df["bath"].notna() & (df["bath"] > 8), "bath"] = pd.NA
+
+# Acre lot
+def to_float_pos(x):
+    if pd.isna(x): return pd.NA
+    try:
+        v = float(x)
+        if v <= 0: return pd.NA
+        return v
+    except:
+        return pd.NA
+df["acre_lot"] = df["acre_lot"].apply(to_float_pos)
+
+# House size
+def clean_house_size(x):
+    if pd.isna(x): return pd.NA
+    try:
+        v = float(x)
+        if v <= 0: return pd.NA
+        if v < 300:  # unrealistic for single-family; treat as invalid
+            return pd.NA
+        return round(v)
+    except:
+        return pd.NA
+df["house_size"] = df["house_size"].apply(clean_house_size)
+
+# Brokered_by numeric, negatives to NaN
+def clean_broker(x):
+    if pd.isna(x): return pd.NA
+    try:
+        v = int(float(x))
+        if v < 0: return pd.NA
+        return v
+    except:
+        return pd.NA
+df["brokered_by"] = df["brokered_by"].apply(clean_broker).astype("Int64")
+
+# State to USPS 2-letter
+state_map = {
+    'alabama':'AL','alaska':'AK','arizona':'AZ','arkansas':'AR','california':'CA','colorado':'CO','connecticut':'CT',
+    'delaware':'DE','florida':'FL','georgia':'GA','hawaii':'HI','idaho':'ID','illinois':'IL','indiana':'IN','iowa':'IA',
+    'kansas':'KS','kentucky':'KY','louisiana':'LA','maine':'ME','maryland':'MD','massachusetts':'MA','michigan':'MI',
+    'minnesota':'MN','mississippi':'MS','missouri':'MO','montana':'MT','nebraska':'NE','nevada':'NV','new hampshire':'NH',
+    'new jersey':'NJ','new mexico':'NM','new york':'NY','north carolina':'NC','north dakota':'ND','ohio':'OH',
+    'oklahoma':'OK','oregon':'OR','pennsylvania':'PA','rhode island':'RI','south carolina':'SC','south dakota':'SD',
+    'tennessee':'TN','texas':'TX','utah':'UT','vermont':'VT','virginia':'VA','washington':'WA',
+    'west virginia':'WV','wisconsin':'WI','wyoming':'WY'
+}
+def clean_state(x):
+    if pd.isna(x): return pd.NA
+    s = str(x).strip()
+    if len(s) == 2:
+        return s.upper()
+    low = s.lower()
+    return state_map.get(low, pd.NA)
+df["state"] = df["state"].apply(clean_state)
+
+# City: nullify Unknown/- already handled
+df["city"] = df["city"].apply(lambda x: x.title() if pd.notna(x) else pd.NA)
+
+# ZIP: keep digits, pad length 4 to 5, else NaN if not 5 digits
+def clean_zip(z):
+    if pd.isna(z): return pd.NA
+    s = re.sub(r"\D","", str(z))
+    if s == "": return pd.NA
+    if len(s) == 4:
+        return "0"+s
+    if len(s) == 5:
+        return s
+    return pd.NA
+df["zip_code"] = df["zip_code"].apply(clean_zip)
+
+# prev_sold_date to ISO date
+def parse_date(d):
+    if pd.isna(d): return pd.NA
+    try:
+        dt = pd.to_datetime(d, errors="coerce", infer_datetime_format=True)
+        return dt.date().isoformat() if pd.notna(dt) else pd.NA
+    except:
+        return pd.NA
+df["prev_sold_date"] = df["prev_sold_date"].apply(parse_date)
+
+# Street normalization: convert "Street, 553" -> "553 Street"; title-case
+def norm_street(s):
+    if pd.isna(s): return pd.NA
+    t = s.strip()
+    m = re.match(r'^(.*?),\s*(\d+)$', t)
+    if m:
+        name, num = m.group(1), m.group(2)
+        t = f"{num} {name}"
+    t = re.sub(r'\s+', ' ', t).strip()
+    return t.title()
+df["street"] = df["street"].apply(norm_street)
+
+# Build normalized address key for dedup (upper, strip punctuation/spaces)
+def norm_addr_piece(x):
+    if pd.isna(x): return ""
+    s = re.sub(r'[^A-Za-z0-9]', '', x.upper())
+    return s
+
+addr_key = (
+    df["street"].apply(norm_addr_piece) + "|" +
+    df["city"].apply(norm_addr_piece) + "|" +
+    df["state"].apply(lambda x: "" if pd.isna(x) else x.upper()) + "|" +
+    df["zip_code"].apply(lambda x: "" if pd.isna(x) else x)
+)
+df["addr_key_full"] = addr_key
+
+# Secondary key without ZIP (to catch near-dups where ZIP missing)
+addr_key_nozip = (
+    df["street"].apply(norm_addr_piece) + "|" +
+    df["city"].apply(norm_addr_piece) + "|" +
+    df["state"].apply(lambda x: "" if pd.isna(x) else x.upper())
+)
+df["addr_key_nozip"] = addr_key_nozip
+
+# Imputations: bed and bath (global mode/median)
+bed_mode = df["bed"].mode(dropna=True)
+bed_mode = bed_mode.iloc[0] if len(bed_mode) else 3
+df["bed"] = df["bed"].fillna(bed_mode)
+
+bath_median = df["bath"].median(skipna=True)
+bath_median = int(bath_median) if pd.notna(bath_median) else 2
+df["bath"] = df["bath"].fillna(bath_median)
+
+# House size impute by (bed, bath), fallback bed, fallback overall
+def impute_by_group(col, groups):
+    s = df[col].copy()
+    # compute medians
+    med_overall = s.median(skipna=True)
+    grp = df.groupby(groups)[col].median()
+    for idx, row in df[df[col].isna()].iterrows():
+        key = tuple(row[g] for g in groups)
+        val = grp.get(key, pd.NA)
+        if pd.isna(val) and len(groups) > 1:
+            # fallback to just bed
+            val = df.groupby(["bed"])[col].median().get(row["bed"], pd.NA)
+        if pd.isna(val):
+            val = med_overall
+        s.at[idx] = val
+    return s
+
+df["house_size"] = impute_by_group("house_size", ["bed", "bath"])
+
+# Price impute by (city, state, bed) -> (state, bed) -> overall
+def impute_price():
+    s = df["price"].copy()
+    overall = s.median(skipna=True)
+    g1 = df.groupby(["city","state","bed"])["price"].median()
+    g2 = df.groupby(["state","bed"])["price"].median()
+    g3 = df.groupby(["bed"])["price"].median()
+    for idx, row in df[df["price"].isna()].iterrows():
+        key1 = (row["city"], row["state"], row["bed"])
+        key2 = (row["state"], row["bed"])
+        key3 = (row["bed"],)
+        val = g1.get(key1, pd.NA)
+        if pd.isna(val): val = g2.get(key2, pd.NA)
+        if pd.isna(val): val = g3.get(key3, pd.NA)
+        if pd.isna(val): val = overall
+        s.at[idx] = val
+    return s
+
+df["price"] = impute_price()
+
+# Drop exact duplicates
+before = len(df)
+df = df.drop_duplicates()
+after_exact = len(df)
+
+# Choose best record per address key:
+# Rank by: (1) has ZIP (2) date present (3) non-null count (4) latest prev_sold_date
+def nonnull_count(row):
+    return row.notna().sum()
+df["nonnulls"] = df.apply(nonnull_count, axis=1)
+df["has_zip"] = df["zip_code"].notna().astype(int)
+
+# Parse date for sorting
+tmp_date = pd.to_datetime(df["prev_sold_date"], errors="coerce")
+df["_date_ord"] = tmp_date
+
+# First pass: group by full address key
+df = (df.sort_values(["addr_key_full","has_zip","_date_ord","nonnulls"], ascending=[True, False, False, False])
+        .drop_duplicates(subset=["addr_key_full"], keep="first"))
+
+# Second pass: group by address without ZIP where full key is empty (missing city/state/street)
+df = (df.sort_values(["addr_key_nozip","has_zip","_date_ord","nonnulls"], ascending=[True, False, False, False])
+        .drop_duplicates(subset=["addr_key_nozip"], keep="first"))
+
+# Clean up helper columns
+df = df.drop(columns=["nonnulls","has_zip","_date_ord"])
+
+# Reorder columns and types
+col_order = ["brokered_by","status","price","bed","bath","acre_lot","street","city","state","zip_code","house_size","prev_sold_date"]
+df = df[col_order]
+
+# Output summary
+print("Rows in raw:", before)
+print("Rows after dropping exact duplicates:", after_exact)
+print("Rows after dedup addresses:", len(df))
+print("\nExample cleaned rows:")
+print(df.head(10).to_string(index=False))
+
+# Save cleaned CSV if desired
+# df.to_csv("cleaned_listings.csv", index=False)
+
+How to use/extend
+- You can adjust outlier rules (e.g., allow bath up to 12 for luxury homes) by modifying thresholds.
+- If you want to keep very small house_size values instead of nulling them, remove the (< 300) check.
+- If you want stricter/looser non-exact duplicate merging, tweak the normalized address key or add fuzzy matching for street names.
+
+If you want, I can run through the output with you and also return the cleaned dataset as CSV in the chat.

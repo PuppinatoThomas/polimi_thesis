@@ -1,0 +1,491 @@
+brokered_by,status,price,bed,bath,acre_lot,street,city,state,zip_code,house_size,prev_sold_date
+,sold,749000,4,2,0.00089,285 Center Ln,Fairfax,Virginia,22030,0.0001057449494949495,2021-12-10
+96817,sold,425000,4,3,0.06,33 Pine Ave,Alexandria,Virginia,22309,2075,2022-02-04
+53673,for_sale,112900,3,2,0.5,169 Meadow St,Mount Pleasant,Michigan,48858,230.0,2012-08-13
+10437,sold,350000,3,2,0.0066,70 Cedar Dr,Cumming,Georgia,30041,1681,
+19903,sold,849500,8,3,0.18,249 South Pl,Houston,Texas,77030,2150,2021-12-31
+20385,for_sale,599500,5,3,0.37,217 Church Ln,Calabash,North Carolina,28467,3058,2020-03-24
+22792,sold,525000,3,12,0.59,,,"Massachusetts",,2211,2021-11-19
+104873,for_sale,888000,4,4,0.21,210 Church Ln,Houston,Texas,77082,4156,2013-09-26
+104876,sold,398000,3,2,0.11,981 Harbor Ave,,Illinois,60659,4.200384527089073e-05,2021-11-30
+58970,sold,949900,3,4,0.23,828 Spring St,Kensington,Maryland,20895,2500,2021-12-30
+,sold,409900,,1,2.12,655 First St,Stockbridge,,1262,1015,2021-11-29
+78139,for_sale,425000,1,1,0.58,949 Franklin Blvd,Palisade,Colorado,81526,987,
+53138,sold,479000,3,3,0.22,47 Lincoln Rd,,Maryland,20720,2375,2022-01-04
+52946,for_sale,150000,4,2,10.0,675 Circle Dr,Hulbert,Oklahoma,74441,1896,2018-04-19
+687,sold,355000,3,2,0.19,272 Terrace Ln,Orlando,Florida,32828,1864,2021-12-08
+103967,for_sale,635000,3,3,0.23,885 Washington Ave,,New Jersey,,2000,2019-02-28
+109987,for_sale,490000,3,4,0.16,229 Broadway Ave,Corpus Christi,Texas,78418,2416,2019-04-03
+2765,unknown,585000,3,3,4.44,699 Wilson Dr,Crossville,Tennessee,,3352,2022-04-15
+78460,for_sale,278900,3,2,0.7,95 Meadow Ave,Somerset,Kentucky,42503,1923,2016-07-01
+53232,for_sale,330000,2,1,0.3,225 Broadway Ct,Kingston,,12401,12.0,2014-07-01
+22916,unknown,376000,4,3,0.28,73 Franklin Rd,Jacksonville,North Carolina,28546,3162,2022-04-25
+57424,for_sale,,3,2,0.15,277 Princess Dr,Livermore,California,94550,1785,2022-04-22
+,for_sale,115900,4,1,0.15,380 Valley Ln,Fairborn,Ohio,45324,1116,2020-08-03
+92736,for_sale,175000,3,2,0.26,862 King Blvd,Owasso,Oklahoma,74055,1144,2017-12-29
+68269,sold,389854,3,,0.15,144 Terrace Blvd,Caldwell,Idaho,83605,1574,2021-12-17
+32769,unknown,1300000,2,3,27.59,550 Second Pl,Julian,California,92036,986,2020-05-15
+84529,for_sale,1075000,3,11,,162 Mill St,Tustin,California,92782,1928,2011-11-14
+22217,sold,898000,3,2,0.21,52 North Blvd,Alhambra,California,91803,,2022-04-08
+65293,for_sale,11400,3,3,1.04,715 Terrace Dr,Sparks,Nevada,,1876,2004-09-10
+7689,sold,98500,4,1,9.0,272 Broadway Ln,Fairview,Michigan,,2064,2022-04-14
+78247,sold,339900,3,2,0.28,676 South Blvd,Troy,,62294,1613,2022-01-26
+105798,for_sale,155990,4,3,0.015,195 Spring Ave,Albany,Indiana,47320,2009,2020-06-19
+2177,sold,479900,3,2,,842 Cedar Dr,Windsor,Colorado,80550,2638,2022-03-18
+26012,sold,259900,8,2,0.13,391 Bridge Rd,Great Falls,Montana,59405,1632,2021-11-09
+96014,sold,370000,4,2,0.12,224 Lincoln St,Spokane,Washington,,2084,2022-04-05
+48807,for_sale,375000,3,3,0.2,88 East Ave,,Texas,78254,2346,2004-05-14
+55214,sold,509900,3,3,0.2,603 Princess St,San Jacinto,California,92583,2383,2022-05-03
+53556,for_sale,375000,5,3,,611 Hill Pl,Wichita,Kansas,67207,2696,2021-11-12
+84534,sold,689900,3,4,,920 Field Dr,Vienna,Virginia,22180,2075,2022-04-22
+,for_sale,550000,3,2,0.22,,Charlottesville,Virginia,22903,1512,2011-09-29
+84529,for_sale,1075000,3,12,0.06,162 Mill St,,California,92782,1928,2011-11-14
+26543,sold,600000,4,3,1.08,763 Adams Pl,,Florida,32934,3056,2022-01-21
+22671,sold,90000,3,2,0.09,553 Third Ct,Saint Louis,Missouri,,1152,2022-03-24
+78075,sold,280000,2,1,0.06,686 East Ln,Reno,Nevada,89506,851,2021-11-19
+,sold,292677,5,3,0.013,63 Field Dr,Sumter,South Carolina,29154,3040,2021-12-22
+,sold,419000,5,4,0.3,864 Lake Ln,Irving,Texas,75060,280.0,2021-12-09
+29538,for_sale,1150000,3,2,0.37,223 Lake St,Long Beach,California,90802,1409,2016-06-10
+109950,sold,225000,3,2,0.23,,Fort Worth,Texas,76133,1552,2022-01-19
+75016,sold,65400,2,2,0.22,,Kirkwood,Missouri,63122,85.0,2021-11-23
+53016,sold,239000,3,2,0.56,829 Main Blvd,Oak Ridge,Tennessee,37830,1724,2022-02-02
+48807,for_sale,375000,3,3,0.2,88 East Ave,San Antonio,Texas,78254,2346,2004-05-14
+21986,sold,269900,4,3,0.17,"Garden Ct, 614",Pooler,Georgia,31322,2368,2021-12-30
+102016,for_sale,374900,3,2,0.14,368 Shore Rd,Zephyrhills,Florida,33542,1694,2019-04-25
+,sold,189900,4,1,0.28,286 Bridge Ln,Saint Louis,Missouri,63114,1624,2022-01-18
+8,for_sale,517300,3,2,35.0,624 River Ln,Cheyenne,Wyoming,82007,3018,2022-10-31
+53173,sold,350000,3,2,0.9,693 Ridge Pl,Harpers Ferry,West Virginia,25425,3220,2021-12-10
+31355,unknown,2365000,5,5,0.19,592 Meadow Ave,Edina,Minnesota,55424,,2021-12-30
+16829,for_sale,1979000,6,6,0.29,400 Adams Ct,Port Washington,New York,11050,5828,2017-05-05
+101497,for_sale,129900,4,,0.0026,575 King Pl,Eastover,South Carolina,29044,2128,2021-09-20
+53556,for_sale,375000,5,3,0.3,611 Hill Pl,,Kansas,67207,2696,2021-11-12
+10649,sold,219900,3,2,0.2,430 Church Rd,Allison Park,Pennsylvania,15101,1188,2022-04-13
+5145,sold,750000,12,4,0.19,59 Park Blvd,Meridian,Idaho,83642,2796,
+53592,for_sale,619900,4,6,,779 Third Blvd,Mchenry,Illinois,60050,4145,2020-04-02
+107955,for_sale,2199000,3,3,0.3,20 First Dr,Hingham,Massachusetts,2043,3650,1992-10-22
+78200,sold,149000,3,2,0.15,688 Garfield Ct,Akron,Ohio,44314,1560,2022-02-09
+15757,for_sale,69900,3,1,0.17,520 View Rd,,Oklahoma,73701,1333,2016-06-09
+16829,sold,350000,4,2,0.18,219 Field St,Houston,Texas,77021,1626,2022-03-31
+86329,for_sale,699000,4,5,14.25,347 Oak Ln,Wetumpka,Alabama,,4758,2015-02-19
+22671,sold,90000,3,2,0.09,"Third Ct, 553",Saint Louis,Missouri,63115,1152,2022-03-24
+16829,sold,350000,4,2,0.18,219 Field St,Houston,Texas,77021,1626,
+,for_sale,215000,3,2,0.12,995 Maple Ave,Calumet City,Illinois,60409,1304,2013-08-15
+57424,sold,935000,5,5,0.16,409 Wood Ct,Manteca,California,95337,3789,2022-02-18
+56084,sold,279900,2,2,0.16,"Elm Ave, 593",Madison,Wisconsin,53704,1699,
+22611,sold,280000,4,2,0.19,952 King Rd,Monroeville,,15146,1874,2022-04-19
+108243,sold,499000,3,,0.18,197 Meadow Ct,Kennewick,Washington,99337,2289,2022-03-30
+4630,for_sale,,4,3,0.13,906 Mill Blvd,Huntsville,Alabama,35801,2778,2020-03-09
+22792,sold,525000,3,2,0.59,977 Adams Blvd,Westford,Massachusetts,,2211,2021-11-19
+81031,sold,219000,3,2,0.31,73 Lake Ln,Chambersburg,Pennsylvania,17202,1189,2021-11-24
+22671,sold,90000,3,2,0.09,"Third Ct, 553",Saint Louis,Missouri,63115,1152,2022-03-24
+45913,sold,250000,3,2,0.86,94 Washington Ave,Queensbury,New York,12804,1883,2021-11-23
+,for_sale,399500,3,3,0.27,411 Wilson Ave,,Georgia,31405,1760,2002-06-03
+22562,for_sale,210000,3,2,0.15,272 Farm Blvd,Dearborn Heights,Michigan,48125,1960,2010-10-14
+109978,sold,760000,3,2,0.36,760 Madison Ln,Escondido,,92026,1888,2021-12-22
+,sold,28100,3,3,0.34,"Franklin Ave, 60",Bella Vista,Arkansas,72714,2035,2021-12-07
+81671,sold,325000,3,2,8.36,651 Vista Blvd,Plato,Missouri,65552,1784,2021-12-17
+109987,for_sale,2500,3,4,0.16,229 Broadway Ave,Corpus Christi,Texas,78418,2416,2019-04-03
+28222,sold,2450000,4,4,0.19,687 Wilson Ave,Los Angeles,California,90064,2751,2022-02-22
+85655,sold,249900,3,1,0.22,159 Meadow Rd,Scituate,Rhode Island,2831,1310,2022-02-04
+78167,sold,350000,,2,0.15,324 Sunset St,Saint Louis Park,Minnesota,55426,1908,2022-04-01
+19415,for_sale,309000,3,2,3.0,820 View Ln,Ojibwa,Wisconsin,,2025,2020-02-04
+45936,for_sale,539900,3,2,0.21,293 Terrace Ct,Skaneateles,New York,13152,6.879878328741965e-05,2015-06-15
+33901,for_sale,225000,2,2,0.33,417 East Ct,Greenfield,Indiana,46140,1456,2017-07-26
+109987,for_sale,490000,3,4,0.16,,Corpus Christi,Texas,78418,,2019-04-03
+78184,sold,,3,3,0.23,390 Madison Ct,North Port,Florida,34286,1708,2022-03-18
+79245,for_sale,599900,,7,0.42,254 Princess Ave,Bettendorf,Iowa,52722,3765,2016-11-21
+53177,for_sale,105000,3,2,0.24,434 Court Ct,Woodward,Oklahoma,73801,2036,2007-06-29
+81311,sold,575000,5,4,0.22,827 Elm Ct,Leland,North Carolina,28451,3057,2022-04-22
+82978,for_sale,335000,3,2,0.18,71 Hill Ln,Temple,Texas,76502,2344,2013-05-01
+22721,sold,799999,8,4,0.15,900 Baker Ln,Natick,Massachusetts,1760,3422,2022-04-05
+52946,unknown,150000,4,2,10.0,675 Circle Dr,Hulbert,Oklahoma,74441,1896,2018-04-19
+Consider this dataset:
+user_id, year, height(cm), gender
+U431, 1987, 190, f
+U855, 1945, 173, f
+U732, 1062, 186, f
+U362, 1984, 130, m
+U825, 1999, 167, f
+U894, 2012, 174, m
+U143, 2412, 181, f
+U087, 1970, 244, f
+U253, 1501, 87, m
+U845, 1993, 159, m
+After performing outlier detection, the following outliers are detected:
+For year, with IQR method: 1062, 2412, 1501; with MAD method: 1062, 2412, 1501;
+For height(cm), with IQR method: 130, 244, 87; With MAD method: 244, 87.
+
+Consider this dataset:
+patient,age,blood_pressureB998, 25, 112
+A221, 30, 115
+V761, 35, 118
+C091, 40, 122
+F009, 45, 180
+J081, 50, 129
+Q112, 55, 132
+R543, 60, 136
+T948, 65, 210
+L827, 70, 95
+After performing outlier detection, the following outliers are detected:
+For blood_pressure, with linear regression and MAD methods: 180, 210, 95; with IQR method: 180, 210.
+
+Consider now the Master dataset after data standardization: perform only outlier detection on it.
+Outlier detection on Master (standardized). Numeric columns assessed: price, bed, bath, acre_lot, house_size. Methods: IQR and MAD. For price, we also checked price vs. house_size (simple linear fit) for leverage/residual outliers.
+
+price
+- IQR: 2500, 11400, 28100, 65400, 98500, 1979000, 2199000, 2365000, 2450000
+- MAD: 2500, 11400, 28100, 65400, 98500, 1979000, 2199000, 2365000, 2450000
+- Linear regression vs. house_size (extreme residuals): 2500, 11400, 28100, 65400, 98500, 2450000, 2365000, 2199000, 1979000
+
+bed
+- IQR: 1, 6, 7, 8, 12
+- MAD: 1, 6, 7, 8, 12
+
+bath
+- IQR: 5, 6, 11, 12
+- MAD: 5, 6, 11, 12
+
+acre_lot
+- IQR (low outliers): 0.00089, 0.0026, 0.0066, 0.013, 0.015
+- IQR (high outliers): 1.04, 1.08, 2.12, 3.0, 4.44, 8.36, 9.0, 10.0, 14.25, 27.59, 35.0
+- MAD: agrees with IQR on the same low and high extremes above
+
+house_size
+- IQR (low outliers): 0.00006879878328741965, 0.00004200384527089073, 12.0, 85.0, 230.0, 280.0
+- IQR (high outliers): 3056, 3057, 3058, 3220, 3352, 3422, 3650, 3789, 4145, 4156, 4758, 5828
+- MAD: agrees with IQR on the same low and high extremes above
+
+Notes
+- Identifiers (brokered_by), zip_code, and dates were not treated as numeric for outlier screening.
+- Repeated values indicate multiple records share the same extreme value.
+Consider this dataset:
+name, age, gender, occupation, city, weight(kg), height(cm), BMI
+, 28, Male,, New York, 75, 180, 23.15
+Jane Smith, 34, Female, Doctor, Los Angeles, 62, 99999, 22.77
+missing, Johnson, 45, null, -, Chicago, 85, 175, -1
+Emily Davis, -1, Female, Student,,nan, 160, 21.09
+David Wilson, 0, Male, Artist,San Francisco, 78, 178, 24.61
+The missing values are: '', 99999, missing, null, -, -1, 0,After imputation (using median for age, mode for gender, deterministic relationships for weight(kg), height(cm), BMI, placeholder for the rest), the dataset becomes:
+name, age, gender, occupation, city, weight(kg), height(cm), BMI
+Unknown, 28, Male, Not specified, New York, 75, 180, 23.15
+Jane Smith, 34, Female, Doctor, Los Angeles, 62, 165, 22.77
+Unknown, 45, Male, Teacher, Chicago, 85, 175, 27.76
+Emily Davis, 34, Female, Student, Not specified, 54, 160, 21.09
+David Wilson, 34, Male, Artist, San Francisco, 78, 178, 24.61
+
+Consider this dataset:
+species,average_length(cm),average_weight(g),habitat,diet
+Neon Tetra, 4, 0.5, Flakes
+Betta splendens, 6, 2, Insects
+Angelfish, 15,, Omnivore
+null, 5, 0.6, Algae
+Ghost Shrimp, 4, 0.3, missing
+Goldfish, 25, 300, Insects
+Corydoras panda, 5, 3, Detritus
+Discus, 20, 200, Protein
+Gourami, -, 5, Omnivore
+Pleco, 30, 500, Algae
+The missing values are: '', missing, null, -
+After imputation (using random forest regressor for average_length(cm) and average_weight(g), mode for diet, placeholder for species), the dataset becomes:
+species,average_length(cm),average_weight(g),habitat,diet
+Neon Tetra, 4, 0.5, Flakes
+Betta splendens, 6, 2, Insects
+Angelfish, 15, 80, Omnivore
+Unknown, 5, 0.6, Algae
+Ghost Shrimp, 4, 0.3, Algae
+Goldfish, 25, 300, Insects
+Corydoras panda, 5, 3, Detritus
+Discus, 20, 200, Protein
+Gourami, 9.91, 5, Omnivore
+Pleco, 30, 500, Algae
+
+Consider the Master dataset after data standardization and outlier detection: perform data imputation on it.
+Imputation rules applied
+- Numeric imputations (global medians): price=375000, bed=3, bath=2, acre_lot=0.2, house_size=2000.
+- Corrections:
+  - acre_lot: if missing, negative, or <0.01, set to 0.2.
+  - house_size: if missing or <300, set to 2000.
+- Categorical placeholders: if missing -> brokered_by=Unknown, street=Unknown, city=Unknown, state=Unknown, zip_code=00000, prev_sold_date=Unknown.
+- Outliers: kept as-is unless covered by the above corrections.
+
+brokered_by,status,price,bed,bath,acre_lot,street,city,state,zip_code,house_size,prev_sold_date
+Unknown,sold,749000,4,2,0.2,285 Center Ln,Fairfax,Virginia,22030,2000,2021-12-10
+96817,sold,425000,4,3,0.06,33 Pine Ave,Alexandria,Virginia,22309,2075,2022-02-04
+53673,for_sale,112900,3,2,0.5,169 Meadow St,Mount Pleasant,Michigan,48858,2000,2012-08-13
+10437,sold,350000,3,2,0.2,70 Cedar Dr,Cumming,Georgia,30041,1681,Unknown
+19903,sold,849500,8,3,0.18,249 South Pl,Houston,Texas,77030,2150,2021-12-31
+20385,for_sale,599500,5,3,0.37,217 Church Ln,Calabash,North Carolina,28467,3058,2020-03-24
+22792,sold,525000,3,12,0.59,Unknown,Unknown,Massachusetts,00000,2211,2021-11-19
+104873,for_sale,888000,4,4,0.21,210 Church Ln,Houston,Texas,77082,4156,2013-09-26
+104876,sold,398000,3,2,0.11,981 Harbor Ave,Unknown,Illinois,60659,2000,2021-11-30
+58970,sold,949900,3,4,0.23,828 Spring St,Kensington,Maryland,20895,2500,2021-12-30
+Unknown,sold,409900,3,1,2.12,655 First St,Stockbridge,Unknown,1262,1015,2021-11-29
+78139,for_sale,425000,1,1,0.58,949 Franklin Blvd,Palisade,Colorado,81526,987,Unknown
+53138,sold,479000,3,3,0.22,47 Lincoln Rd,Unknown,Maryland,20720,2375,2022-01-04
+52946,for_sale,150000,4,2,10.0,675 Circle Dr,Hulbert,Oklahoma,74441,1896,2018-04-19
+687,sold,355000,3,2,0.19,272 Terrace Ln,Orlando,Florida,32828,1864,2021-12-08
+103967,for_sale,635000,3,3,0.23,885 Washington Ave,Unknown,New Jersey,00000,2000,2019-02-28
+109987,for_sale,490000,3,4,0.16,229 Broadway Ave,Corpus Christi,Texas,78418,2416,2019-04-03
+2765,unknown,585000,3,3,4.44,699 Wilson Dr,Crossville,Tennessee,00000,3352,2022-04-15
+78460,for_sale,278900,3,2,0.7,95 Meadow Ave,Somerset,Kentucky,42503,1923,2016-07-01
+53232,for_sale,330000,2,1,0.3,225 Broadway Ct,Kingston,Unknown,12401,2000,2014-07-01
+22916,unknown,376000,4,3,0.28,73 Franklin Rd,Jacksonville,North Carolina,28546,3162,2022-04-25
+57424,for_sale,375000,3,2,0.15,277 Princess Dr,Livermore,California,94550,1785,2022-04-22
+Unknown,for_sale,115900,4,1,0.15,380 Valley Ln,Fairborn,Ohio,45324,1116,2020-08-03
+92736,for_sale,175000,3,2,0.26,862 King Blvd,Owasso,Oklahoma,74055,1144,2017-12-29
+68269,sold,389854,3,2,0.15,144 Terrace Blvd,Caldwell,Idaho,83605,1574,2021-12-17
+32769,unknown,1300000,2,3,27.59,550 Second Pl,Julian,California,92036,986,2020-05-15
+84529,for_sale,1075000,3,11,0.2,162 Mill St,Tustin,California,92782,1928,2011-11-14
+22217,sold,898000,3,2,0.21,52 North Blvd,Alhambra,California,91803,2000,2022-04-08
+65293,for_sale,11400,3,3,1.04,715 Terrace Dr,Sparks,Nevada,00000,1876,2004-09-10
+7689,sold,98500,4,1,9.0,272 Broadway Ln,Fairview,Michigan,00000,2000,2022-04-14
+78247,sold,339900,3,2,0.28,676 South Blvd,Troy,Unknown,62294,1613,2022-01-26
+105798,for_sale,155990,4,3,0.015,195 Spring Ave,Albany,Indiana,47320,2009,2020-06-19
+2177,sold,479900,3,2,0.2,842 Cedar Dr,Windsor,Colorado,80550,2638,2022-03-18
+26012,sold,259900,8,2,0.13,391 Bridge Rd,Great Falls,Montana,59405,1632,2021-11-09
+96014,sold,370000,4,2,0.12,224 Lincoln St,Spokane,Washington,00000,2084,2022-04-05
+48807,for_sale,375000,3,3,0.2,88 East Ave,Unknown,Texas,78254,2346,2004-05-14
+55214,sold,509900,3,3,0.2,603 Princess St,San Jacinto,California,92583,2383,2022-05-03
+53556,for_sale,375000,5,3,0.2,611 Hill Pl,Wichita,Kansas,67207,2696,2021-11-12
+84534,sold,689900,3,4,0.2,920 Field Dr,Vienna,Virginia,22180,2075,2022-04-22
+Unknown,for_sale,550000,3,2,0.22,Unknown,Charlottesville,Virginia,22903,1512,2011-09-29
+84529,for_sale,1075000,3,12,0.06,162 Mill St,Unknown,California,92782,1928,2011-11-14
+26543,sold,600000,4,3,1.08,763 Adams Pl,Unknown,Florida,32934,3056,2022-01-21
+22671,sold,90000,3,2,0.09,553 Third Ct,Saint Louis,Missouri,00000,1152,2022-03-24
+78075,sold,280000,2,1,0.06,686 East Ln,Reno,Nevada,89506,851,2021-11-19
+Unknown,sold,292677,5,3,0.013,63 Field Dr,Sumter,South Carolina,29154,3040,2021-12-22
+Unknown,sold,419000,5,4,0.3,864 Lake Ln,Irving,Texas,75060,2000,2021-12-09
+29538,for_sale,1150000,3,2,0.37,223 Lake St,Long Beach,California,90802,1409,2016-06-10
+109950,sold,225000,3,2,0.23,Unknown,Fort Worth,Texas,76133,1552,2022-01-19
+75016,sold,65400,2,2,0.22,Unknown,Kirkwood,Missouri,63122,2000,2021-11-23
+53016,sold,239000,3,2,0.56,829 Main Blvd,Oak Ridge,Tennessee,37830,1724,2022-02-02
+48807,for_sale,375000,3,3,0.2,88 East Ave,San Antonio,Texas,78254,2346,2004-05-14
+21986,sold,269900,4,3,0.17,"Garden Ct, 614",Pooler,Georgia,31322,2368,2021-12-30
+102016,for_sale,374900,3,2,0.14,368 Shore Rd,Zephyrhills,Florida,33542,1694,2019-04-25
+Unknown,sold,189900,4,1,0.28,286 Bridge Ln,Saint Louis,Missouri,63114,1624,2022-01-18
+8,for_sale,517300,3,2,35.0,624 River Ln,Cheyenne,Wyoming,82007,3018,2022-10-31
+53173,sold,350000,3,2,0.9,693 Ridge Pl,Harpers Ferry,West Virginia,25425,3220,2021-12-10
+31355,unknown,2365000,5,5,0.19,592 Meadow Ave,Edina,Minnesota,55424,2000,2021-12-30
+16829,for_sale,1979000,6,6,0.29,400 Adams Ct,Port Washington,New York,11050,5828,2017-05-05
+101497,for_sale,129900,4,2,0.2,575 King Pl,Eastover,South Carolina,29044,2128,2021-09-20
+53556,for_sale,375000,5,3,0.3,611 Hill Pl,Unknown,Kansas,67207,2696,2021-11-12
+10649,sold,219900,3,2,0.2,430 Church Rd,Allison Park,Pennsylvania,15101,1188,2022-04-13
+5145,sold,750000,12,4,0.19,59 Park Blvd,Meridian,Idaho,83642,2796,Unknown
+53592,for_sale,619900,4,6,0.2,779 Third Blvd,Mchenry,Illinois,60050,4145,2020-04-02
+107955,for_sale,2199000,3,3,0.3,20 First Dr,Hingham,Massachusetts,2043,3650,1992-10-22
+78200,sold,149000,3,2,0.15,688 Garfield Ct,Akron,Ohio,44314,1560,2022-02-09
+15757,for_sale,69900,3,1,0.17,520 View Rd,Unknown,Oklahoma,73701,1333,2016-06-09
+16829,sold,350000,4,2,0.18,219 Field St,Houston,Texas,77021,1626,2022-03-31
+86329,for_sale,699000,4,5,14.25,347 Oak Ln,Wetumpka,Alabama,00000,4758,2015-02-19
+22671,sold,90000,3,2,0.09,"Third Ct, 553",Saint Louis,Missouri,63115,1152,2022-03-24
+16829,sold,350000,4,2,0.18,219 Field St,Houston,Texas,77021,1626,Unknown
+Unknown,for_sale,215000,3,2,0.12,995 Maple Ave,Calumet City,Illinois,60409,1304,2013-08-15
+57424,sold,935000,5,5,0.16,409 Wood Ct,Manteca,California,95337,3789,2022-02-18
+56084,sold,279900,2,2,0.16,"Elm Ave, 593",Madison,Wisconsin,53704,1699,Unknown
+22611,sold,280000,4,2,0.19,952 King Rd,Monroeville,Unknown,15146,1874,2022-04-19
+108243,sold,499000,3,2,0.18,197 Meadow Ct,Kennewick,Washington,99337,2289,2022-03-30
+4630,for_sale,375000,4,3,0.13,906 Mill Blvd,Huntsville,Alabama,35801,2778,2020-03-09
+22792,sold,525000,3,2,0.59,977 Adams Blvd,Westford,Massachusetts,00000,2211,2021-11-19
+81031,sold,219000,3,2,0.31,73 Lake Ln,Chambersburg,Pennsylvania,17202,1189,2021-11-24
+22671,sold,90000,3,2,0.09,"Third Ct, 553",Saint Louis,Missouri,63115,1152,2022-03-24
+45913,sold,250000,3,2,0.86,94 Washington Ave,Queensbury,New York,12804,1883,2021-11-23
+Unknown,for_sale,399500,3,3,0.27,411 Wilson Ave,Unknown,Georgia,31405,1760,2002-06-03
+22562,for_sale,210000,3,2,0.15,272 Farm Blvd,Dearborn Heights,Michigan,48125,1960,2010-10-14
+109978,sold,760000,3,2,0.36,760 Madison Ln,Escondido,Unknown,92026,1888,2021-12-22
+Unknown,sold,28100,3,3,0.34,"Franklin Ave, 60",Bella Vista,Arkansas,72714,2035,2021-12-07
+81671,sold,325000,3,2,8.36,651 Vista Blvd,Plato,Missouri,65552,1784,2021-12-17
+109987,for_sale,2500,3,4,0.16,229 Broadway Ave,Corpus Christi,Texas,78418,2416,2019-04-03
+28222,sold,2450000,4,4,0.19,687 Wilson Ave,Los Angeles,California,90064,2751,2022-02-22
+85655,sold,249900,3,1,0.22,159 Meadow Rd,Scituate,Rhode Island,2831,1310,2022-02-04
+78167,sold,350000,3,2,0.15,324 Sunset St,Saint Louis Park,Minnesota,55426,1908,2022-04-01
+19415,for_sale,309000,3,2,3.0,820 View Ln,Ojibwa,Wisconsin,00000,2025,2020-02-04
+45936,for_sale,539900,3,2,0.21,293 Terrace Ct,Skaneateles,New York,13152,2000,2015-06-15
+33901,for_sale,225000,2,2,0.33,417 East Ct,Greenfield,Indiana,46140,1456,2017-07-26
+109987,for_sale,490000,3,4,0.16,Unknown,Corpus Christi,Texas,78418,2000,2019-04-03
+78184,sold,375000,3,3,0.23,390 Madison Ct,North Port,Florida,34286,1708,2022-03-18
+79245,for_sale,599900,3,7,0.42,254 Princess Ave,Bettendorf,Iowa,52722,3765,2016-11-21
+53177,for_sale,105000,3,2,0.24,434 Court Ct,Woodward,Oklahoma,73801,2036,2007-06-29
+81311,sold,575000,5,4,0.22,827 Elm Ct,Leland,North Carolina,28451,3057,2022-04-22
+82978,for_sale,335000,3,2,0.18,71 Hill Ln,Temple,Texas,76502,2344,2013-05-01
+22721,sold,799999,8,4,0.15,900 Baker Ln,Natick,Massachusetts,1760,3422,2022-04-05
+52946,unknown,150000,4,2,10.0,675 Circle Dr,Hulbert,Oklahoma,74441,1896,2018-04-19
+
+Notes
+- Imputed values are based on simple global medians and placeholders, chosen to be conservative and transparent.
+- Extreme but plausible values (e.g., large acre_lot, very high prices, many beds/baths) were not altered. Only clearly erroneous magnitudes (tiny lot size <0.01, tiny house_size <300) and missing values were imputed.
+Consider this dataset:
+title, author, genre, pages, year
+The Catcher in the Rye, J.D. Salinger, Classic, 277, 1951
+1984 ,George Orwell, Dystopian, 328, 1949
+To Kill a Mockingbird, Harper Lee, Classic, 281, 1960
+Brave New World, Aldous Huxley, Dystopian, 268,1932
+The Hobbit, J.R.R. Tolkien, Fantasy, 310, 1937
+The Catcher in the Rye, J.D. Salinger, Classic, 277, 1951
+The Catcher in the Rye, J.D. Salingher, Classic, 278, 1951
+Pride and Prejudice, Jane Austen, Romance, 279, 1813
+Fahrenheit 451, Ray Bradbury, Dystopian, 194, 1953
+The Great Gatsby, F. Scott Fitzgerald, Classic, 180, 1925
+The exact duplicates are lines 1 and 6. Using a record linkage approach, the non-exact duplicates are lines 1 and 7 and lines 6 and 7.
+Consider this dataset:
+course, track, semester, #students
+Mathematical Analysis I, Mathematical Engineering, 1, 300
+Mathematical Analysis I, Computer Science, 2, 200
+Mathematical Analysis II, Mathematical Engineering, 1, 200
+Mathematical Analysis II, Mathematical Engineering, 1, 500
+Data and Information Quality, Computer Science, 1, 150
+There are no exact duplicates. The non_exact duplicate are lines 3 and 4.
+Consider the Master dataset after data standardization, outlier detection and data imputation: perform data deduplication on it. 
+Data deduplication on Master (after standardization, outlier detection, imputation)
+
+How duplicates were identified
+- Exact duplicates: identical rows across all columns.
+- Non-exact (record linkage): same property detected by a normalized address key = normalized(street) + city + state + zip_code, where:
+  - Address normalization trims, lowercases, removes punctuation, and resolves “number, street” vs “street, number” ordering (e.g., “Third Ct, 553” -> “553 Third Ct”).
+  - “Unknown”/empty/00000 treated as missing and down-weighted.
+  - Supporting signals: same brokered_by, same/similar price, similar bed/bath, similar house_size.
+
+Exact duplicates (remove duplicates; keep one)
+- 22671, sold, 90000, 3 bed, 2 bath, 0.09 acre, “Third Ct, 553”, Saint Louis, MO 63115, 1152 sqft, 2022-03-24
+  - Appears twice identically (two exact copies).
+
+Non-exact duplicate clusters (keep the canonical record listed; remove others in the cluster)
+
+1) 22671 — 553 Third Ct, Saint Louis, MO 63115
+- Records:
+  - 22671, sold, 90000, 3/2, 0.09, “Third Ct, 553”, Saint Louis, MO 63115, 1152, 2022-03-24
+  - 22671, sold, 90000, 3/2, 0.09, 553 Third Ct, Saint Louis, MO 00000, 1152, 2022-03-24
+- Canonical to keep:
+  - 22671,sold,90000,3,2,0.09,553 Third Ct,Saint Louis,Missouri,63115,1152,2022-03-24
+
+2) 109987 — 229 Broadway Ave, Corpus Christi, TX 78418
+- Records:
+  - 109987, for_sale, 490000, 3/4, 0.16, 229 Broadway Ave, Corpus Christi, TX 78418, 2416, 2019-04-03
+  - 109987, for_sale, 490000, 3/4, 0.16, Unknown, Corpus Christi, TX 78418, 2000, 2019-04-03
+  - 109987, for_sale, 2500,    3/4, 0.16, 229 Broadway Ave, Corpus Christi, TX 78418, 2416, 2019-04-03
+- Canonical to keep:
+  - 109987,for_sale,490000,3,4,0.16,229 Broadway Ave,Corpus Christi,Texas,78418,2416,2019-04-03
+
+3) 84529 — 162 Mill St, Tustin, CA 92782
+- Records:
+  - 84529, for_sale, 1075000, 3/11, 0.20, 162 Mill St, Tustin, CA 92782, 1928, 2011-11-14
+  - 84529, for_sale, 1075000, 3/12, 0.06, 162 Mill St, Unknown, CA 92782, 1928, 2011-11-14
+- Canonical to keep (more complete address):
+  - 84529,for_sale,1075000,3,11,0.20,162 Mill St,Tustin,California,92782,1928,2011-11-14
+  - Note: conflicting bath (11 vs 12) and lot (0.20 vs 0.06); retained the record with complete city.
+
+4) 48807 — 88 East Ave, San Antonio, TX 78254
+- Records:
+  - 48807, for_sale, 375000, 3/3, 0.20, 88 East Ave, Unknown, TX 78254, 2346, 2004-05-14
+  - 48807, for_sale, 375000, 3/3, 0.20, 88 East Ave, San Antonio, TX 78254, 2346, 2004-05-14
+- Canonical to keep:
+  - 48807,for_sale,375000,3,3,0.20,88 East Ave,San Antonio,Texas,78254,2346,2004-05-14
+
+5) 22792 — 977 Adams Blvd, Westford, MA
+- Records:
+  - 22792, sold, 525000, 3/12, 0.59, Unknown, Unknown, MA 00000, 2211, 2021-11-19
+  - 22792, sold, 525000, 3/2,  0.59, 977 Adams Blvd, Westford, MA 00000, 2211, 2021-11-19
+- Canonical to keep (complete address):
+  - 22792,sold,525000,3,2,0.59,977 Adams Blvd,Westford,Massachusetts,00000,2211,2021-11-19
+
+6) 16829 — 219 Field St, Houston, TX 77021
+- Records:
+  - 16829, sold, 350000, 4/2, 0.18, 219 Field St, Houston, TX 77021, 1626, 2022-03-31
+  - 16829, sold, 350000, 4/2, 0.18, 219 Field St, Houston, TX 77021, 1626, Unknown
+- Canonical to keep (has date):
+  - 16829,sold,350000,4,2,0.18,219 Field St,Houston,Texas,77021,1626,2022-03-31
+
+7) 53556 — 611 Hill Pl, Wichita, KS 67207
+- Records:
+  - 53556, for_sale, 375000, 5/3, 0.20, 611 Hill Pl, Wichita, KS 67207, 2696, 2021-11-12
+  - 53556, for_sale, 375000, 5/3, 0.30, 611 Hill Pl, Unknown, KS 67207, 2696, 2021-11-12
+- Canonical to keep (complete city):
+  - 53556,for_sale,375000,5,3,0.20,611 Hill Pl,Wichita,Kansas,67207,2696,2021-11-12
+
+8) 52946 — 675 Circle Dr, Hulbert, OK 74441
+- Records:
+  - 52946, for_sale, 150000, 4/2, 10.0, 675 Circle Dr, Hulbert, OK 74441, 1896, 2018-04-19
+  - 52946, unknown,  150000, 4/2, 10.0, 675 Circle Dr, Hulbert, OK 74441, 1896, 2018-04-19
+- Canonical to keep (explicit status):
+  - 52946,for_sale,150000,4,2,10.0,675 Circle Dr,Hulbert,Oklahoma,74441,1896,2018-04-19
+
+Outcome
+- Exact-duplicate pairs removed: 1 pair (22671 “Third Ct, 553”).
+- Non-exact duplicate clusters resolved: 7 clusters (22671, 109987, 84529, 48807, 22792, 16829, 53556, 52946).
+- All remaining records are unique under the normalized address key.
+Data deduplication on Master (after standardization, outlier detection, imputation)
+
+How duplicates were identified
+- Exact duplicates: identical rows across all columns.
+- Non-exact (record linkage): same property detected by a normalized address key = normalized(street) + city + state + zip_code, where:
+  - Address normalization trims, lowercases, removes punctuation, and resolves “number, street” vs “street, number” ordering (e.g., “Third Ct, 553” -> “553 Third Ct”).
+  - “Unknown”/empty/00000 treated as missing and down-weighted.
+  - Supporting signals: same brokered_by, same/similar price, similar bed/bath, similar house_size.
+
+Exact duplicates (remove duplicates; keep one)
+- 22671, sold, 90000, 3 bed, 2 bath, 0.09 acre, “Third Ct, 553”, Saint Louis, MO 63115, 1152 sqft, 2022-03-24
+  - Appears twice identically (two exact copies).
+
+Non-exact duplicate clusters (keep the canonical record listed; remove others in the cluster)
+
+1) 22671 — 553 Third Ct, Saint Louis, MO 63115
+- Records:
+  - 22671, sold, 90000, 3/2, 0.09, “Third Ct, 553”, Saint Louis, MO 63115, 1152, 2022-03-24
+  - 22671, sold, 90000, 3/2, 0.09, 553 Third Ct, Saint Louis, MO 00000, 1152, 2022-03-24
+- Canonical to keep:
+  - 22671,sold,90000,3,2,0.09,553 Third Ct,Saint Louis,Missouri,63115,1152,2022-03-24
+
+2) 109987 — 229 Broadway Ave, Corpus Christi, TX 78418
+- Records:
+  - 109987, for_sale, 490000, 3/4, 0.16, 229 Broadway Ave, Corpus Christi, TX 78418, 2416, 2019-04-03
+  - 109987, for_sale, 490000, 3/4, 0.16, Unknown, Corpus Christi, TX 78418, 2000, 2019-04-03
+  - 109987, for_sale, 2500,    3/4, 0.16, 229 Broadway Ave, Corpus Christi, TX 78418, 2416, 2019-04-03
+- Canonical to keep:
+  - 109987,for_sale,490000,3,4,0.16,229 Broadway Ave,Corpus Christi,Texas,78418,2416,2019-04-03
+
+3) 84529 — 162 Mill St, Tustin, CA 92782
+- Records:
+  - 84529, for_sale, 1075000, 3/11, 0.20, 162 Mill St, Tustin, CA 92782, 1928, 2011-11-14
+  - 84529, for_sale, 1075000, 3/12, 0.06, 162 Mill St, Unknown, CA 92782, 1928, 2011-11-14
+- Canonical to keep (more complete address):
+  - 84529,for_sale,1075000,3,11,0.20,162 Mill St,Tustin,California,92782,1928,2011-11-14
+  - Note: conflicting bath (11 vs 12) and lot (0.20 vs 0.06); retained the record with complete city.
+
+4) 48807 — 88 East Ave, San Antonio, TX 78254
+- Records:
+  - 48807, for_sale, 375000, 3/3, 0.20, 88 East Ave, Unknown, TX 78254, 2346, 2004-05-14
+  - 48807, for_sale, 375000, 3/3, 0.20, 88 East Ave, San Antonio, TX 78254, 2346, 2004-05-14
+- Canonical to keep:
+  - 48807,for_sale,375000,3,3,0.20,88 East Ave,San Antonio,Texas,78254,2346,2004-05-14
+
+5) 22792 — 977 Adams Blvd, Westford, MA
+- Records:
+  - 22792, sold, 525000, 3/12, 0.59, Unknown, Unknown, MA 00000, 2211, 2021-11-19
+  - 22792, sold, 525000, 3/2,  0.59, 977 Adams Blvd, Westford, MA 00000, 2211, 2021-11-19
+- Canonical to keep (complete address):
+  - 22792,sold,525000,3,2,0.59,977 Adams Blvd,Westford,Massachusetts,00000,2211,2021-11-19
+
+6) 16829 — 219 Field St, Houston, TX 77021
+- Records:
+  - 16829, sold, 350000, 4/2, 0.18, 219 Field St, Houston, TX 77021, 1626, 2022-03-31
+  - 16829, sold, 350000, 4/2, 0.18, 219 Field St, Houston, TX 77021, 1626, Unknown
+- Canonical to keep (has date):
+  - 16829,sold,350000,4,2,0.18,219 Field St,Houston,Texas,77021,1626,2022-03-31
+
+7) 53556 — 611 Hill Pl, Wichita, KS 67207
+- Records:
+  - 53556, for_sale, 375000, 5/3, 0.20, 611 Hill Pl, Wichita, KS 67207, 2696, 2021-11-12
+  - 53556, for_sale, 375000, 5/3, 0.30, 611 Hill Pl, Unknown, KS 67207, 2696, 2021-11-12
+- Canonical to keep (complete city):
+  - 53556,for_sale,375000,5,3,0.20,611 Hill Pl,Wichita,Kansas,67207,2696,2021-11-12
+
+8) 52946 — 675 Circle Dr, Hulbert, OK 74441
+- Records:
+  - 52946, for_sale, 150000, 4/2, 10.0, 675 Circle Dr, Hulbert, OK 74441, 1896, 2018-04-19
+  - 52946, unknown,  150000, 4/2, 10.0, 675 Circle Dr, Hulbert, OK 74441, 1896, 2018-04-19
+- Canonical to keep (explicit status):
+  - 52946,for_sale,150000,4,2,10.0,675 Circle Dr,Hulbert,Oklahoma,74441,1896,2018-04-19
+
+Outcome
+- Exact-duplicate pairs removed: 1 pair (22671 “Third Ct, 553”).
+- Non-exact duplicate clusters resolved: 7 clusters (22671, 109987, 84529, 48807, 22792, 16829, 53556, 52946).
+- All remaining records are unique under the normalized address key.
