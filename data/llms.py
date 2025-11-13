@@ -1,15 +1,15 @@
 from experiments.model.llm import GPT, Gemini, DeepSeek
 
 llms = [
-    #GPT(
-    #   model_name="gpt-5"
-    #),
-    #Gemini(
-    #   model_name="gemini-2.0-flash"
-    #),
-    #DeepSeek(
-    #   model_name="deepseek-reasoner"
-    #)
+    GPT(
+       model_name="gpt-5"
+    ),
+    Gemini(
+       model_name="gemini-2.0-flash"
+    ),
+    DeepSeek(
+       model_name="deepseek-reasoner"
+    )
 ]
 
 def get_llm(llm_name):

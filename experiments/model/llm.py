@@ -23,7 +23,7 @@ class GPT(BaseLLM):
     def __init__(self, model_name):
         super().__init__(name="GPT", model_name=model_name)
         self.client = OpenAI(
-            #api_key=key  # put the key here
+            #api_key=  # put the key here
         )
         self.messages = []
 
@@ -73,7 +73,7 @@ class DeepSeek(BaseLLM):
         super().__init__(name="DeepSeek", model_name=model_name)
 
         self.client = OpenAI(
-            #api_key="key", #put the key here
+            #api_key=, #put the key here
             base_url="https://api.deepseek.com")
         self.messages = []
 
@@ -126,7 +126,7 @@ class Gemini(BaseLLM):
         super().__init__(name="Gemini", model_name=model_name)
 
     def create_model(self, prompt):
-        #genai.configure(api_key=key) #put the key there
+        #genai.configure(api_key= ) #put the key there
         generation_config = {
             "temperature": 0
         }
